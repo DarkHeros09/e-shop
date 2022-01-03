@@ -1,3 +1,15 @@
+DROP trigger set_timestamp_user on "user";
+DROP trigger set_timestamp_shopping_session on "shopping_session";
+DROP trigger set_timestamp_cart_item on "cart_item";
+DROP trigger set_timestamp_payment_detail on "payment_detail";
+DROP trigger set_timestamp_product on "product";
+DROP trigger set_timestamp_order_detail on "order_detail";
+DROP trigger set_timestamp_order_items on "order_items";
+DROP trigger set_timestamp_product_category on "product_category";
+DROP trigger set_timestamp_product_inventory on "product_inventory";
+DROP trigger set_timestamp_discount on "discount";
+DROP function trigger_set_timestamp();
+
 DROP TABLE IF EXISTS "discount" CASCADE;
 DROP TABLE IF EXISTS "product_inventory" CASCADE;
 DROP TABLE IF EXISTS "product_category" CASCADE;

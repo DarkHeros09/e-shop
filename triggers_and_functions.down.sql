@@ -1,0 +1,11 @@
+DROP trigger set_timestamp on "user";
+DROP trigger set_timestamp on "shopping_session";
+DROP trigger set_timestamp on "cart_item";
+DROP trigger set_timestamp on "payment_detail";
+DROP trigger set_timestamp on "product";
+DROP trigger set_timestamp on "order_detail";
+DROP trigger set_timestamp on "order_items";
+DROP trigger set_timestamp on "product_category";
+DROP trigger set_timestamp on "product_inventory";
+DROP trigger set_timestamp on "discount";
+DROP function trigger_set_timestamp();
