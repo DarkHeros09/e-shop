@@ -1,11 +1,10 @@
 -- name: CreatePaymentDetail :one
 INSERT INTO "payment_detail" (
-  order_id,
   amount,
   provider,
   status
 ) VALUES (
-  $1, $2, $3, $4
+  $1, $2, $3
 )
 RETURNING *;
 
@@ -21,9 +20,10 @@ OFFSET $2;
 
 -- name: UpdatePaymentDetail :one
 UPDATE "payment_detail"
-SET amount = $2,
-provider = $3,
-status = $4
+SET order_id = $2,
+amount = $3,
+provider = $4,
+status = $5
 WHERE id = $1
 RETURNING *;
 

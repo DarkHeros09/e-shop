@@ -16,7 +16,7 @@ func createRandomCartItem(t *testing.T) CartItem {
 	arg := CreateCartItemParams{
 		SessionID: shoppingSession.ID,
 		ProductID: product.ID,
-		Quantity:  int32(util.RandomInt(0, 10)),
+		Quantity:  int32(util.RandomInt(1, 9)),
 	}
 
 	cartItem, err := testQueires.CreateCartItem(context.Background(), arg)

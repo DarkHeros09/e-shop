@@ -9,30 +9,23 @@ import (
 
 const createPaymentDetail = `-- name: CreatePaymentDetail :one
 INSERT INTO "payment_detail" (
-  order_id,
   amount,
   provider,
   status
 ) VALUES (
-  $1, $2, $3, $4
+  $1, $2, $3
 )
 RETURNING id, order_id, amount, provider, status, created_at, updated_at
 `
 
 type CreatePaymentDetailParams struct {
-	OrderID  int64  `json:"order_id"`
 	Amount   int32  `json:"amount"`
 	Provider string `json:"provider"`
 	Status   string `json:"status"`
 }
 
 func (q *Queries) CreatePaymentDetail(ctx context.Context, arg CreatePaymentDetailParams) (PaymentDetail, error) {
-	row := q.db.QueryRowContext(ctx, createPaymentDetail,
-		arg.OrderID,
-		arg.Amount,
-		arg.Provider,
-		arg.Status,
-	)
+	row := q.db.QueryRowContext(ctx, createPaymentDetail, arg.Amount, arg.Provider, arg.Status)
 	var i PaymentDetail
 	err := row.Scan(
 		&i.ID,
@@ -121,15 +114,17 @@ func (q *Queries) ListPaymentDetails(ctx context.Context, arg ListPaymentDetails
 
 const updatePaymentDetail = `-- name: UpdatePaymentDetail :one
 UPDATE "payment_detail"
-SET amount = $2,
-provider = $3,
-status = $4
+SET order_id = $2,
+amount = $3,
+provider = $4,
+status = $5
 WHERE id = $1
 RETURNING id, order_id, amount, provider, status, created_at, updated_at
 `
 
 type UpdatePaymentDetailParams struct {
 	ID       int64  `json:"id"`
+	OrderID  int64  `json:"order_id"`
 	Amount   int32  `json:"amount"`
 	Provider string `json:"provider"`
 	Status   string `json:"status"`
@@ -138,6 +133,7 @@ type UpdatePaymentDetailParams struct {
 func (q *Queries) UpdatePaymentDetail(ctx context.Context, arg UpdatePaymentDetailParams) (PaymentDetail, error) {
 	row := q.db.QueryRowContext(ctx, updatePaymentDetail,
 		arg.ID,
+		arg.OrderID,
 		arg.Amount,
 		arg.Provider,
 		arg.Status,

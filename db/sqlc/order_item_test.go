@@ -42,7 +42,7 @@ func TestCreateOrderItem(t *testing.T) {
 
 func TestGetOrderItem(t *testing.T) {
 	orderItem1 := createRandomOrderItem(t)
-	orderItem2, err := testQueires.GetOrderItem(context.Background(), orderItem1.ID)
+	orderItem2, err := testQueires.GetOrderItemByID(context.Background(), orderItem1.ID)
 
 	require.NoError(t, err)
 	require.NotEmpty(t, orderItem2)
@@ -82,7 +82,7 @@ func TestDeleteOrderItem(t *testing.T) {
 
 	require.NoError(t, err)
 
-	orderItem2, err := testQueires.GetOrderItem(context.Background(), orderItem1.ID)
+	orderItem2, err := testQueires.GetOrderItemByID(context.Background(), orderItem1.ID)
 
 	require.Error(t, err)
 	require.EqualError(t, err, sql.ErrNoRows.Error())

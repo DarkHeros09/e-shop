@@ -68,17 +68,17 @@ CREATE TABLE "product" (
 
 CREATE TABLE "order_detail" (
   "id" bigserial PRIMARY KEY NOT NULL,
-  "user_id" bigint UNIQUE NOT NULL,
+  "user_id" bigint NOT NULL,
   "total" decimal NOT NULL,
   "payment_id" bigint UNIQUE NOT NULL,
   "created_at" timestamptz NOT NULL DEFAULT (now()),
   "updated_at" timestamptz NOT NULL DEFAULT (now())
 );
 
-CREATE TABLE "order_items" (
+CREATE TABLE "order_item" (
   "id" bigserial PRIMARY KEY NOT NULL,
   "order_id" bigint UNIQUE NOT NULL,
-  "product_id" bigint UNIQUE NOT NULL,
+  "product_id" bigint NOT NULL,
   "quantity" int NOT NULL,
   "created_at" timestamptz NOT NULL DEFAULT (now()),
   "updated_at" timestamptz NOT NULL DEFAULT (now())
@@ -131,9 +131,9 @@ ALTER TABLE "order_detail" ADD FOREIGN KEY ("user_id") REFERENCES "user" ("id");
 
 ALTER TABLE "order_detail" ADD FOREIGN KEY ("payment_id") REFERENCES "payment_detail" ("id");
 
-ALTER TABLE "order_items" ADD FOREIGN KEY ("order_id") REFERENCES "order_detail" ("id");
+ALTER TABLE "order_item" ADD FOREIGN KEY ("order_id") REFERENCES "order_detail" ("id");
 
-ALTER TABLE "order_items" ADD FOREIGN KEY ("product_id") REFERENCES "product" ("id");
+ALTER TABLE "order_item" ADD FOREIGN KEY ("product_id") REFERENCES "product" ("id");
 
 CREATE INDEX ON "user" ("username");
 
@@ -153,7 +153,7 @@ COMMENT ON COLUMN "product"."active" IS 'default is false';
 
 COMMENT ON COLUMN "order_detail"."total" IS 'must be positive';
 
-COMMENT ON COLUMN "order_items"."quantity" IS 'must be positive';
+COMMENT ON COLUMN "order_item"."quantity" IS 'must be positive';
 
 COMMENT ON COLUMN "product_category"."active" IS 'default is false';
 
@@ -204,7 +204,7 @@ FOR EACH ROW
 EXECUTE PROCEDURE trigger_set_timestamp();
 
 CREATE TRIGGER set_timestamp_order_items
-BEFORE UPDATE ON "order_items"
+BEFORE UPDATE ON "order_item"
 FOR EACH ROW
 EXECUTE PROCEDURE trigger_set_timestamp();
 

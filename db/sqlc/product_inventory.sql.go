@@ -57,6 +57,25 @@ func (q *Queries) GetProductInventory(ctx context.Context, id int64) (ProductInv
 	return i, err
 }
 
+const getProductInventoryForUpdate = `-- name: GetProductInventoryForUpdate :one
+SELECT id, quantity, active, created_at, updated_at FROM "product_inventory"
+WHERE id = $1 LIMIT 1
+FOR NO KEY UPDATE
+`
+
+func (q *Queries) GetProductInventoryForUpdate(ctx context.Context, id int64) (ProductInventory, error) {
+	row := q.db.QueryRowContext(ctx, getProductInventoryForUpdate, id)
+	var i ProductInventory
+	err := row.Scan(
+		&i.ID,
+		&i.Quantity,
+		&i.Active,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
 const listProductInventories = `-- name: ListProductInventories :many
 SELECT id, quantity, active, created_at, updated_at FROM "product_inventory"
 ORDER BY id
@@ -114,6 +133,31 @@ type UpdateProductInventoryParams struct {
 
 func (q *Queries) UpdateProductInventory(ctx context.Context, arg UpdateProductInventoryParams) (ProductInventory, error) {
 	row := q.db.QueryRowContext(ctx, updateProductInventory, arg.ID, arg.Quantity, arg.Active)
+	var i ProductInventory
+	err := row.Scan(
+		&i.ID,
+		&i.Quantity,
+		&i.Active,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const updateProductQuantity = `-- name: UpdateProductQuantity :one
+UPDATE "product_inventory"
+SET quantity = quantity + $1
+WHERE id = $2
+RETURNING id, quantity, active, created_at, updated_at
+`
+
+type UpdateProductQuantityParams struct {
+	Quantity int32 `json:"quantity"`
+	ID       int64 `json:"id"`
+}
+
+func (q *Queries) UpdateProductQuantity(ctx context.Context, arg UpdateProductQuantityParams) (ProductInventory, error) {
+	row := q.db.QueryRowContext(ctx, updateProductQuantity, arg.Quantity, arg.ID)
 	var i ProductInventory
 	err := row.Scan(
 		&i.ID,

@@ -6,11 +6,12 @@ import (
 	"testing"
 	"time"
 
+	"github.com/DarkHeros09/e-shop/v2/util"
 	"github.com/stretchr/testify/require"
 )
 
 func createRandomProductInventory(t *testing.T) ProductInventory {
-	arg := int32(10)
+	arg := int32(util.RandomInt(10, 20))
 
 	productInventory, err := testQueires.CreateProductInventory(context.Background(), arg)
 

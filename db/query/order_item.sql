@@ -1,5 +1,5 @@
 -- name: CreateOrderItem :one
-INSERT INTO "order_items" (
+INSERT INTO "order_item" (
   order_id,
   product_id,
   quantity
@@ -8,22 +8,26 @@ INSERT INTO "order_items" (
 )
 RETURNING *;
 
--- name: GetOrderItem :one
-SELECT * FROM "order_items"
+-- name: GetOrderItemByID :one
+SELECT * FROM "order_item"
 WHERE id = $1 LIMIT 1;
 
+-- name: GetOrderItemByOrderDetailID :one
+SELECT * FROM "order_item"
+WHERE order_id = $1 LIMIT 1;
+
 -- name: ListOrderItems :many
-SELECT * FROM "order_items"
+SELECT * FROM "order_item"
 ORDER BY id
 LIMIT $1
 OFFSET $2;
 
 -- name: UpdateOrderItem :one
-UPDATE "order_items"
+UPDATE "order_item"
 SET quantity = $2
 WHERE id = $1
 RETURNING *;
 
 -- name: DeleteOrderItem :exec
-DELETE FROM "order_items"
+DELETE FROM "order_item"
 WHERE id = $1;

@@ -49,7 +49,8 @@ type OrderItem struct {
 }
 
 type PaymentDetail struct {
-	ID      int64 `json:"id"`
+	ID int64 `json:"id"`
+	// default is 0
 	OrderID int64 `json:"order_id"`
 	// must be positive
 	Amount    int32     `json:"amount"`
