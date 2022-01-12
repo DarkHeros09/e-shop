@@ -87,7 +87,7 @@ func (q *Queries) ListDiscounts(ctx context.Context, arg ListDiscountsParams) ([
 		return nil, err
 	}
 	defer rows.Close()
-	var items []Discount
+	items := []Discount{}
 	for rows.Next() {
 		var i Discount
 		if err := rows.Scan(

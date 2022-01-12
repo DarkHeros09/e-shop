@@ -90,7 +90,7 @@ func (q *Queries) ListUserAddresses(ctx context.Context, arg ListUserAddressesPa
 		return nil, err
 	}
 	defer rows.Close()
-	var items []UserAddress
+	items := []UserAddress{}
 	for rows.Next() {
 		var i UserAddress
 		if err := rows.Scan(

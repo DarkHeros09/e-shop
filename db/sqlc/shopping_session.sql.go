@@ -82,7 +82,7 @@ func (q *Queries) ListShoppingSessions(ctx context.Context, arg ListShoppingSess
 		return nil, err
 	}
 	defer rows.Close()
-	var items []ShoppingSession
+	items := []ShoppingSession{}
 	for rows.Next() {
 		var i ShoppingSession
 		if err := rows.Scan(

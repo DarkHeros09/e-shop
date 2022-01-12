@@ -87,7 +87,7 @@ func (q *Queries) ListPaymentDetails(ctx context.Context, arg ListPaymentDetails
 		return nil, err
 	}
 	defer rows.Close()
-	var items []PaymentDetail
+	items := []PaymentDetail{}
 	for rows.Next() {
 		var i PaymentDetail
 		if err := rows.Scan(

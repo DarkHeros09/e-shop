@@ -83,7 +83,7 @@ func (q *Queries) ListProductCategories(ctx context.Context, arg ListProductCate
 		return nil, err
 	}
 	defer rows.Close()
-	var items []ProductCategory
+	items := []ProductCategory{}
 	for rows.Next() {
 		var i ProductCategory
 		if err := rows.Scan(

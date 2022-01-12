@@ -85,7 +85,7 @@ func (q *Queries) ListOrderDetails(ctx context.Context, arg ListOrderDetailsPara
 		return nil, err
 	}
 	defer rows.Close()
-	var items []OrderDetail
+	items := []OrderDetail{}
 	for rows.Next() {
 		var i OrderDetail
 		if err := rows.Scan(
