@@ -66,7 +66,7 @@ type getOrderItemByOrderDetailIDRequest struct {
 }
 
 func (server *Server) getOrderItemByOrderDetailID(ctx *gin.Context) {
-	var req getOrderItemByIDRequest
+	var req getOrderItemByOrderDetailIDRequest
 
 	if err := ctx.ShouldBindUri(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, errResponse(err))

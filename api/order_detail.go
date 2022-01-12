@@ -9,9 +9,9 @@ import (
 )
 
 type createOrderDetailRequest struct {
-	UserID    int64  `json:"user_id" binding:"required`
-	Total     string `json:"total" binding:"required`
-	PaymentID int64  `json:"payment_id" binding:"required`
+	UserID    int64  `json:"user_id" binding:"required"`
+	Total     string `json:"total" binding:"required"`
+	PaymentID int64  `json:"payment_id" binding:"required"`
 }
 
 func (server *Server) createOrderDetail(ctx *gin.Context) {
