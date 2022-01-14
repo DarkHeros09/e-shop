@@ -43,3 +43,12 @@ func RandomMoney() int64 {
 func RandomEmail() string {
 	return fmt.Sprintf("%s@email.com", RandomString(6))
 }
+
+/*
+RandBool
+    This function returns a random boolean value based on the current time
+*/
+func RandomBool() bool {
+	rand.Seed(time.Now().UnixNano())
+	return rand.Intn(2) == 1
+}

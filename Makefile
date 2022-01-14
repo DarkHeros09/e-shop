@@ -1,5 +1,5 @@
 postgres:
-	docker run --name postgres14-eshop -p 5555:5432 -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=secret -d postgres:14-alpine
+	docker run --name postgres14-eshop -p 5555:5432 -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=secret -d postgres:14.1-alpine
 
 createdb:
 	docker exec -it postgres14-eshop createdb --username=postgres --owner=postgres eshop
@@ -41,6 +41,6 @@ server:
 	go run main.go
 
 mock:
-	mockgen -package mockdb -destination db/mock/store.go github.com/mnbenghuzzi/simplebank/v2/db/sqlc Store
+	mockgen --build_flags=--mod=mod -package mockdb -destination db/mock/store.go github.com/DarkHeros09/e-shop/v2/db/sqlc Store
 
 .PHONY: postgres createdb dropdb migrateup migratedown migrateup1 migratedown1 cimigrateup cimigratedown sqlc sqlcfix sqlcwin test server mock
