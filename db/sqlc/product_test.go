@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 	"testing"
+	"time"
 
 	"github.com/DarkHeros09/e-shop/v2/util"
 	"github.com/stretchr/testify/require"
@@ -73,10 +74,13 @@ func TestGetProduct(t *testing.T) {
 func TestUpdateProduct(t *testing.T) {
 	product1 := createRandomProduct(t)
 	arg := UpdateProductParams{
-		ID:         product1.ID,
-		Price:      fmt.Sprint(util.RandomMoney()),
-		DiscountID: product1.DiscountID,
-		Active:     true,
+		ID:          product1.ID,
+		Name:        product1.Name,
+		Description: "new discription",
+		Sku:         util.RandomString(5),
+		CategoryID:  product1.CategoryID,
+		Price:       fmt.Sprint(util.RandomMoney()),
+		Active:      true,
 	}
 
 	product2, err := testQueires.UpdateProduct(context.Background(), arg)
@@ -86,14 +90,13 @@ func TestUpdateProduct(t *testing.T) {
 
 	require.Equal(t, product1.ID, product2.ID)
 	require.Equal(t, product1.Name, product2.Name)
-	require.Equal(t, product1.Description, product2.Description)
+	require.Equal(t, arg.Description, product2.Description)
 	require.Equal(t, arg.Price, product2.Price)
-	require.Equal(t, product1.Sku, product2.Sku)
+	require.Equal(t, arg.Sku, product2.Sku)
 	require.Equal(t, product1.CategoryID, product2.CategoryID)
 	require.Equal(t, product1.InventoryID, product2.InventoryID)
-	require.Equal(t, arg.DiscountID, product2.DiscountID)
 	require.Equal(t, arg.Active, product2.Active)
-	require.Equal(t, product1.CreatedAt, product2.CreatedAt)
+	require.WithinDuration(t, product1.CreatedAt, product2.CreatedAt, time.Second)
 	require.NotEqual(t, product1.UpdatedAt, product2.UpdatedAt)
 
 	require.True(t, product2.Active)

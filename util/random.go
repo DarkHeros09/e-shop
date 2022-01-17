@@ -48,7 +48,14 @@ func RandomEmail() string {
 RandBool
     This function returns a random boolean value based on the current time
 */
+// func RandomBool() bool {
+// 	rand.Seed(time.Now().UnixNano())
+// 	return rand.Intn(2) == 1
+// }
+
+// RandomBool generates a random boolean
 func RandomBool() bool {
-	rand.Seed(time.Now().UnixNano())
-	return rand.Intn(2) == 1
+	bool := []bool{true, false}
+	n := len(bool)
+	return bool[rand.Intn(n)]
 }

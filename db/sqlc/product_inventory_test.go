@@ -50,6 +50,23 @@ func TestGetProductInventory(t *testing.T) {
 
 }
 
+func TestGetProductInventoryForUpdate(t *testing.T) {
+	productInventory1 := createRandomProductInventory(t)
+	productInventory2, err := testQueires.GetProductInventoryForUpdate(context.Background(), productInventory1.ID)
+
+	require.NoError(t, err)
+	require.NotEmpty(t, productInventory2)
+
+	require.Equal(t, productInventory1.ID, productInventory2.ID)
+	require.Equal(t, productInventory1.Quantity, productInventory2.Quantity)
+	require.Equal(t, productInventory1.Active, productInventory2.Active)
+	require.WithinDuration(t, productInventory1.CreatedAt, productInventory2.CreatedAt, time.Second)
+	require.WithinDuration(t, productInventory1.UpdatedAt, productInventory2.UpdatedAt, time.Second)
+
+	require.True(t, productInventory2.Active)
+
+}
+
 func TestUpdateProductInventory(t *testing.T) {
 	productInventory1 := createRandomProductInventory(t)
 	arg := UpdateProductInventoryParams{

@@ -6,6 +6,7 @@ import (
 
 	db "github.com/DarkHeros09/e-shop/v2/db/sqlc"
 	"github.com/gin-gonic/gin"
+	"github.com/lib/pq"
 )
 
 type createPaymentDetailRequest struct {
@@ -18,7 +19,7 @@ func (server *Server) createPaymentDetail(ctx *gin.Context) {
 	var req createPaymentDetailRequest
 
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, errResponse(err))
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
 
@@ -30,7 +31,14 @@ func (server *Server) createPaymentDetail(ctx *gin.Context) {
 
 	paymentDetail, err := server.store.CreatePaymentDetail(ctx, arg)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, errResponse(err))
+		if pqErr, ok := err.(*pq.Error); ok {
+			switch pqErr.Code.Name() {
+			case "unique_violation":
+				ctx.JSON(http.StatusForbidden, errorResponse(err))
+				return
+			}
+		}
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
 
@@ -45,17 +53,17 @@ func (server *Server) getPaymentDetail(ctx *gin.Context) {
 	var req getPaymentDetailRequest
 
 	if err := ctx.ShouldBindUri(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, errResponse(err))
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
 
 	paymentDetail, err := server.store.GetPaymentDetail(ctx, req.ID)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			ctx.JSON(http.StatusNotFound, errResponse(err))
+			ctx.JSON(http.StatusNotFound, errorResponse(err))
 			return
 		}
-		ctx.JSON(http.StatusInternalServerError, errResponse(err))
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
 	ctx.JSON(http.StatusOK, paymentDetail)
@@ -70,7 +78,7 @@ func (server *Server) listPaymentDetails(ctx *gin.Context) {
 	var req listPaymentDetailsRequest
 
 	if err := ctx.ShouldBindQuery(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, errResponse(err))
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
 
@@ -81,10 +89,10 @@ func (server *Server) listPaymentDetails(ctx *gin.Context) {
 	paymentDetails, err := server.store.ListPaymentDetails(ctx, arg)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			ctx.JSON(http.StatusNotFound, errResponse(err))
+			ctx.JSON(http.StatusNotFound, errorResponse(err))
 			return
 		}
-		ctx.JSON(http.StatusInternalServerError, errResponse(err))
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
 	ctx.JSON(http.StatusOK, paymentDetails)

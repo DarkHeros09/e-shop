@@ -50,8 +50,8 @@ func TestGetUser(t *testing.T) {
 	require.Equal(t, user1.Email, user2.Email)
 	require.Equal(t, user1.Password, user2.Password)
 	require.Equal(t, user1.Telephone, user2.Telephone)
-	require.Equal(t, user1.CreatedAt, user2.CreatedAt, time.Second)
-	require.Equal(t, user1.UpdatedAt, user2.UpdatedAt, time.Second)
+	require.WithinDuration(t, user1.CreatedAt, user2.CreatedAt, time.Second)
+	require.WithinDuration(t, user1.UpdatedAt, user2.UpdatedAt, time.Second)
 }
 
 func TestUpdateUser(t *testing.T) {

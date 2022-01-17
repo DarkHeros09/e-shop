@@ -57,7 +57,7 @@ CREATE TABLE "product" (
   "name" varchar UNIQUE NOT NULL,
   "description" text NOT NULL,
   "sku" varchar UNIQUE NOT NULL,
-  "category_id" bigint UNIQUE NOT NULL,
+  "category_id" bigint NOT NULL,
   "inventory_id" bigint UNIQUE NOT NULL,
   "price" decimal NOT NULL,
   "active" boolean NOT NULL DEFAULT false,

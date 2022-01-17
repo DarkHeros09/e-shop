@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"testing"
+	"time"
 
 	"github.com/DarkHeros09/e-shop/v2/util"
 	"github.com/stretchr/testify/require"
@@ -53,6 +54,26 @@ func TestGetOrderItem(t *testing.T) {
 	require.Equal(t, orderItem1.Quantity, orderItem2.Quantity)
 	require.Equal(t, orderItem1.CreatedAt, orderItem2.CreatedAt)
 	require.Equal(t, orderItem1.UpdatedAt, orderItem2.UpdatedAt)
+
+}
+
+func TestGetOrderItemByOrderID(t *testing.T) {
+	orderItem1 := createRandomOrderItem(t)
+	orderID := orderItem1.OrderID
+
+	orderItem2, err := testQueires.GetOrderItemByOrderDetailID(context.Background(), orderID)
+
+	require.NoError(t, err)
+	require.NotEmpty(t, orderItem2)
+
+	require.Equal(t, orderItem1.ID, orderItem2.ID)
+	require.Equal(t, orderItem1.OrderID, orderItem2.OrderID)
+	require.Equal(t, orderItem1.ProductID, orderItem2.ProductID)
+	require.Equal(t, orderItem1.Quantity, orderItem2.Quantity)
+	require.Equal(t, orderItem1.CreatedAt, orderItem2.CreatedAt)
+	require.Equal(t, orderItem1.UpdatedAt, orderItem2.UpdatedAt)
+
+	require.WithinDuration(t, orderItem1.CreatedAt, orderItem2.UpdatedAt, time.Second)
 
 }
 

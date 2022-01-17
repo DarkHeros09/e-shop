@@ -32,12 +32,17 @@ func NewServer(store db.Store) *Server {
 	router.GET("/categories/:id", server.getCategory)
 	router.GET("/categories", server.listCategories)
 
+	router.POST("/inventories", server.createInventory)
 	router.GET("/inventories/:id", server.getInventory)
+	router.GET("/inventories", server.listInventories)
 
+	router.POST("/discounts", server.createDiscount)
 	router.GET("/discounts/:id", server.getDiscount)
+	router.GET("/discounts", server.listDiscount)
 
 	router.POST("/products", server.createProduct)
 	router.GET("/products/:id", server.getProduct)
+	router.PUT("/products/:id", server.updateProduct)
 	router.GET("/products", server.listProducts)
 
 	router.POST("/shoppingsessions", server.createShoppingSession)
@@ -66,6 +71,6 @@ func (server *Server) Start(address string) error {
 	return server.router.Run(address)
 }
 
-func errResponse(err error) gin.H {
+func errorResponse(err error) gin.H {
 	return gin.H{"error": err.Error()}
 }

@@ -6,6 +6,7 @@ import (
 
 	db "github.com/DarkHeros09/e-shop/v2/db/sqlc"
 	"github.com/gin-gonic/gin"
+	"github.com/lib/pq"
 )
 
 type createProductCategoryRequest struct {
@@ -17,7 +18,7 @@ func (server *Server) createCategory(ctx *gin.Context) {
 	var req createProductCategoryRequest
 
 	if err := ctx.BindJSON(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, errResponse(err))
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
 
@@ -28,7 +29,15 @@ func (server *Server) createCategory(ctx *gin.Context) {
 
 	Category, err := server.store.CreateProductCategory(ctx, arg)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, errResponse(err))
+		if pqErr, ok := err.(*pq.Error); ok {
+			switch pqErr.Code.Name() {
+			case "unique_violation":
+				ctx.JSON(http.StatusForbidden, errorResponse(err))
+				return
+			}
+		}
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
 	}
 
 	ctx.JSON(http.StatusOK, Category)
@@ -42,17 +51,17 @@ func (server *Server) getCategory(ctx *gin.Context) {
 	var req getProductCategoryRequest
 
 	if err := ctx.ShouldBindUri(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, errResponse(err))
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
 
 	Category, err := server.store.GetProductCategory(ctx, req.ID)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			ctx.JSON(http.StatusNotFound, errResponse(err))
+			ctx.JSON(http.StatusNotFound, errorResponse(err))
 			return
 		}
-		ctx.JSON(http.StatusInternalServerError, errResponse(err))
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
 	ctx.JSON(http.StatusOK, Category)
@@ -67,7 +76,7 @@ func (server *Server) listCategories(ctx *gin.Context) {
 	var req listProductCategoriesRequest
 
 	if err := ctx.ShouldBindQuery(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, errResponse(err))
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
 
@@ -78,10 +87,10 @@ func (server *Server) listCategories(ctx *gin.Context) {
 	categories, err := server.store.ListProductCategories(ctx, arg)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			ctx.JSON(http.StatusNotFound, errResponse(err))
+			ctx.JSON(http.StatusNotFound, errorResponse(err))
 			return
 		}
-		ctx.JSON(http.StatusInternalServerError, errResponse(err))
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
 	ctx.JSON(http.StatusOK, categories)
