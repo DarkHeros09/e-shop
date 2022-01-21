@@ -3,38 +3,33 @@ package api
 import (
 	"database/sql"
 	"net/http"
-	"time"
 
 	db "github.com/DarkHeros09/e-shop/v2/db/sqlc"
 	"github.com/gin-gonic/gin"
 	"github.com/lib/pq"
 )
 
-type createUserPaymentRequest struct {
-	UserID      int64     `json:"user_id" binding:"required"`
-	PaymentType string    `json:"payment_type" binding:"required"`
-	Provider    string    `json:"provider" binding:"required"`
-	AccountNo   int32     `json:"account_no" binding:"required"`
-	Expiry      time.Time `json:"expiry" binding:"required"`
+type createCartItemRequest struct {
+	SessionID int64 `json:"session_id" binding:"required"`
+	ProductID int64 `json:"product_id" binding:"required"`
+	Quantity  int32 `json:"quantity" binding:"required"`
 }
 
-func (server *Server) createUserPayment(ctx *gin.Context) {
-	var req createUserPaymentRequest
+func (server *Server) createCartItem(ctx *gin.Context) {
+	var req createCartItemRequest
 
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
 
-	arg := db.CreateUserPaymentParams{
-		UserID:      req.UserID,
-		PaymentType: req.PaymentType,
-		Provider:    req.Provider,
-		AccountNo:   req.AccountNo,
-		Expiry:      req.Expiry,
+	arg := db.CreateCartItemParams{
+		SessionID: req.SessionID,
+		ProductID: req.ProductID,
+		Quantity:  req.Quantity,
 	}
 
-	userPayment, err := server.store.CreateUserPayment(ctx, arg)
+	cartItem, err := server.store.CreateCartItem(ctx, arg)
 	if err != nil {
 		if pqErr, ok := err.(*pq.Error); ok {
 			switch pqErr.Code.Name() {
@@ -47,22 +42,22 @@ func (server *Server) createUserPayment(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, userPayment)
+	ctx.JSON(http.StatusOK, cartItem)
 }
 
-type getUserPaymentRequest struct {
+type getCartItemRequest struct {
 	ID int64 `uri:"id" binding:"required,min=1"`
 }
 
-func (server *Server) getUserPayment(ctx *gin.Context) {
-	var req getUserPaymentRequest
+func (server *Server) getCartItem(ctx *gin.Context) {
+	var req getCartItemRequest
 
 	if err := ctx.ShouldBindUri(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
 
-	userPayment, err := server.store.GetUserPayment(ctx, req.ID)
+	cartItem, err := server.store.GetCartItem(ctx, req.ID)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			ctx.JSON(http.StatusNotFound, errorResponse(err))
@@ -71,27 +66,27 @@ func (server *Server) getUserPayment(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
-	ctx.JSON(http.StatusOK, userPayment)
+	ctx.JSON(http.StatusOK, cartItem)
 }
 
-type listUserPaymentsRequest struct {
+type listCartItemsRequest struct {
 	PageID   int32 `form:"page_id" binding:"required,min=1"`
 	PageSize int32 `form:"page_size" binding:"required,min=5,max=10"`
 }
 
-func (server *Server) listUserPayments(ctx *gin.Context) {
-	var req listUserPaymentsRequest
+func (server *Server) listCartItems(ctx *gin.Context) {
+	var req listCartItemsRequest
 
 	if err := ctx.ShouldBindQuery(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
 
-	arg := db.ListUserPaymentsParams{
+	arg := db.ListCartItemParams{
 		Limit:  req.PageSize,
 		Offset: (req.PageID - 1) * req.PageSize,
 	}
-	userPayments, err := server.store.ListUserPayments(ctx, arg)
+	cartItems, err := server.store.ListCartItem(ctx, arg)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			ctx.JSON(http.StatusNotFound, errorResponse(err))
@@ -100,5 +95,5 @@ func (server *Server) listUserPayments(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
-	ctx.JSON(http.StatusOK, userPayments)
+	ctx.JSON(http.StatusOK, cartItems)
 }

@@ -44,9 +44,14 @@ func NewServer(store db.Store) *Server {
 	router.GET("/products/:id", server.getProduct)
 	router.PUT("/products/:id", server.updateProduct)
 	router.GET("/products", server.listProducts)
+	router.DELETE("/products/:id", server.deleteProduct)
 
 	router.POST("/shoppingsessions", server.createShoppingSession)
 	router.GET("/shoppingsessions/:id", server.getShoppingSession)
+
+	router.POST("/cartitems", server.createCartItem)
+	router.GET("/cartitems/:id", server.getCartItem)
+	router.GET("/cartitems", server.listCartItems)
 
 	router.POST("/orderItems", server.createOrderItem)
 	router.GET("/orderItemsByID/:id", server.getOrderItemByID)
@@ -65,8 +70,15 @@ func NewServer(store db.Store) *Server {
 	return server
 }
 
-// Start runs the HTTP server on a specific address
+// TODO: write the default tests for all the methods
+
+// TODO: add update and delete methods
+
+// TODO: add tests for update and delete methods
+
+// TODO: add etag logic with tests
 // TODO: add gracefull shutdown logic
+// Start runs the HTTP server on a specific address
 func (server *Server) Start(address string) error {
 	return server.router.Run(address)
 }

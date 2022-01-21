@@ -5,14 +5,21 @@ import (
 	"net/http"
 
 	db "github.com/DarkHeros09/e-shop/v2/db/sqlc"
+	"github.com/DarkHeros09/e-shop/v2/util"
 	"github.com/gin-gonic/gin"
 	"github.com/lib/pq"
 )
 
 type createUserRequest struct {
-	Username  string `json:"username" binding:"required"`
-	Email     string `json:"email" binding:"required"`
-	Password  string `json:"password"`
+	Username  string `json:"username" binding:"required,alphanum"`
+	Email     string `json:"email" binding:"required,email"`
+	Password  string `json:"password" binding:"required,min=6"`
+	Telephone int32  `json:"telephone" binding:"required,min=6"`
+}
+
+type createUserResponse struct {
+	Username  string `json:"username"`
+	Email     string `json:"email"`
 	Telephone int32  `json:"telephone"`
 }
 
@@ -24,10 +31,16 @@ func (server *Server) createUser(ctx *gin.Context) {
 		return
 	}
 
+	hashedPassword, err := util.HashPassword(req.Password)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+
 	arg := db.CreateUserParams{
 		Username:  req.Username,
 		Email:     req.Email,
-		Password:  req.Password,
+		Password:  hashedPassword,
 		Telephone: req.Telephone,
 	}
 
@@ -44,7 +57,12 @@ func (server *Server) createUser(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, user)
+	rsp := createUserResponse{
+		Username:  user.Username,
+		Email:     user.Email,
+		Telephone: user.Telephone,
+	}
+	ctx.JSON(http.StatusOK, rsp)
 }
 
 type getUserRequest struct {

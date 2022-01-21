@@ -26,10 +26,9 @@ OFFSET $2;
 UPDATE "product"
 SET name = $2,
 description = $3,
-sku = $4,
-category_id = $5,
-price = $6,
-active = $7
+category_id = $4,
+price = $5,
+active = $6
 WHERE id = $1
 RETURNING *;
 

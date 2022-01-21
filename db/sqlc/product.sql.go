@@ -144,10 +144,9 @@ const updateProduct = `-- name: UpdateProduct :one
 UPDATE "product"
 SET name = $2,
 description = $3,
-sku = $4,
-category_id = $5,
-price = $6,
-active = $7
+category_id = $4,
+price = $5,
+active = $6
 WHERE id = $1
 RETURNING id, name, description, sku, category_id, inventory_id, price, active, discount_id, created_at, updated_at
 `
@@ -156,7 +155,6 @@ type UpdateProductParams struct {
 	ID          int64  `json:"id"`
 	Name        string `json:"name"`
 	Description string `json:"description"`
-	Sku         string `json:"sku"`
 	CategoryID  int64  `json:"category_id"`
 	Price       string `json:"price"`
 	Active      bool   `json:"active"`
@@ -167,7 +165,6 @@ func (q *Queries) UpdateProduct(ctx context.Context, arg UpdateProductParams) (P
 		arg.ID,
 		arg.Name,
 		arg.Description,
-		arg.Sku,
 		arg.CategoryID,
 		arg.Price,
 		arg.Active,

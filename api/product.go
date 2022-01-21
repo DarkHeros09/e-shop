@@ -41,7 +41,7 @@ func (server *Server) createProduct(ctx *gin.Context) {
 	if err != nil {
 		if pqErr, ok := err.(*pq.Error); ok {
 			switch pqErr.Code.Name() {
-			case "unique_violation":
+			case "foreign_key_violation", "unique_violation":
 				ctx.JSON(http.StatusForbidden, errorResponse(err))
 				return
 			}
@@ -81,7 +81,6 @@ type updateProductRequest struct {
 	ID          int64  `json:"id" binding:"required,min=1"`
 	Name        string `json:"name" binding:"required"`
 	Description string `json:"description" binding:"required"`
-	Sku         string `json:"sku" binding:"required"`
 	CategoryID  int64  `json:"category_id" binding:"required"`
 	Price       string `json:"price" binding:"required"`
 	Active      bool   `json:"active" binding:"required"`
@@ -99,7 +98,6 @@ func (server *Server) updateProduct(ctx *gin.Context) {
 		ID:          req.ID,
 		Name:        req.Name,
 		Description: req.Description,
-		Sku:         req.Sku,
 		CategoryID:  req.CategoryID,
 		Price:       req.Price,
 		Active:      req.Active,
@@ -107,9 +105,12 @@ func (server *Server) updateProduct(ctx *gin.Context) {
 
 	product, err := server.store.UpdateProduct(ctx, arg)
 	if err != nil {
-		if err == sql.ErrNoRows {
-			ctx.JSON(http.StatusNotFound, errorResponse(err))
-			return
+		if pqErr, ok := err.(*pq.Error); ok {
+			switch pqErr.Code.Name() {
+			case "foreign_key_violation", "unique_violation":
+				ctx.JSON(http.StatusForbidden, errorResponse(err))
+				return
+			}
 		}
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
@@ -144,4 +145,35 @@ func (server *Server) listProducts(ctx *gin.Context) {
 		return
 	}
 	ctx.JSON(http.StatusOK, products)
+}
+
+type deleteProductRequest struct {
+	ID int64 `uri:"id" binding:"required,min=1"`
+}
+
+func (server *Server) deleteProduct(ctx *gin.Context) {
+	var req deleteProductRequest
+
+	if err := ctx.BindJSON(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		return
+	}
+
+	err := server.store.DeleteProduct(ctx, req.ID)
+	if err != nil {
+		if pqErr, ok := err.(*pq.Error); ok {
+			switch pqErr.Code.Name() {
+			case "foreign_key_violation", "unique_violation":
+				ctx.JSON(http.StatusForbidden, errorResponse(err))
+				return
+			}
+		} else if err == sql.ErrNoRows {
+			ctx.JSON(http.StatusNotFound, errorResponse(err))
+			return
+		}
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{})
 }

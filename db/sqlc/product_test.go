@@ -77,7 +77,6 @@ func TestUpdateProduct(t *testing.T) {
 		ID:          product1.ID,
 		Name:        product1.Name,
 		Description: "new discription",
-		Sku:         util.RandomString(5),
 		CategoryID:  product1.CategoryID,
 		Price:       fmt.Sprint(util.RandomMoney()),
 		Active:      true,
@@ -92,7 +91,7 @@ func TestUpdateProduct(t *testing.T) {
 	require.Equal(t, product1.Name, product2.Name)
 	require.Equal(t, arg.Description, product2.Description)
 	require.Equal(t, arg.Price, product2.Price)
-	require.Equal(t, arg.Sku, product2.Sku)
+	require.Equal(t, product1.Sku, product2.Sku)
 	require.Equal(t, product1.CategoryID, product2.CategoryID)
 	require.Equal(t, product1.InventoryID, product2.InventoryID)
 	require.Equal(t, arg.Active, product2.Active)
