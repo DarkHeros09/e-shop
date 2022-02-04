@@ -13,6 +13,14 @@ RETURNING *;
 SELECT * FROM "user"
 WHERE id = $1 LIMIT 1;
 
+-- name: GetUserByUsername :one
+SELECT * FROM "user"
+WHERE username = $1 LIMIT 1;
+
+-- name: GetUserByEmail :one
+SELECT * FROM "user"
+WHERE email = $1 LIMIT 1;
+
 -- name: ListUsers :many
 SELECT * FROM "user"
 ORDER BY id

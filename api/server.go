@@ -1,24 +1,52 @@
 package api
 
 import (
+	"fmt"
+
 	db "github.com/DarkHeros09/e-shop/v2/db/sqlc"
+	"github.com/DarkHeros09/e-shop/v2/token"
+	"github.com/DarkHeros09/e-shop/v2/util"
 	"github.com/gin-gonic/gin"
 )
 
 // Server serves HTTP requests for our eshop service.
 type Server struct {
-	store  db.Store
-	router *gin.Engine
+	config     util.Config
+	store      db.Store
+	tokenMaker token.Maker
+	router     *gin.Engine
 }
 
 // NewServer creates a new HTTP server and setup routing.
-func NewServer(store db.Store) *Server {
-	server := &Server{store: store}
+func NewServer(config util.Config, store db.Store) (*Server, error) {
+	// TODO: implement symmetrickey in .env file
+	tokenMaker, err := token.NewPasetoMaker(config.TokenSymmetricKey)
+	if err != nil {
+		return nil, fmt.Errorf("cannot create token maker: %w", err)
+	}
+
+	server := &Server{
+		config:     config,
+		store:      store,
+		tokenMaker: tokenMaker,
+	}
+
+	server.setupRouter()
+	return server, nil
+}
+
+func (server *Server) setupRouter() {
 	router := gin.Default()
 
 	router.POST("/users", server.createUser)
+	router.POST("/users/login", server.loginUser)
+
+	// authRoutes := router.Group("/").Use(authMiddleware(server.tokenMaker))
+
 	router.GET("/users/:id", server.getUser)
 	router.GET("/users", server.listUsers)
+	router.PUT("/users/:id", server.updateUser)
+	router.DELETE("/users/:id", server.deleteUser)
 
 	router.POST("/useraddresses", server.createUserAddress)
 	router.GET("/useraddresses/:id", server.getUserAddress)
@@ -42,8 +70,8 @@ func NewServer(store db.Store) *Server {
 
 	router.POST("/products", server.createProduct)
 	router.GET("/products/:id", server.getProduct)
-	router.PUT("/products/:id", server.updateProduct)
 	router.GET("/products", server.listProducts)
+	router.PUT("/products/:id", server.updateProduct)
 	router.DELETE("/products/:id", server.deleteProduct)
 
 	router.POST("/shoppingsessions", server.createShoppingSession)
@@ -67,14 +95,13 @@ func NewServer(store db.Store) *Server {
 	router.GET("/paymentDetails", server.listPaymentDetails)
 
 	server.router = router
-	return server
 }
 
 // TODO: write the default tests for all the methods
 
 // TODO: add update and delete methods
 
-// TODO: add tests for update and delete methods
+// TODO: modify the verification tags in the apis
 
 // TODO: add etag logic with tests
 // TODO: add gracefull shutdown logic

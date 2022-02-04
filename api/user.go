@@ -17,10 +17,18 @@ type createUserRequest struct {
 	Telephone int32  `json:"telephone" binding:"required,min=6"`
 }
 
-type createUserResponse struct {
+type userResponse struct {
 	Username  string `json:"username"`
 	Email     string `json:"email"`
 	Telephone int32  `json:"telephone"`
+}
+
+func newUserResponse(user db.User) userResponse {
+	return userResponse{
+		Username:  user.Username,
+		Email:     user.Email,
+		Telephone: user.Telephone,
+	}
 }
 
 func (server *Server) createUser(ctx *gin.Context) {
@@ -57,11 +65,7 @@ func (server *Server) createUser(ctx *gin.Context) {
 		return
 	}
 
-	rsp := createUserResponse{
-		Username:  user.Username,
-		Email:     user.Email,
-		Telephone: user.Telephone,
-	}
+	rsp := newUserResponse(user)
 	ctx.JSON(http.StatusOK, rsp)
 }
 
@@ -116,4 +120,120 @@ func (server *Server) listUsers(ctx *gin.Context) {
 		return
 	}
 	ctx.JSON(http.StatusOK, users)
+}
+
+type updateUserRequest struct {
+	ID        int64 `json:"id" binding:"required,min=1"`
+	Telephone int32 `json:"telephone" binding:"required"`
+}
+
+func (server *Server) updateUser(ctx *gin.Context) {
+	var req updateUserRequest
+
+	if err := ctx.BindJSON(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		return
+	}
+
+	arg := db.UpdateUserParams{
+		ID:        req.ID,
+		Telephone: req.Telephone,
+	}
+
+	user, err := server.store.UpdateUser(ctx, arg)
+	if err != nil {
+		if pqErr, ok := err.(*pq.Error); ok {
+			switch pqErr.Code.Name() {
+			case "unique_violation":
+				ctx.JSON(http.StatusForbidden, errorResponse(err))
+				return
+			}
+		}
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+	ctx.JSON(http.StatusOK, user)
+}
+
+type deleteUserRequest struct {
+	ID int64 `uri:"id" binding:"required,min=1"`
+}
+
+func (server *Server) deleteUser(ctx *gin.Context) {
+	var req deleteUserRequest
+
+	if err := ctx.BindJSON(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		return
+	}
+
+	err := server.store.DeleteUser(ctx, req.ID)
+	if err != nil {
+		if pqErr, ok := err.(*pq.Error); ok {
+			switch pqErr.Code.Name() {
+			case "foreign_key_violation", "unique_violation":
+				ctx.JSON(http.StatusForbidden, errorResponse(err))
+				return
+			}
+		} else if err == sql.ErrNoRows {
+			ctx.JSON(http.StatusNotFound, errorResponse(err))
+			return
+		}
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{})
+}
+
+type loginUserRequest struct {
+	//TODO: remove id implement getuser with username
+	ID       int64  `json:"id" binding:"required,min=1"`
+	Username string `json:"username" binding:"required,alphanum"`
+	Password string `json:"password" binding:"required,min=6"`
+}
+
+type loginUserResponse struct {
+	AccessToken string       `json:"access_token"`
+	User        userResponse `json:"user"`
+}
+
+func (server *Server) loginUser(ctx *gin.Context) {
+	var req loginUserRequest
+
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		return
+	}
+
+	user, err := server.store.GetUser(ctx, req.ID)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			ctx.JSON(http.StatusNotFound, errorResponse(err))
+			return
+		}
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+
+	err = util.CheckPassword(req.Password, user.Password)
+	if err != nil {
+		ctx.JSON(http.StatusUnauthorized, errorResponse(err))
+		return
+	}
+
+	accessToken, err := server.tokenMaker.CreateToken(
+		user.Username,
+		server.config.AccessTokenDuration,
+	)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+
+	rsp := loginUserResponse{
+		AccessToken: accessToken,
+		User:        newUserResponse(user),
+	}
+	ctx.JSON(http.StatusOK, rsp)
 }

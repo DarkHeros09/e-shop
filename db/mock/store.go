@@ -593,6 +593,36 @@ func (mr *MockStoreMockRecorder) GetUserAddress(arg0, arg1 interface{}) *gomock.
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserAddress", reflect.TypeOf((*MockStore)(nil).GetUserAddress), arg0, arg1)
 }
 
+// GetUserByEmail mocks base method.
+func (m *MockStore) GetUserByEmail(arg0 context.Context, arg1 string) (db.User, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetUserByEmail", arg0, arg1)
+	ret0, _ := ret[0].(db.User)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetUserByEmail indicates an expected call of GetUserByEmail.
+func (mr *MockStoreMockRecorder) GetUserByEmail(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserByEmail", reflect.TypeOf((*MockStore)(nil).GetUserByEmail), arg0, arg1)
+}
+
+// GetUserByUsername mocks base method.
+func (m *MockStore) GetUserByUsername(arg0 context.Context, arg1 string) (db.User, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetUserByUsername", arg0, arg1)
+	ret0, _ := ret[0].(db.User)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetUserByUsername indicates an expected call of GetUserByUsername.
+func (mr *MockStoreMockRecorder) GetUserByUsername(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserByUsername", reflect.TypeOf((*MockStore)(nil).GetUserByUsername), arg0, arg1)
+}
+
 // GetUserPayment mocks base method.
 func (m *MockStore) GetUserPayment(arg0 context.Context, arg1 int64) (db.UserPayment, error) {
 	m.ctrl.T.Helper()

@@ -44,6 +44,8 @@ type Querier interface {
 	GetShoppingSession(ctx context.Context, id int64) (ShoppingSession, error)
 	GetUser(ctx context.Context, id int64) (User, error)
 	GetUserAddress(ctx context.Context, id int64) (UserAddress, error)
+	GetUserByEmail(ctx context.Context, email string) (User, error)
+	GetUserByUsername(ctx context.Context, username string) (User, error)
 	GetUserPayment(ctx context.Context, id int64) (UserPayment, error)
 	ListCartItem(ctx context.Context, arg ListCartItemParams) ([]CartItem, error)
 	ListDiscounts(ctx context.Context, arg ListDiscountsParams) ([]Discount, error)
