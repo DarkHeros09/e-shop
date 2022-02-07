@@ -44,6 +44,7 @@ type Querier interface {
 	GetShoppingSession(ctx context.Context, id int64) (ShoppingSession, error)
 	GetUser(ctx context.Context, id int64) (User, error)
 	GetUserAddress(ctx context.Context, id int64) (UserAddress, error)
+	GetUserAddressByUserID(ctx context.Context, userID int64) (UserAddress, error)
 	GetUserByEmail(ctx context.Context, email string) (User, error)
 	GetUserByUsername(ctx context.Context, username string) (User, error)
 	GetUserPayment(ctx context.Context, id int64) (UserPayment, error)
@@ -71,6 +72,7 @@ type Querier interface {
 	UpdateShoppingSession(ctx context.Context, arg UpdateShoppingSessionParams) (ShoppingSession, error)
 	UpdateUser(ctx context.Context, arg UpdateUserParams) (User, error)
 	UpdateUserAddress(ctx context.Context, arg UpdateUserAddressParams) (UserAddress, error)
+	UpdateUserAddressByUserID(ctx context.Context, arg UpdateUserAddressByUserIDParams) (UserAddress, error)
 	UpdateUserPayment(ctx context.Context, arg UpdateUserPaymentParams) (UserPayment, error)
 }
 

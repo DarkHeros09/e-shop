@@ -41,43 +41,45 @@ func (server *Server) setupRouter() {
 	router.POST("/users", server.createUser)
 	router.POST("/users/login", server.loginUser)
 
-	// authRoutes := router.Group("/").Use(authMiddleware(server.tokenMaker))
+	authRoutes := router.Group("/").Use(authMiddleware(server.tokenMaker))
 
-	router.GET("/users/:id", server.getUser)
-	router.GET("/users", server.listUsers)
-	router.PUT("/users/:id", server.updateUser)
-	router.DELETE("/users/:id", server.deleteUser)
+	authRoutes.GET("/users/:id", server.getUser)    //* Finished With tests (token and changed response... No Etag)
+	router.GET("/users", server.listUsers)          //! Admin Only
+	authRoutes.PUT("/users/:id", server.updateUser) //* Finished With tests (token and changed response... No Etag)
+	router.DELETE("/users/:id", server.deleteUser)  //! Admin Only
 
-	router.POST("/useraddresses", server.createUserAddress)
-	router.GET("/useraddresses/:id", server.getUserAddress)
-	router.GET("/useraddresses", server.listUserAddresses)
+	authRoutes.POST("/useraddresses", server.createUserAddress)
+	authRoutes.GET("/useraddresses/:id", server.getUserAddress)
+	authRoutes.GET("/useraddressesByUserID/:user_id", server.getUserAddressByUserID)
+	authRoutes.GET("/useraddresses", server.listUserAddresses)
+	authRoutes.PUT("/useraddresses/:user_id", server.updateUserAddressByUserID)
 
 	router.POST("/userpayments", server.createUserPayment)
 	router.GET("/userpayments/:id", server.getUserPayment)
 	router.GET("/userpayments", server.listUserPayments)
 
-	router.POST("/categories", server.createCategory)
+	router.POST("/categories", server.createCategory) //! Admin Only
 	router.GET("/categories/:id", server.getCategory)
 	router.GET("/categories", server.listCategories)
 
-	router.POST("/inventories", server.createInventory)
+	router.POST("/inventories", server.createInventory) //! Admin Only
 	router.GET("/inventories/:id", server.getInventory)
 	router.GET("/inventories", server.listInventories)
 
-	router.POST("/discounts", server.createDiscount)
+	router.POST("/discounts", server.createDiscount) //! Admin Only
 	router.GET("/discounts/:id", server.getDiscount)
 	router.GET("/discounts", server.listDiscount)
 
-	router.POST("/products", server.createProduct)
+	router.POST("/products", server.createProduct) //! Admin Only
 	router.GET("/products/:id", server.getProduct)
 	router.GET("/products", server.listProducts)
-	router.PUT("/products/:id", server.updateProduct)
-	router.DELETE("/products/:id", server.deleteProduct)
+	router.PUT("/products/:id", server.updateProduct)    //! Admin Only
+	router.DELETE("/products/:id", server.deleteProduct) //! Admin Only
 
-	router.POST("/shoppingsessions", server.createShoppingSession)
-	router.GET("/shoppingsessions/:id", server.getShoppingSession)
+	authRoutes.POST("/shoppingsessions", server.createShoppingSession)
+	authRoutes.GET("/shoppingsessions/:id", server.getShoppingSession)
 
-	router.POST("/cartitems", server.createCartItem)
+	authRoutes.POST("/cartitems", server.createCartItem)
 	router.GET("/cartitems/:id", server.getCartItem)
 	router.GET("/cartitems", server.listCartItems)
 
@@ -101,9 +103,12 @@ func (server *Server) setupRouter() {
 
 // TODO: add update and delete methods
 
-// TODO: modify the verification tags in the apis
+// TODO: modify the verification tags in the apis line required tags
 
 // TODO: add etag logic with tests
+
+// TODO: modify the list methods where needed like the listshoppingsession method. video 22 mintue 19.50
+
 // TODO: add gracefull shutdown logic
 // Start runs the HTTP server on a specific address
 func (server *Server) Start(address string) error {

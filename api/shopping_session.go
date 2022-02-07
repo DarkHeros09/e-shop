@@ -2,9 +2,11 @@ package api
 
 import (
 	"database/sql"
+	"errors"
 	"net/http"
 
 	db "github.com/DarkHeros09/e-shop/v2/db/sqlc"
+	"github.com/DarkHeros09/e-shop/v2/token"
 	"github.com/gin-gonic/gin"
 	"github.com/lib/pq"
 )
@@ -22,8 +24,9 @@ func (server *Server) createShoppingSession(ctx *gin.Context) {
 		return
 	}
 
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
 	arg := db.CreateShoppingSessionParams{
-		UserID: req.UserID,
+		UserID: authPayload.UserID,
 		Total:  req.Total,
 	}
 
@@ -62,6 +65,13 @@ func (server *Server) getShoppingSession(ctx *gin.Context) {
 			return
 		}
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
+	if shoppingSession.UserID != authPayload.UserID {
+		err := errors.New("account deosn't belong to the authenticated user")
+		ctx.JSON(http.StatusUnauthorized, errorResponse(err))
 		return
 	}
 	ctx.JSON(http.StatusOK, shoppingSession)

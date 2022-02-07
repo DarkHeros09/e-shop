@@ -86,13 +86,15 @@ func TestDeleteShoppingSession(t *testing.T) {
 }
 
 func TestListShoppingSessions(t *testing.T) {
+	var lastShoppingSession ShoppingSession
 	for i := 0; i < 10; i++ {
-		createRandomShoppingSession(t)
+		lastShoppingSession = createRandomShoppingSession(t)
 	}
 
 	arg := ListShoppingSessionsParams{
+		UserID: lastShoppingSession.UserID,
 		Limit:  5,
-		Offset: 5,
+		Offset: 0,
 	}
 
 	shoppingSessions, err := testQueires.ListShoppingSessions(context.Background(), arg)
@@ -102,5 +104,8 @@ func TestListShoppingSessions(t *testing.T) {
 
 	for _, shoppingSession := range shoppingSessions {
 		require.NotEmpty(t, shoppingSession)
+		require.Equal(t, lastShoppingSession.ID, shoppingSession.ID)
+		require.Equal(t, lastShoppingSession.UserID, shoppingSession.UserID)
+		require.Equal(t, lastShoppingSession.Total, shoppingSession.Total)
 	}
 }

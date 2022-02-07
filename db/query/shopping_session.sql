@@ -14,9 +14,10 @@ LIMIT 1;
 
 -- name: ListShoppingSessions :many
 SELECT * FROM "shopping_session"
+WHERE user_id = $1
 ORDER BY id
-LIMIT $1
-OFFSET $2;
+LIMIT $2
+OFFSET $3;
 
 -- name: UpdateShoppingSession :one
 UPDATE "shopping_session"

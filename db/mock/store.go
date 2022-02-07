@@ -593,6 +593,21 @@ func (mr *MockStoreMockRecorder) GetUserAddress(arg0, arg1 interface{}) *gomock.
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserAddress", reflect.TypeOf((*MockStore)(nil).GetUserAddress), arg0, arg1)
 }
 
+// GetUserAddressByUserID mocks base method.
+func (m *MockStore) GetUserAddressByUserID(arg0 context.Context, arg1 int64) (db.UserAddress, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetUserAddressByUserID", arg0, arg1)
+	ret0, _ := ret[0].(db.UserAddress)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetUserAddressByUserID indicates an expected call of GetUserAddressByUserID.
+func (mr *MockStoreMockRecorder) GetUserAddressByUserID(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserAddressByUserID", reflect.TypeOf((*MockStore)(nil).GetUserAddressByUserID), arg0, arg1)
+}
+
 // GetUserByEmail mocks base method.
 func (m *MockStore) GetUserByEmail(arg0 context.Context, arg1 string) (db.User, error) {
 	m.ctrl.T.Helper()
@@ -996,6 +1011,21 @@ func (m *MockStore) UpdateUserAddress(arg0 context.Context, arg1 db.UpdateUserAd
 func (mr *MockStoreMockRecorder) UpdateUserAddress(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateUserAddress", reflect.TypeOf((*MockStore)(nil).UpdateUserAddress), arg0, arg1)
+}
+
+// UpdateUserAddressByUserID mocks base method.
+func (m *MockStore) UpdateUserAddressByUserID(arg0 context.Context, arg1 db.UpdateUserAddressByUserIDParams) (db.UserAddress, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateUserAddressByUserID", arg0, arg1)
+	ret0, _ := ret[0].(db.UserAddress)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UpdateUserAddressByUserID indicates an expected call of UpdateUserAddressByUserID.
+func (mr *MockStoreMockRecorder) UpdateUserAddressByUserID(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateUserAddressByUserID", reflect.TypeOf((*MockStore)(nil).UpdateUserAddressByUserID), arg0, arg1)
 }
 
 // UpdateUserPayment mocks base method.

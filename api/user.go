@@ -2,9 +2,11 @@ package api
 
 import (
 	"database/sql"
+	"errors"
 	"net/http"
 
 	db "github.com/DarkHeros09/e-shop/v2/db/sqlc"
+	"github.com/DarkHeros09/e-shop/v2/token"
 	"github.com/DarkHeros09/e-shop/v2/util"
 	"github.com/gin-gonic/gin"
 	"github.com/lib/pq"
@@ -90,7 +92,15 @@ func (server *Server) getUser(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
-	ctx.JSON(http.StatusOK, user)
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
+	if user.ID != authPayload.UserID {
+		err := errors.New("account deosn't belong to the authenticated user")
+		ctx.JSON(http.StatusUnauthorized, errorResponse(err))
+		return
+	}
+
+	rsp := newUserResponse(user)
+	ctx.JSON(http.StatusOK, rsp)
 }
 
 type listUsersRequest struct {
@@ -134,9 +144,9 @@ func (server *Server) updateUser(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
-
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
 	arg := db.UpdateUserParams{
-		ID:        req.ID,
+		ID:        authPayload.UserID,
 		Telephone: req.Telephone,
 	}
 
@@ -152,7 +162,9 @@ func (server *Server) updateUser(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
-	ctx.JSON(http.StatusOK, user)
+
+	rsp := newUserResponse(user)
+	ctx.JSON(http.StatusOK, rsp)
 }
 
 type deleteUserRequest struct {
@@ -223,6 +235,7 @@ func (server *Server) loginUser(ctx *gin.Context) {
 	}
 
 	accessToken, err := server.tokenMaker.CreateToken(
+		user.ID,
 		user.Username,
 		server.config.AccessTokenDuration,
 	)

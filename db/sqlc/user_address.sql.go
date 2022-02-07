@@ -72,20 +72,40 @@ func (q *Queries) GetUserAddress(ctx context.Context, id int64) (UserAddress, er
 	return i, err
 }
 
+const getUserAddressByUserID = `-- name: GetUserAddressByUserID :one
+SELECT id, user_id, address_line, city, telephone FROM "user_address"
+WHERE user_id = $1 LIMIT 1
+`
+
+func (q *Queries) GetUserAddressByUserID(ctx context.Context, userID int64) (UserAddress, error) {
+	row := q.db.QueryRowContext(ctx, getUserAddressByUserID, userID)
+	var i UserAddress
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.AddressLine,
+		&i.City,
+		&i.Telephone,
+	)
+	return i, err
+}
+
 const listUserAddresses = `-- name: ListUserAddresses :many
 SELECT id, user_id, address_line, city, telephone FROM "user_address"
+WHERE user_id = $1
 ORDER BY id
-LIMIT $1
-OFFSET $2
+LIMIT $2
+OFFSET $3
 `
 
 type ListUserAddressesParams struct {
+	UserID int64 `json:"user_id"`
 	Limit  int32 `json:"limit"`
 	Offset int32 `json:"offset"`
 }
 
 func (q *Queries) ListUserAddresses(ctx context.Context, arg ListUserAddressesParams) ([]UserAddress, error) {
-	rows, err := q.db.QueryContext(ctx, listUserAddresses, arg.Limit, arg.Offset)
+	rows, err := q.db.QueryContext(ctx, listUserAddresses, arg.UserID, arg.Limit, arg.Offset)
 	if err != nil {
 		return nil, err
 	}
@@ -132,6 +152,40 @@ type UpdateUserAddressParams struct {
 func (q *Queries) UpdateUserAddress(ctx context.Context, arg UpdateUserAddressParams) (UserAddress, error) {
 	row := q.db.QueryRowContext(ctx, updateUserAddress,
 		arg.ID,
+		arg.AddressLine,
+		arg.City,
+		arg.Telephone,
+	)
+	var i UserAddress
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.AddressLine,
+		&i.City,
+		&i.Telephone,
+	)
+	return i, err
+}
+
+const updateUserAddressByUserID = `-- name: UpdateUserAddressByUserID :one
+UPDATE "user_address"
+SET address_line = $2,
+city = $3,
+telephone = $4
+WHERE user_id = $1
+RETURNING id, user_id, address_line, city, telephone
+`
+
+type UpdateUserAddressByUserIDParams struct {
+	UserID      int64  `json:"user_id"`
+	AddressLine string `json:"address_line"`
+	City        string `json:"city"`
+	Telephone   int32  `json:"telephone"`
+}
+
+func (q *Queries) UpdateUserAddressByUserID(ctx context.Context, arg UpdateUserAddressByUserIDParams) (UserAddress, error) {
+	row := q.db.QueryRowContext(ctx, updateUserAddressByUserID,
+		arg.UserID,
 		arg.AddressLine,
 		arg.City,
 		arg.Telephone,

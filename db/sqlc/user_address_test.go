@@ -38,6 +38,21 @@ func TestCreateUserAddress(t *testing.T) {
 
 func TestGetUserAddress(t *testing.T) {
 	userAdress1 := createRandomUserAddress(t)
+	userAdress2, err := testQueires.GetUserAddressByUserID(context.Background(), userAdress1.UserID)
+
+	require.NoError(t, err)
+	require.NotEmpty(t, userAdress2)
+
+	require.Equal(t, userAdress1.ID, userAdress2.ID)
+	require.Equal(t, userAdress1.UserID, userAdress2.UserID)
+	require.Equal(t, userAdress1.AddressLine, userAdress2.AddressLine)
+	require.Equal(t, userAdress1.City, userAdress2.City)
+	require.Equal(t, userAdress1.Telephone, userAdress2.Telephone)
+
+}
+
+func TestGetUserAddressByUserID(t *testing.T) {
+	userAdress1 := createRandomUserAddress(t)
 	userAdress2, err := testQueires.GetUserAddress(context.Background(), userAdress1.ID)
 
 	require.NoError(t, err)
@@ -88,20 +103,27 @@ func TestDeleteUserAddress(t *testing.T) {
 }
 
 func TestListUserAddresses(t *testing.T) {
+	var lastUserAddress UserAddress
 	for i := 0; i < 10; i++ {
-		createRandomUserAddress(t)
+		lastUserAddress = createRandomUserAddress(t)
 	}
 	arg := ListUserAddressesParams{
+		UserID: lastUserAddress.UserID,
 		Limit:  5,
-		Offset: 5,
+		Offset: 0,
 	}
 
 	userAddresses, err := testQueires.ListUserAddresses(context.Background(), arg)
 	require.NoError(t, err)
-	require.Len(t, userAddresses, 5)
+	require.Len(t, userAddresses, 1)
 
 	for _, userAddress := range userAddresses {
 		require.NotEmpty(t, userAddress)
+		require.Equal(t, lastUserAddress.ID, userAddress.ID)
+		require.Equal(t, lastUserAddress.UserID, userAddress.UserID)
+		require.Equal(t, lastUserAddress.AddressLine, userAddress.AddressLine)
+		require.Equal(t, lastUserAddress.City, userAddress.City)
+		require.Equal(t, lastUserAddress.Telephone, userAddress.Telephone)
 
 	}
 }

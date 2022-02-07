@@ -66,18 +66,20 @@ func (q *Queries) GetShoppingSession(ctx context.Context, id int64) (ShoppingSes
 
 const listShoppingSessions = `-- name: ListShoppingSessions :many
 SELECT id, user_id, total, created_at, updated_at FROM "shopping_session"
+WHERE user_id = $1
 ORDER BY id
-LIMIT $1
-OFFSET $2
+LIMIT $2
+OFFSET $3
 `
 
 type ListShoppingSessionsParams struct {
+	UserID int64 `json:"user_id"`
 	Limit  int32 `json:"limit"`
 	Offset int32 `json:"offset"`
 }
 
 func (q *Queries) ListShoppingSessions(ctx context.Context, arg ListShoppingSessionsParams) ([]ShoppingSession, error) {
-	rows, err := q.db.QueryContext(ctx, listShoppingSessions, arg.Limit, arg.Offset)
+	rows, err := q.db.QueryContext(ctx, listShoppingSessions, arg.UserID, arg.Limit, arg.Offset)
 	if err != nil {
 		return nil, err
 	}

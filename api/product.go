@@ -24,7 +24,7 @@ type createProductRequest struct {
 func (server *Server) createProduct(ctx *gin.Context) {
 	var req createProductRequest
 
-	if err := ctx.BindJSON(&req); err != nil {
+	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
