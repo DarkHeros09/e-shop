@@ -874,7 +874,7 @@ func createRandomUserPayment(t *testing.T, user db.User) (userPayment db.UserPay
 		PaymentType: util.RandomUser(),
 		Provider:    util.RandomUser(),
 		AccountNo:   int32(util.RandomMoney()),
-		Expiry:      time.Now().Truncate(0),
+		Expiry:      time.Now().UTC().Truncate(0),
 	}
 	return
 }
