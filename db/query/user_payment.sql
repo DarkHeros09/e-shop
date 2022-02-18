@@ -14,16 +14,22 @@ RETURNING *;
 SELECT * FROM "user_payment"
 WHERE id = $1 LIMIT 1;
 
+-- name: GetUserPaymentByUserID :one
+SELECT * FROM "user_payment"
+WHERE user_id = $1 LIMIT 1;
+
 -- name: ListUserPayments :many
 SELECT * FROM "user_payment"
+WHERE user_id = $1
 ORDER BY id
-LIMIT $1
-OFFSET $2;
+LIMIT $2
+OFFSET $3;
 
--- name: UpdateUserPayment :one
+-- name: UpdateUserPaymentByUserID :one
 UPDATE "user_payment"
-SET payment_type = $2
-WHERE id = $1
+SET payment_type = $3
+WHERE user_id = $1
+AND id = $2
 RETURNING *;
 
 -- name: DeleteUserPayment :exec

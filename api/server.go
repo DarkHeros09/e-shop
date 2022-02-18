@@ -48,15 +48,19 @@ func (server *Server) setupRouter() {
 	authRoutes.PUT("/users/:id", server.updateUser) //* Finished With tests (token and changed response... No Etag)
 	router.DELETE("/users/:id", server.deleteUser)  //! Admin Only
 
-	authRoutes.POST("/useraddresses", server.createUserAddress)
-	authRoutes.GET("/useraddresses/:id", server.getUserAddress)
-	authRoutes.GET("/useraddressesByUserID/:user_id", server.getUserAddressByUserID)
-	authRoutes.GET("/useraddresses", server.listUserAddresses)
-	authRoutes.PUT("/useraddresses/:user_id", server.updateUserAddressByUserID)
+	authRoutes.POST("/useraddresses", server.createUserAddress)                      //* Finished With tests (token and changed response... No Etag)
+	authRoutes.GET("/useraddresses/:id", server.getUserAddress)                      //* Finished With tests (token and changed response... No Etag)
+	authRoutes.GET("/useraddressesByUserID/:user_id", server.getUserAddressByUserID) //* Finished With tests (token and changed response... No Etag)
+	authRoutes.GET("/useraddresses", server.listUserAddresses)                       //* Finished With tests (token and changed response... No Etag)
+	authRoutes.PUT("/useraddresses/:user_id", server.updateUserAddressByUserID)      //* Finished With tests (token and changed response... No Etag)
+	authRoutes.DELETE("/useraddresses/:id", server.deleteUserAddress)                //* Finished With tests (token and changed response... No Etag)
 
-	router.POST("/userpayments", server.createUserPayment)
-	router.GET("/userpayments/:id", server.getUserPayment)
-	router.GET("/userpayments", server.listUserPayments)
+	authRoutes.POST("/userpayments", server.createUserPayment)                      //* Finished With tests (token and changed response... No Etag)
+	authRoutes.GET("/userpayments/:id", server.getUserPayment)                      //* Finished With tests (token and changed response... No Etag)
+	authRoutes.GET("/userpaymentsByUserID/:user_id", server.getUserPaymentByUserID) //* Finished With tests (token and changed response... No Etag)
+	authRoutes.GET("/userpayments", server.listUserPayments)                        //* Finished With tests (token and changed response... No Etag)
+	authRoutes.PUT("/userpayments/:user_id", server.updateUserPaymentByUserID)      //* Finished With tests (token and changed response... No Etag)
+	authRoutes.DELETE("/userpayments/:id", server.deleteUserPayment)                //* Finished With tests (token and changed response... No Etag)
 
 	router.POST("/categories", server.createCategory) //! Admin Only
 	router.GET("/categories/:id", server.getCategory)
@@ -108,6 +112,8 @@ func (server *Server) setupRouter() {
 // TODO: add etag logic with tests
 
 // TODO: modify the list methods where needed like the listshoppingsession method. video 22 mintue 19.50
+
+// TODO: make etags for put and get, list methods
 
 // TODO: add gracefull shutdown logic
 // Start runs the HTTP server on a specific address

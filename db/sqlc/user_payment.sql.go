@@ -78,20 +78,41 @@ func (q *Queries) GetUserPayment(ctx context.Context, id int64) (UserPayment, er
 	return i, err
 }
 
+const getUserPaymentByUserID = `-- name: GetUserPaymentByUserID :one
+SELECT id, user_id, payment_type, provider, account_no, expiry FROM "user_payment"
+WHERE user_id = $1 LIMIT 1
+`
+
+func (q *Queries) GetUserPaymentByUserID(ctx context.Context, userID int64) (UserPayment, error) {
+	row := q.db.QueryRowContext(ctx, getUserPaymentByUserID, userID)
+	var i UserPayment
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.PaymentType,
+		&i.Provider,
+		&i.AccountNo,
+		&i.Expiry,
+	)
+	return i, err
+}
+
 const listUserPayments = `-- name: ListUserPayments :many
 SELECT id, user_id, payment_type, provider, account_no, expiry FROM "user_payment"
+WHERE user_id = $1
 ORDER BY id
-LIMIT $1
-OFFSET $2
+LIMIT $2
+OFFSET $3
 `
 
 type ListUserPaymentsParams struct {
+	UserID int64 `json:"user_id"`
 	Limit  int32 `json:"limit"`
 	Offset int32 `json:"offset"`
 }
 
 func (q *Queries) ListUserPayments(ctx context.Context, arg ListUserPaymentsParams) ([]UserPayment, error) {
-	rows, err := q.db.QueryContext(ctx, listUserPayments, arg.Limit, arg.Offset)
+	rows, err := q.db.QueryContext(ctx, listUserPayments, arg.UserID, arg.Limit, arg.Offset)
 	if err != nil {
 		return nil, err
 	}
@@ -120,20 +141,22 @@ func (q *Queries) ListUserPayments(ctx context.Context, arg ListUserPaymentsPara
 	return items, nil
 }
 
-const updateUserPayment = `-- name: UpdateUserPayment :one
+const updateUserPaymentByUserID = `-- name: UpdateUserPaymentByUserID :one
 UPDATE "user_payment"
-SET payment_type = $2
-WHERE id = $1
+SET payment_type = $3
+WHERE user_id = $1
+AND id = $2
 RETURNING id, user_id, payment_type, provider, account_no, expiry
 `
 
-type UpdateUserPaymentParams struct {
+type UpdateUserPaymentByUserIDParams struct {
+	UserID      int64  `json:"user_id"`
 	ID          int64  `json:"id"`
 	PaymentType string `json:"payment_type"`
 }
 
-func (q *Queries) UpdateUserPayment(ctx context.Context, arg UpdateUserPaymentParams) (UserPayment, error) {
-	row := q.db.QueryRowContext(ctx, updateUserPayment, arg.ID, arg.PaymentType)
+func (q *Queries) UpdateUserPaymentByUserID(ctx context.Context, arg UpdateUserPaymentByUserIDParams) (UserPayment, error) {
+	row := q.db.QueryRowContext(ctx, updateUserPaymentByUserID, arg.UserID, arg.ID, arg.PaymentType)
 	var i UserPayment
 	err := row.Scan(
 		&i.ID,

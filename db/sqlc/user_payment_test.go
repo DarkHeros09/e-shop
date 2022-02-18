@@ -55,12 +55,13 @@ func TestGetUserPayment(t *testing.T) {
 func TestUpdateUserPayment(t *testing.T) {
 	userPayment1 := createRandomUserPayment(t)
 
-	arg := UpdateUserPaymentParams{
+	arg := UpdateUserPaymentByUserIDParams{
+		UserID:      userPayment1.UserID,
 		ID:          userPayment1.ID,
 		PaymentType: "edfa3le",
 	}
 
-	userPayment2, err := testQueires.UpdateUserPayment(context.Background(), arg)
+	userPayment2, err := testQueires.UpdateUserPaymentByUserID(context.Background(), arg)
 
 	require.NoError(t, err)
 	require.NotEmpty(t, userPayment2)
@@ -86,20 +87,28 @@ func TestDeleteUserPayment(t *testing.T) {
 }
 
 func TestListUserPayments(t *testing.T) {
+	var lastUserPayment UserPayment
 	for i := 0; i < 10; i++ {
-		createRandomUserPayment(t)
+		lastUserPayment = createRandomUserPayment(t)
 	}
 	arg := ListUserPaymentsParams{
+		UserID: lastUserPayment.UserID,
 		Limit:  5,
-		Offset: 5,
+		Offset: 0,
 	}
 
 	userPayments, err := testQueires.ListUserPayments(context.Background(), arg)
 	require.NoError(t, err)
-	require.Len(t, userPayments, 5)
+	require.Len(t, userPayments, 1)
 
 	for _, userPayment := range userPayments {
 		require.NotEmpty(t, userPayment)
+		require.Equal(t, lastUserPayment.ID, userPayment.ID)
+		require.Equal(t, lastUserPayment.UserID, userPayment.UserID)
+		require.Equal(t, lastUserPayment.PaymentType, userPayment.PaymentType)
+		require.Equal(t, lastUserPayment.Provider, userPayment.Provider)
+		require.Equal(t, lastUserPayment.AccountNo, userPayment.AccountNo)
+		require.Equal(t, lastUserPayment.Expiry, userPayment.Expiry)
 
 	}
 }

@@ -34,10 +34,11 @@ RETURNING *;
 
 -- name: UpdateUserAddressByUserID :one
 UPDATE "user_address"
-SET address_line = $2,
-city = $3,
-telephone = $4
+SET address_line = $3,
+city = $4,
+telephone = $5
 WHERE user_id = $1
+AND id = $2
 RETURNING *;
 
 -- name: DeleteUserAddress :exec

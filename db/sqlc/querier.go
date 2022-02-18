@@ -48,6 +48,7 @@ type Querier interface {
 	GetUserByEmail(ctx context.Context, email string) (User, error)
 	GetUserByUsername(ctx context.Context, username string) (User, error)
 	GetUserPayment(ctx context.Context, id int64) (UserPayment, error)
+	GetUserPaymentByUserID(ctx context.Context, userID int64) (UserPayment, error)
 	ListCartItem(ctx context.Context, arg ListCartItemParams) ([]CartItem, error)
 	ListDiscounts(ctx context.Context, arg ListDiscountsParams) ([]Discount, error)
 	ListOrderDetails(ctx context.Context, arg ListOrderDetailsParams) ([]OrderDetail, error)
@@ -73,7 +74,7 @@ type Querier interface {
 	UpdateUser(ctx context.Context, arg UpdateUserParams) (User, error)
 	UpdateUserAddress(ctx context.Context, arg UpdateUserAddressParams) (UserAddress, error)
 	UpdateUserAddressByUserID(ctx context.Context, arg UpdateUserAddressByUserIDParams) (UserAddress, error)
-	UpdateUserPayment(ctx context.Context, arg UpdateUserPaymentParams) (UserPayment, error)
+	UpdateUserPaymentByUserID(ctx context.Context, arg UpdateUserPaymentByUserIDParams) (UserPayment, error)
 }
 
 var _ Querier = (*Queries)(nil)

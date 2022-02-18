@@ -169,15 +169,17 @@ func (q *Queries) UpdateUserAddress(ctx context.Context, arg UpdateUserAddressPa
 
 const updateUserAddressByUserID = `-- name: UpdateUserAddressByUserID :one
 UPDATE "user_address"
-SET address_line = $2,
-city = $3,
-telephone = $4
+SET address_line = $3,
+city = $4,
+telephone = $5
 WHERE user_id = $1
+AND id = $2
 RETURNING id, user_id, address_line, city, telephone
 `
 
 type UpdateUserAddressByUserIDParams struct {
 	UserID      int64  `json:"user_id"`
+	ID          int64  `json:"id"`
 	AddressLine string `json:"address_line"`
 	City        string `json:"city"`
 	Telephone   int32  `json:"telephone"`
@@ -186,6 +188,7 @@ type UpdateUserAddressByUserIDParams struct {
 func (q *Queries) UpdateUserAddressByUserID(ctx context.Context, arg UpdateUserAddressByUserIDParams) (UserAddress, error) {
 	row := q.db.QueryRowContext(ctx, updateUserAddressByUserID,
 		arg.UserID,
+		arg.ID,
 		arg.AddressLine,
 		arg.City,
 		arg.Telephone,

@@ -73,7 +73,7 @@ func (server *Server) getUserAddress(ctx *gin.Context) {
 	}
 	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
 	if userAddress.UserID != authPayload.UserID {
-		err := errors.New("account deosn't belong to the authenticated user")
+		err := errors.New("account doesn't belong to the authenticated user")
 		ctx.JSON(http.StatusUnauthorized, errorResponse(err))
 		return
 	}
@@ -103,7 +103,7 @@ func (server *Server) getUserAddressByUserID(ctx *gin.Context) {
 	}
 	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
 	if userAddress.UserID != authPayload.UserID {
-		err := errors.New("account deosn't belong to the authenticated user")
+		err := errors.New("account doesn't belong to the authenticated user")
 		ctx.JSON(http.StatusUnauthorized, errorResponse(err))
 		return
 	}
@@ -141,7 +141,7 @@ func (server *Server) listUserAddresses(ctx *gin.Context) {
 }
 
 type updateUserAddressByUserIDRequest struct {
-	UserID      int64  `json:"user_id" binding:"required,min=1"`
+	ID          int64  `json:"id" binding:"required,min=1"`
 	AddressLine string `json:"address_line"`
 	City        string `json:"city"`
 	Telephone   int32  `json:"telephone" binding:"required"`
@@ -156,6 +156,7 @@ func (server *Server) updateUserAddressByUserID(ctx *gin.Context) {
 	}
 	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
 	arg := db.UpdateUserAddressByUserIDParams{
+		ID:          req.ID,
 		UserID:      authPayload.UserID,
 		AddressLine: req.AddressLine,
 		City:        req.City,
@@ -176,4 +177,43 @@ func (server *Server) updateUserAddressByUserID(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, userAddress)
+}
+
+type deleteUserAddressRequest struct {
+	ID     int64 `json:"id" binding:"required,min=1"`
+	UserID int64 `json:"user_id" binding:"required,min=1"`
+}
+
+func (server *Server) deleteUserAddress(ctx *gin.Context) {
+	var req deleteUserAddressRequest
+
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		return
+	}
+
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
+	if req.UserID != authPayload.UserID {
+		err := errors.New("account doesn't belong to the authenticated user")
+		ctx.JSON(http.StatusUnauthorized, errorResponse(err))
+		return
+	}
+
+	err := server.store.DeleteUserAddress(ctx, req.ID)
+	if err != nil {
+		if pqErr, ok := err.(*pq.Error); ok {
+			switch pqErr.Code.Name() {
+			case "foreign_key_violation", "unique_violation":
+				ctx.JSON(http.StatusForbidden, errorResponse(err))
+				return
+			}
+		} else if err == sql.ErrNoRows {
+			ctx.JSON(http.StatusNotFound, errorResponse(err))
+			return
+		}
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{})
 }
