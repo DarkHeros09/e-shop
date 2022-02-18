@@ -891,7 +891,7 @@ func requireBodyMatchUserPayment(t *testing.T, body *bytes.Buffer, userPayment d
 	require.Equal(t, userPayment.UserID, gotUserPayment.UserID)
 	require.Equal(t, userPayment.Provider, gotUserPayment.Provider)
 	require.Equal(t, userPayment.PaymentType, gotUserPayment.PaymentType)
-	require.Equal(t, userPayment.Expiry.Local(), gotUserPayment.Expiry) // added local to pass the github action timing issue.
+	require.Equal(t, userPayment.Expiry, gotUserPayment.Expiry.Local()) // added local to pass the github action timing issue.
 }
 
 func requireBodyMatchUserPayments(t *testing.T, body *bytes.Buffer, userPayments []db.UserPayment) {
