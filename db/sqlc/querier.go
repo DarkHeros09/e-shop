@@ -7,6 +7,8 @@ import (
 )
 
 type Querier interface {
+	CreateAdmin(ctx context.Context, arg CreateAdminParams) (Admin, error)
+	CreateAdminType(ctx context.Context, adminType string) (AdminType, error)
 	CreateCartItem(ctx context.Context, arg CreateCartItemParams) (CartItem, error)
 	CreateDiscount(ctx context.Context, arg CreateDiscountParams) (Discount, error)
 	CreateOrderDetail(ctx context.Context, arg CreateOrderDetailParams) (OrderDetail, error)
@@ -19,6 +21,9 @@ type Querier interface {
 	CreateUser(ctx context.Context, arg CreateUserParams) (User, error)
 	CreateUserAddress(ctx context.Context, arg CreateUserAddressParams) (UserAddress, error)
 	CreateUserPayment(ctx context.Context, arg CreateUserPaymentParams) (UserPayment, error)
+	DeleteAdmin(ctx context.Context, id int64) error
+	DeleteAdminTypeByID(ctx context.Context, id int64) error
+	DeleteAdminTypeByType(ctx context.Context, adminType string) error
 	DeleteCartItem(ctx context.Context, id int64) error
 	DeleteDiscount(ctx context.Context, id int64) error
 	DeleteOrderDetail(ctx context.Context, id int64) error
@@ -31,6 +36,9 @@ type Querier interface {
 	DeleteUser(ctx context.Context, id int64) error
 	DeleteUserAddress(ctx context.Context, id int64) error
 	DeleteUserPayment(ctx context.Context, id int64) error
+	GetAdmin(ctx context.Context, id int64) (Admin, error)
+	GetAdminByEmail(ctx context.Context, email string) (Admin, error)
+	GetAdminType(ctx context.Context, id int64) (AdminType, error)
 	GetCartItem(ctx context.Context, id int64) (CartItem, error)
 	GetDiscount(ctx context.Context, id int64) (Discount, error)
 	GetOrderDetail(ctx context.Context, id int64) (OrderDetail, error)
@@ -49,6 +57,8 @@ type Querier interface {
 	GetUserByUsername(ctx context.Context, username string) (User, error)
 	GetUserPayment(ctx context.Context, id int64) (UserPayment, error)
 	GetUserPaymentByUserID(ctx context.Context, userID int64) (UserPayment, error)
+	ListAdminTypes(ctx context.Context, arg ListAdminTypesParams) ([]AdminType, error)
+	ListAdmins(ctx context.Context, arg ListAdminsParams) ([]Admin, error)
 	ListCartItem(ctx context.Context, arg ListCartItemParams) ([]CartItem, error)
 	ListDiscounts(ctx context.Context, arg ListDiscountsParams) ([]Discount, error)
 	ListOrderDetails(ctx context.Context, arg ListOrderDetailsParams) ([]OrderDetail, error)
@@ -61,6 +71,8 @@ type Querier interface {
 	ListUserAddresses(ctx context.Context, arg ListUserAddressesParams) ([]UserAddress, error)
 	ListUserPayments(ctx context.Context, arg ListUserPaymentsParams) ([]UserPayment, error)
 	ListUsers(ctx context.Context, arg ListUsersParams) ([]User, error)
+	UpdateAdmin(ctx context.Context, arg UpdateAdminParams) (Admin, error)
+	UpdateAdminType(ctx context.Context, arg UpdateAdminTypeParams) (AdminType, error)
 	UpdateCartItem(ctx context.Context, arg UpdateCartItemParams) (CartItem, error)
 	UpdateDiscount(ctx context.Context, arg UpdateDiscountParams) (Discount, error)
 	UpdateOrderDetail(ctx context.Context, arg UpdateOrderDetailParams) (OrderDetail, error)

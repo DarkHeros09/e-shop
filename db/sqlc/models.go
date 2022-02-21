@@ -6,6 +6,25 @@ import (
 	"time"
 )
 
+type Admin struct {
+	ID        int64     `json:"id"`
+	Username  string    `json:"username"`
+	Email     string    `json:"email"`
+	Password  string    `json:"password"`
+	Active    bool      `json:"active"`
+	TypeID    int64     `json:"type_id"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+	LastLogin time.Time `json:"last_login"`
+}
+
+type AdminType struct {
+	ID        int64     `json:"id"`
+	AdminType string    `json:"admin_type"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+}
+
 type CartItem struct {
 	ID        int64 `json:"id"`
 	SessionID int64 `json:"session_id"`

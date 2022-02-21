@@ -8,16 +8,16 @@ dropdb:
 	docker exec -it postgres14-eshop dropdb eshop
 
 migrateup:
-	migrate -path db/migration -database "postgresql://postgres:secret@192.168.10.139:5555/eshop?sslmode=disable" -verbose up
+	migrate -path db/migration -database "postgresql://postgres:secret@localhost:5555/eshop?sslmode=disable" -verbose up
 
 migrateup1:
-	migrate -path db/migration -database "postgresql://postgres:secret@192.168.10.139:5555/eshop?sslmode=disable" -verbose up 1
+	migrate -path db/migration -database "postgresql://postgres:secret@localhost:5555/eshop?sslmode=disable" -verbose up 1
 
 migratedown:
-	migrate -path db/migration -database "postgresql://postgres:secret@192.168.10.139:5555/eshop?sslmode=disable" -verbose down
+	migrate -path db/migration -database "postgresql://postgres:secret@localhost:5555/eshop?sslmode=disable" -verbose down
 
 migratedown1:
-	migrate -path db/migration -database "postgresql://postgres:secret@192.168.10.139:5555/eshop?sslmode=disable" -verbose down 1
+	migrate -path db/migration -database "postgresql://postgres:secret@localhost:5555/eshop?sslmode=disable" -verbose down 1
 
 cimigrateup:
 	migrate -path db/migration -database "postgresql://postgres:secret@localhost:5555/eshop?sslmode=disable" -verbose up

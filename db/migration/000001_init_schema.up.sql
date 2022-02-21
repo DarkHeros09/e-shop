@@ -5,7 +5,7 @@ CREATE TABLE "user" (
   "password" varchar NOT NULL,
   "telephone" int NOT NULL,
   "created_at" timestamptz NOT NULL DEFAULT (now()),
-  "updated_at" timestamptz NOT NULL DEFAULT (now())
+  "updated_at" timestamptz NOT NULL DEFAULT '0001-01-01 00:00:00Z'
 );
 
 CREATE TABLE "user_address" (
@@ -30,7 +30,7 @@ CREATE TABLE "shopping_session" (
   "user_id" bigint UNIQUE NOT NULL,
   "total" decimal NOT NULL,
   "created_at" timestamptz NOT NULL DEFAULT (now()),
-  "updated_at" timestamptz NOT NULL DEFAULT (now())
+  "updated_at" timestamptz NOT NULL DEFAULT '0001-01-01 00:00:00Z'
 );
 
 CREATE TABLE "cart_item" (
@@ -39,7 +39,7 @@ CREATE TABLE "cart_item" (
   "product_id" bigint UNIQUE NOT NULL,
   "quantity" int NOT NULL,
   "created_at" timestamptz NOT NULL DEFAULT (now()),
-  "updated_at" timestamptz NOT NULL DEFAULT (now())
+  "updated_at" timestamptz NOT NULL DEFAULT '0001-01-01 00:00:00Z'
 );
 
 CREATE TABLE "payment_detail" (
@@ -49,7 +49,7 @@ CREATE TABLE "payment_detail" (
   "provider" varchar NOT NULL,
   "status" varchar NOT NULL,
   "created_at" timestamptz NOT NULL DEFAULT (now()),
-  "updated_at" timestamptz NOT NULL DEFAULT (now())
+  "updated_at" timestamptz NOT NULL DEFAULT '0001-01-01 00:00:00Z'
 );
 
 CREATE TABLE "product" (
@@ -63,7 +63,7 @@ CREATE TABLE "product" (
   "active" boolean NOT NULL DEFAULT false,
   "discount_id" bigint UNIQUE NOT NULL,
   "created_at" timestamptz NOT NULL DEFAULT (now()),
-  "updated_at" timestamptz NOT NULL DEFAULT (now())
+  "updated_at" timestamptz NOT NULL DEFAULT '0001-01-01 00:00:00Z'
 );
 
 CREATE TABLE "order_detail" (
@@ -72,7 +72,7 @@ CREATE TABLE "order_detail" (
   "total" decimal NOT NULL,
   "payment_id" bigint UNIQUE NOT NULL,
   "created_at" timestamptz NOT NULL DEFAULT (now()),
-  "updated_at" timestamptz NOT NULL DEFAULT (now())
+  "updated_at" timestamptz NOT NULL DEFAULT '0001-01-01 00:00:00Z'
 );
 
 CREATE TABLE "order_item" (
@@ -81,7 +81,7 @@ CREATE TABLE "order_item" (
   "product_id" bigint NOT NULL,
   "quantity" int NOT NULL,
   "created_at" timestamptz NOT NULL DEFAULT (now()),
-  "updated_at" timestamptz NOT NULL DEFAULT (now())
+  "updated_at" timestamptz NOT NULL DEFAULT '0001-01-01 00:00:00Z'
 );
 
 CREATE TABLE "product_category" (
@@ -90,7 +90,7 @@ CREATE TABLE "product_category" (
   "description" text NOT NULL,
   "active" boolean NOT NULL DEFAULT false,
   "created_at" timestamptz NOT NULL DEFAULT (now()),
-  "updated_at" timestamptz NOT NULL DEFAULT (now())
+  "updated_at" timestamptz NOT NULL DEFAULT '0001-01-01 00:00:00Z'
 );
 
 CREATE TABLE "product_inventory" (
@@ -98,7 +98,7 @@ CREATE TABLE "product_inventory" (
   "quantity" int NOT NULL,
   "active" boolean NOT NULL DEFAULT true,
   "created_at" timestamptz NOT NULL DEFAULT (now()),
-  "updated_at" timestamptz NOT NULL DEFAULT (now())
+  "updated_at" timestamptz NOT NULL DEFAULT '0001-01-01 00:00:00Z'
 );
 
 CREATE TABLE "discount" (
@@ -108,7 +108,7 @@ CREATE TABLE "discount" (
   "discount_percent" decimal NOT NULL DEFAULT 0,
   "active" boolean NOT NULL DEFAULT false,
   "created_at" timestamptz NOT NULL DEFAULT (now()),
-  "updated_at" timestamptz NOT NULL DEFAULT (now())
+  "updated_at" timestamptz NOT NULL DEFAULT '0001-01-01 00:00:00Z'
 );
 
 ALTER TABLE "user_address" ADD FOREIGN KEY ("user_id") REFERENCES "user" ("id");
