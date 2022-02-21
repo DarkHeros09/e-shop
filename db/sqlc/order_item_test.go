@@ -29,7 +29,7 @@ func createRandomOrderItem(t *testing.T) OrderItem {
 
 	require.NotEmpty(t, orderItem.ID)
 	require.NotEmpty(t, orderItem.CreatedAt)
-	require.Zero(t, orderItem.UpdatedAt)
+	require.True(t, orderItem.UpdatedAt.IsZero())
 
 	return orderItem
 

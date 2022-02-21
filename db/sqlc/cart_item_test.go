@@ -30,7 +30,7 @@ func createRandomCartItem(t *testing.T) CartItem {
 
 	require.NotEmpty(t, cartItem.ID)
 	require.NotEmpty(t, cartItem.CreatedAt)
-	require.Zero(t, cartItem.UpdatedAt)
+	require.True(t, cartItem.UpdatedAt.IsZero())
 
 	return cartItem
 

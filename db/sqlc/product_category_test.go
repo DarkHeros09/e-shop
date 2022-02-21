@@ -27,7 +27,7 @@ func createRandomProductCategory(t *testing.T) ProductCategory {
 
 	require.NotEmpty(t, productCategory.ID)
 	require.NotEmpty(t, productCategory.CreatedAt)
-	require.Zero(t, productCategory.UpdatedAt)
+	require.True(t, productCategory.UpdatedAt.IsZero())
 
 	return productCategory
 

@@ -28,7 +28,7 @@ func createRandomDiscount(t *testing.T) Discount {
 
 	require.NotZero(t, discount.ID)
 	require.NotZero(t, discount.CreatedAt)
-	require.Zero(t, discount.UpdatedAt)
+	require.True(t, discount.UpdatedAt.IsZero())
 
 	require.False(t, discount.Active)
 

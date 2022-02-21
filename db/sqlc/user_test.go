@@ -32,7 +32,7 @@ func createRandomUser(t *testing.T) User {
 
 	require.NotZero(t, user.ID)
 	require.NotZero(t, user.CreatedAt)
-	require.Zero(t, user.UpdatedAt)
+	require.True(t, user.UpdatedAt.IsZero())
 
 	return user
 

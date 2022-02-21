@@ -22,7 +22,7 @@ func createRandomAdminType(t *testing.T) AdminType {
 
 	require.NotEmpty(t, adminType.ID)
 	require.NotEmpty(t, adminType.CreatedAt)
-	require.Zero(t, adminType.UpdatedAt)
+	require.True(t, adminType.UpdatedAt.IsZero())
 
 	return adminType
 }

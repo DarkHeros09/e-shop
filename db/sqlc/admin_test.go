@@ -34,7 +34,7 @@ func createRandomAdmin(t *testing.T) Admin {
 
 	require.NotZero(t, admin.ID)
 	require.NotZero(t, admin.CreatedAt)
-	require.Zero(t, admin.UpdatedAt)
+	require.True(t, admin.UpdatedAt.IsZero())
 
 	return admin
 
