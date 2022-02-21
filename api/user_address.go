@@ -26,7 +26,7 @@ func (server *Server) createUserAddress(ctx *gin.Context) {
 		return
 	}
 
-	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.UserPayload)
 	arg := db.CreateUserAddressParams{
 		UserID:      authPayload.UserID,
 		AddressLine: req.AddressLine,
@@ -71,7 +71,7 @@ func (server *Server) getUserAddress(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
-	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.UserPayload)
 	if userAddress.UserID != authPayload.UserID {
 		err := errors.New("account doesn't belong to the authenticated user")
 		ctx.JSON(http.StatusUnauthorized, errorResponse(err))
@@ -101,7 +101,7 @@ func (server *Server) getUserAddressByUserID(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
-	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.UserPayload)
 	if userAddress.UserID != authPayload.UserID {
 		err := errors.New("account doesn't belong to the authenticated user")
 		ctx.JSON(http.StatusUnauthorized, errorResponse(err))
@@ -122,7 +122,7 @@ func (server *Server) listUserAddresses(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
-	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.UserPayload)
 	arg := db.ListUserAddressesParams{
 		UserID: authPayload.UserID,
 		Limit:  req.PageSize,
@@ -154,7 +154,7 @@ func (server *Server) updateUserAddressByUserID(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
-	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.UserPayload)
 	arg := db.UpdateUserAddressByUserIDParams{
 		ID:          req.ID,
 		UserID:      authPayload.UserID,
@@ -192,7 +192,7 @@ func (server *Server) deleteUserAddress(ctx *gin.Context) {
 		return
 	}
 
-	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.UserPayload)
 	if req.UserID != authPayload.UserID {
 		err := errors.New("account doesn't belong to the authenticated user")
 		ctx.JSON(http.StatusUnauthorized, errorResponse(err))

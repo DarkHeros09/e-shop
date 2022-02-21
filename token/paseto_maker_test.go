@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestPasetoMaker(t *testing.T) {
+func TestPasetoMakerForUser(t *testing.T) {
 	maker, err := NewPasetoMaker(util.RandomString(32))
 	require.NoError(t, err)
 
@@ -19,11 +19,11 @@ func TestPasetoMaker(t *testing.T) {
 	issuedAt := time.Now()
 	expiredAt := issuedAt.Add(duration)
 
-	token, err := maker.CreateToken(userID, username, duration)
+	token, err := maker.CreateTokenForUser(userID, username, duration)
 	require.NoError(t, err)
 	require.NotEmpty(t, token)
 
-	payload, err := maker.VerifyToken(token)
+	payload, err := maker.VerifyTokenForUser(token)
 	require.NoError(t, err)
 	require.NotEmpty(t, token)
 
@@ -33,15 +33,58 @@ func TestPasetoMaker(t *testing.T) {
 	require.WithinDuration(t, expiredAt, payload.ExpiredAt, time.Second)
 }
 
-func TestExpiredPasetoToken(t *testing.T) {
+func TestExpiredPasetoTokenForUser(t *testing.T) {
 	maker, err := NewPasetoMaker(util.RandomString(32))
 	require.NoError(t, err)
 
-	token, err := maker.CreateToken(util.RandomMoney(), util.RandomUser(), -time.Minute)
+	token, err := maker.CreateTokenForUser(util.RandomMoney(), util.RandomUser(), -time.Minute)
 	require.NoError(t, err)
 	require.NotEmpty(t, token)
 
-	payload, err := maker.VerifyToken(token)
+	payload, err := maker.VerifyTokenForUser(token)
+	require.Error(t, err)
+	require.EqualError(t, err, ErrExpiredToken.Error())
+	require.Nil(t, payload)
+}
+
+func TestPasetoMakerForAdmin(t *testing.T) {
+	maker, err := NewPasetoMaker(util.RandomString(32))
+	require.NoError(t, err)
+
+	adminID := util.RandomMoney()
+	username := util.RandomUser()
+	typeID := util.RandomMoney()
+	active := util.RandomBool()
+	duration := time.Minute
+
+	issuedAt := time.Now()
+	expiredAt := issuedAt.Add(duration)
+
+	token, err := maker.CreateTokenForAdmin(adminID, username, typeID, active, duration)
+	require.NoError(t, err)
+	require.NotEmpty(t, token)
+
+	payload, err := maker.VerifyTokenForAdmin(token)
+	require.NoError(t, err)
+	require.NotEmpty(t, token)
+
+	require.NotZero(t, payload.ID)
+	require.Equal(t, username, payload.Username)
+	require.Equal(t, typeID, payload.TypeID)
+	require.Equal(t, active, payload.Active)
+	require.WithinDuration(t, issuedAt, payload.IssuedAt, time.Second)
+	require.WithinDuration(t, expiredAt, payload.ExpiredAt, time.Second)
+}
+
+func TestExpiredPasetoTokenForAdmin(t *testing.T) {
+	maker, err := NewPasetoMaker(util.RandomString(32))
+	require.NoError(t, err)
+
+	token, err := maker.CreateTokenForAdmin(util.RandomMoney(), util.RandomUser(), util.RandomMoney(), util.RandomBool(), -time.Minute)
+	require.NoError(t, err)
+	require.NotEmpty(t, token)
+
+	payload, err := maker.VerifyTokenForAdmin(token)
 	require.Error(t, err)
 	require.EqualError(t, err, ErrExpiredToken.Error())
 	require.Nil(t, payload)

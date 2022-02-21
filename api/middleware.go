@@ -16,7 +16,7 @@ const (
 	authorizationPayloadKey = "authorization_payload"
 )
 
-func authMiddleware(tokenMaker token.Maker) gin.HandlerFunc {
+func authMiddleware(tokenMaker token.Maker, admin bool) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		authorizationHeader := ctx.GetHeader(authorizationHeaderKey)
 
@@ -41,13 +41,31 @@ func authMiddleware(tokenMaker token.Maker) gin.HandlerFunc {
 		}
 
 		accessToken := fields[1]
-		payload, err := tokenMaker.VerifyToken(accessToken)
-		if err != nil {
-			ctx.AbortWithStatusJSON(http.StatusUnauthorized, errorResponse(err))
-			return
+		var adminPayload *token.AdminPayload
+		var userPayload *token.UserPayload
+		var err error
+		if admin {
+			adminPayload, err = tokenMaker.VerifyTokenForAdmin(accessToken)
+			if err != nil {
+				ctx.AbortWithStatusJSON(http.StatusUnauthorized, errorResponse(err))
+				return
+			}
+
+			ctx.Set(authorizationPayloadKey, adminPayload)
+			ctx.Next()
 		}
 
-		ctx.Set(authorizationPayloadKey, payload)
-		ctx.Next()
+		if !admin {
+			userPayload, err = tokenMaker.VerifyTokenForUser(accessToken)
+			if err != nil {
+				ctx.AbortWithStatusJSON(http.StatusUnauthorized, errorResponse(err))
+				return
+			}
+
+			ctx.Set(authorizationPayloadKey, userPayload)
+			ctx.Next()
+
+		}
+
 	}
 }

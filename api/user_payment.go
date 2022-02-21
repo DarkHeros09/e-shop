@@ -28,7 +28,7 @@ func (server *Server) createUserPayment(ctx *gin.Context) {
 		return
 	}
 
-	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.UserPayload)
 	arg := db.CreateUserPaymentParams{
 		UserID:      authPayload.UserID,
 		PaymentType: req.PaymentType,
@@ -75,7 +75,7 @@ func (server *Server) getUserPayment(ctx *gin.Context) {
 		return
 	}
 
-	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.UserPayload)
 	if userPayment.UserID != authPayload.UserID {
 		err := errors.New("account doesn't belong to the authenticated user")
 		ctx.JSON(http.StatusUnauthorized, errorResponse(err))
@@ -106,7 +106,7 @@ func (server *Server) getUserPaymentByUserID(ctx *gin.Context) {
 		return
 	}
 
-	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.UserPayload)
 	if userPayment.UserID != authPayload.UserID {
 		err := errors.New("account doesn't belong to the authenticated user")
 		ctx.JSON(http.StatusUnauthorized, errorResponse(err))
@@ -128,7 +128,7 @@ func (server *Server) listUserPayments(ctx *gin.Context) {
 		return
 	}
 
-	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.UserPayload)
 	arg := db.ListUserPaymentsParams{
 		UserID: authPayload.UserID,
 		Limit:  req.PageSize,
@@ -158,7 +158,7 @@ func (server *Server) updateUserPaymentByUserID(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
-	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.UserPayload)
 	arg := db.UpdateUserPaymentByUserIDParams{
 		UserID:      authPayload.UserID,
 		ID:          req.ID,
@@ -194,7 +194,7 @@ func (server *Server) deleteUserPayment(ctx *gin.Context) {
 		return
 	}
 
-	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.UserPayload)
 	if req.UserID != authPayload.UserID {
 		err := errors.New("account doesn't belong to the authenticated user")
 		ctx.JSON(http.StatusUnauthorized, errorResponse(err))

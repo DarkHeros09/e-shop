@@ -24,7 +24,7 @@ func (server *Server) createShoppingSession(ctx *gin.Context) {
 		return
 	}
 
-	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.UserPayload)
 	arg := db.CreateShoppingSessionParams{
 		UserID: authPayload.UserID,
 		Total:  req.Total,
@@ -68,7 +68,7 @@ func (server *Server) getShoppingSession(ctx *gin.Context) {
 		return
 	}
 
-	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.UserPayload)
 	if shoppingSession.UserID != authPayload.UserID {
 		err := errors.New("account deosn't belong to the authenticated user")
 		ctx.JSON(http.StatusUnauthorized, errorResponse(err))

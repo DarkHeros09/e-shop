@@ -41,26 +41,27 @@ func (server *Server) setupRouter() {
 	router.POST("/users", server.createUser)
 	router.POST("/users/login", server.loginUser)
 
-	authRoutes := router.Group("/").Use(authMiddleware(server.tokenMaker))
+	userRoutes := router.Group("/").Use(authMiddleware(server.tokenMaker, false))
+	adminRoutes := router.Group("/").Use(authMiddleware(server.tokenMaker, true))
 
-	authRoutes.GET("/users/:id", server.getUser)    //* Finished With tests (token and changed response... No Etag)
-	router.GET("/users", server.listUsers)          //! Admin Only
-	authRoutes.PUT("/users/:id", server.updateUser) //* Finished With tests (token and changed response... No Etag)
+	userRoutes.GET("/users/:id", server.getUser)    //* Finished With tests (token and changed response... No Etag)
+	adminRoutes.GET("/users", server.listUsers)     //! Admin Only
+	userRoutes.PUT("/users/:id", server.updateUser) //* Finished With tests (token and changed response... No Etag)
 	router.DELETE("/users/:id", server.deleteUser)  //! Admin Only
 
-	authRoutes.POST("/useraddresses", server.createUserAddress)                      //* Finished With tests (token and changed response... No Etag)
-	authRoutes.GET("/useraddresses/:id", server.getUserAddress)                      //* Finished With tests (token and changed response... No Etag)
-	authRoutes.GET("/useraddressesByUserID/:user_id", server.getUserAddressByUserID) //* Finished With tests (token and changed response... No Etag)
-	authRoutes.GET("/useraddresses", server.listUserAddresses)                       //* Finished With tests (token and changed response... No Etag)
-	authRoutes.PUT("/useraddresses/:user_id", server.updateUserAddressByUserID)      //* Finished With tests (token and changed response... No Etag)
-	authRoutes.DELETE("/useraddresses/:id", server.deleteUserAddress)                //* Finished With tests (token and changed response... No Etag)
+	userRoutes.POST("/useraddresses", server.createUserAddress)                      //* Finished With tests (token and changed response... No Etag)
+	userRoutes.GET("/useraddresses/:id", server.getUserAddress)                      //* Finished With tests (token and changed response... No Etag)
+	userRoutes.GET("/useraddressesByUserID/:user_id", server.getUserAddressByUserID) //* Finished With tests (token and changed response... No Etag)
+	userRoutes.GET("/useraddresses", server.listUserAddresses)                       //* Finished With tests (token and changed response... No Etag)
+	userRoutes.PUT("/useraddresses/:user_id", server.updateUserAddressByUserID)      //* Finished With tests (token and changed response... No Etag)
+	userRoutes.DELETE("/useraddresses/:id", server.deleteUserAddress)                //* Finished With tests (token and changed response... No Etag)
 
-	authRoutes.POST("/userpayments", server.createUserPayment)                      //* Finished With tests (token and changed response... No Etag)
-	authRoutes.GET("/userpayments/:id", server.getUserPayment)                      //* Finished With tests (token and changed response... No Etag)
-	authRoutes.GET("/userpaymentsByUserID/:user_id", server.getUserPaymentByUserID) //* Finished With tests (token and changed response... No Etag)
-	authRoutes.GET("/userpayments", server.listUserPayments)                        //* Finished With tests (token and changed response... No Etag)
-	authRoutes.PUT("/userpayments/:user_id", server.updateUserPaymentByUserID)      //* Finished With tests (token and changed response... No Etag)
-	authRoutes.DELETE("/userpayments/:id", server.deleteUserPayment)                //* Finished With tests (token and changed response... No Etag)
+	userRoutes.POST("/userpayments", server.createUserPayment)                      //* Finished With tests (token and changed response... No Etag)
+	userRoutes.GET("/userpayments/:id", server.getUserPayment)                      //* Finished With tests (token and changed response... No Etag)
+	userRoutes.GET("/userpaymentsByUserID/:user_id", server.getUserPaymentByUserID) //* Finished With tests (token and changed response... No Etag)
+	userRoutes.GET("/userpayments", server.listUserPayments)                        //* Finished With tests (token and changed response... No Etag)
+	userRoutes.PUT("/userpayments/:user_id", server.updateUserPaymentByUserID)      //* Finished With tests (token and changed response... No Etag)
+	userRoutes.DELETE("/userpayments/:id", server.deleteUserPayment)                //* Finished With tests (token and changed response... No Etag)
 
 	router.POST("/categories", server.createCategory) //! Admin Only
 	router.GET("/categories/:id", server.getCategory)
@@ -80,10 +81,10 @@ func (server *Server) setupRouter() {
 	router.PUT("/products/:id", server.updateProduct)    //! Admin Only
 	router.DELETE("/products/:id", server.deleteProduct) //! Admin Only
 
-	authRoutes.POST("/shoppingsessions", server.createShoppingSession)
-	authRoutes.GET("/shoppingsessions/:id", server.getShoppingSession)
+	userRoutes.POST("/shoppingsessions", server.createShoppingSession)
+	userRoutes.GET("/shoppingsessions/:id", server.getShoppingSession)
 
-	authRoutes.POST("/cartitems", server.createCartItem)
+	userRoutes.POST("/cartitems", server.createCartItem)
 	router.GET("/cartitems/:id", server.getCartItem)
 	router.GET("/cartitems", server.listCartItems)
 

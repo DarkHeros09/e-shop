@@ -21,14 +21,32 @@ func addAuthorization(
 	username string,
 	duration time.Duration,
 ) {
-	token, err := tokenMaker.CreateToken(userID, username, duration)
+	token, err := tokenMaker.CreateTokenForUser(userID, username, duration)
 	require.NoError(t, err)
 
 	authorizationHeader := fmt.Sprintf("%s %s", authorizationType, token)
 	request.Header.Set(authorizationHeaderKey, authorizationHeader)
 }
 
-func TestAuthMiddleware(t *testing.T) {
+func addAuthorizationForAdmin(
+	t *testing.T,
+	request *http.Request,
+	tokenMaker token.Maker,
+	authorizationType string,
+	adminID int64,
+	username string,
+	typeID int64,
+	active bool,
+	duration time.Duration,
+) {
+	token, err := tokenMaker.CreateTokenForAdmin(adminID, username, typeID, active, duration)
+	require.NoError(t, err)
+
+	authorizationHeader := fmt.Sprintf("%s %s", authorizationType, token)
+	request.Header.Set(authorizationHeaderKey, authorizationHeader)
+}
+
+func TestAuthMiddlewareForUser(t *testing.T) {
 	testCases := []struct {
 		name          string
 		setupAuth     func(t *testing.T, request *http.Request, tokenMaker token.Maker)
@@ -89,7 +107,7 @@ func TestAuthMiddleware(t *testing.T) {
 			authPath := "/auth"
 			server.router.GET(
 				authPath,
-				authMiddleware(server.tokenMaker),
+				authMiddleware(server.tokenMaker, false),
 				func(ctx *gin.Context) {
 					ctx.JSON(http.StatusOK, gin.H{})
 				},

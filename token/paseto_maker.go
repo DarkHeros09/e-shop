@@ -29,8 +29,8 @@ func NewPasetoMaker(symmetricKey string) (Maker, error) {
 }
 
 // CreateToken creates a new token for specific username and duration
-func (maker *PasetoMaker) CreateToken(userID int64, username string, duration time.Duration) (string, error) {
-	payload, err := NewPayload(userID, username, duration)
+func (maker *PasetoMaker) CreateTokenForUser(userID int64, username string, duration time.Duration) (string, error) {
+	payload, err := NewPayloadForUser(userID, username, duration)
 	if err != nil {
 		return "", err
 	}
@@ -39,18 +39,45 @@ func (maker *PasetoMaker) CreateToken(userID int64, username string, duration ti
 }
 
 // VerifyToken checks if the token is valid or not
-func (maker *PasetoMaker) VerifyToken(token string) (*Payload, error) {
-	payload := &Payload{}
+func (maker *PasetoMaker) VerifyTokenForUser(token string) (*UserPayload, error) {
+	userPayload := &UserPayload{}
 
-	err := maker.paseto.Decrypt(token, maker.symmetricKey, payload, nil)
+	err := maker.paseto.Decrypt(token, maker.symmetricKey, userPayload, nil)
 	if err != nil {
 		return nil, ErrInvalidToken
 	}
 
-	err = payload.Valid()
+	err = userPayload.ValidUser()
 	if err != nil {
 		return nil, err
 	}
 
-	return payload, nil
+	return userPayload, nil
+}
+
+// CreateToken creates a new admin token for specific admin and duration
+func (maker *PasetoMaker) CreateTokenForAdmin(adminID int64, username string, type_id int64, active bool, duration time.Duration) (string, error) {
+	payload, err := NewPayloadForAdmin(adminID, username, type_id, active, duration)
+	if err != nil {
+		return "", err
+	}
+
+	return maker.paseto.Encrypt(maker.symmetricKey, payload, nil)
+}
+
+// VerifyToken checks if the token is valid or not
+func (maker *PasetoMaker) VerifyTokenForAdmin(token string) (*AdminPayload, error) {
+	adminPayload := &AdminPayload{}
+
+	err := maker.paseto.Decrypt(token, maker.symmetricKey, adminPayload, nil)
+	if err != nil {
+		return nil, ErrInvalidToken
+	}
+
+	err = adminPayload.ValidAdmin()
+	if err != nil {
+		return nil, err
+	}
+
+	return adminPayload, nil
 }

@@ -4,9 +4,15 @@ import "time"
 
 // Maker is an interface for manging tokens
 type Maker interface {
-	// CreateToken creates a new token for specific username and duration
-	CreateToken(userID int64, username string, duration time.Duration) (string, error)
+	// CreateToken creates a new user token for specific username and duration
+	CreateTokenForUser(userID int64, username string, duration time.Duration) (string, error)
 
-	// VerifyToken checks if the token is vslid or not
-	VerifyToken(token string) (*Payload, error)
+	// VerifyTokenForUser checks if the user token is valid or not
+	VerifyTokenForUser(token string) (*UserPayload, error)
+
+	// CreateToken creates a new admin token for specific admin and duration
+	CreateTokenForAdmin(userID int64, username string, type_id int64, active bool, duration time.Duration) (string, error)
+
+	// VerifyTokenForAdmin checks if the admin token is valid or not
+	VerifyTokenForAdmin(token string) (*AdminPayload, error)
 }

@@ -92,7 +92,7 @@ func (server *Server) getUser(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
-	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.UserPayload)
 	if user.ID != authPayload.UserID {
 		err := errors.New("account deosn't belong to the authenticated user")
 		ctx.JSON(http.StatusUnauthorized, errorResponse(err))
@@ -120,8 +120,15 @@ func (server *Server) listUsers(ctx *gin.Context) {
 		Limit:  req.PageSize,
 		Offset: (req.PageID - 1) * req.PageSize,
 	}
+
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.AdminPayload)
 	users, err := server.store.ListUsers(ctx, arg)
-	if err != nil {
+
+	if err != nil || authPayload.AdminID == 0 || authPayload.TypeID != 1 || !authPayload.Active {
+		if authPayload.AdminID == 0 || authPayload.TypeID != 1 || !authPayload.Active {
+			ctx.JSON(http.StatusUnauthorized, errorResponse(err))
+			return
+		}
 		if err == sql.ErrNoRows {
 			ctx.JSON(http.StatusNotFound, errorResponse(err))
 			return
@@ -130,6 +137,7 @@ func (server *Server) listUsers(ctx *gin.Context) {
 		return
 	}
 	ctx.JSON(http.StatusOK, users)
+
 }
 
 type updateUserRequest struct {
@@ -144,7 +152,7 @@ func (server *Server) updateUser(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
-	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.UserPayload)
 	arg := db.UpdateUserParams{
 		ID:        authPayload.UserID,
 		Telephone: req.Telephone,
@@ -234,7 +242,7 @@ func (server *Server) loginUser(ctx *gin.Context) {
 		return
 	}
 
-	accessToken, err := server.tokenMaker.CreateToken(
+	accessToken, err := server.tokenMaker.CreateTokenForUser(
 		user.ID,
 		user.Username,
 		server.config.AccessTokenDuration,
