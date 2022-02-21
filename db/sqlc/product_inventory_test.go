@@ -23,8 +23,7 @@ func createRandomProductInventory(t *testing.T) ProductInventory {
 
 	require.NotEmpty(t, productInventory.ID)
 	require.NotEmpty(t, productInventory.CreatedAt)
-	require.NotEmpty(t, productInventory.UpdatedAt)
-	require.Equal(t, productInventory.CreatedAt, productInventory.UpdatedAt)
+	require.Zero(t, productInventory.UpdatedAt)
 
 	return productInventory
 

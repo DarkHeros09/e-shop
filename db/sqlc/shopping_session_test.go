@@ -27,8 +27,7 @@ func createRandomShoppingSession(t *testing.T) ShoppingSession {
 	require.Equal(t, arg.Total, shoppingSession.Total)
 	require.NotEmpty(t, shoppingSession.ID)
 	require.NotEmpty(t, shoppingSession.CreatedAt)
-	require.NotEmpty(t, shoppingSession.UpdatedAt)
-	require.Equal(t, shoppingSession.CreatedAt, shoppingSession.UpdatedAt, time.Second)
+	require.Zero(t, shoppingSession.UpdatedAt)
 
 	return shoppingSession
 

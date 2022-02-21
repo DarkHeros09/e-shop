@@ -30,8 +30,7 @@ func createRandomCartItem(t *testing.T) CartItem {
 
 	require.NotEmpty(t, cartItem.ID)
 	require.NotEmpty(t, cartItem.CreatedAt)
-	require.NotEmpty(t, cartItem.UpdatedAt)
-	require.Equal(t, cartItem.CreatedAt, cartItem.UpdatedAt, time.Second)
+	require.Zero(t, cartItem.UpdatedAt)
 
 	return cartItem
 
@@ -55,7 +54,7 @@ func TestGetCartItem(t *testing.T) {
 	require.Equal(t, cartItem1.CreatedAt, cartItem2.CreatedAt)
 	require.Equal(t, cartItem1.UpdatedAt, cartItem2.UpdatedAt)
 
-	require.Equal(t, cartItem2.CreatedAt, cartItem2.UpdatedAt)
+	require.NotEqual(t, cartItem2.CreatedAt, cartItem2.UpdatedAt)
 
 }
 

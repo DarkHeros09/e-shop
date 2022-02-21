@@ -22,7 +22,7 @@ func createRandomAdminType(t *testing.T) AdminType {
 
 	require.NotEmpty(t, adminType.ID)
 	require.NotEmpty(t, adminType.CreatedAt)
-	require.Empty(t, adminType.UpdatedAt)
+	require.Zero(t, adminType.UpdatedAt)
 
 	return adminType
 }
@@ -102,8 +102,8 @@ func TestListAdminTypes(t *testing.T) {
 	require.NoError(t, err)
 	require.Len(t, adminTypes, 5)
 
-	for _, userCategory := range adminTypes {
-		require.NotEmpty(t, userCategory)
+	for _, adminType := range adminTypes {
+		require.NotEmpty(t, adminType)
 
 	}
 }

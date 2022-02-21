@@ -26,9 +26,8 @@ func createRandomPaymentDetail(t *testing.T) PaymentDetail {
 
 	require.NotEmpty(t, paymentDetail.ID)
 	require.NotEmpty(t, paymentDetail.CreatedAt)
-	require.NotEmpty(t, paymentDetail.UpdatedAt)
+	require.Zero(t, paymentDetail.UpdatedAt)
 
-	require.Equal(t, paymentDetail.CreatedAt, paymentDetail.UpdatedAt)
 	// require.Zero(t, paymentDetail.ID)
 
 	return paymentDetail

@@ -30,8 +30,7 @@ func createRandomOrderDetail(t *testing.T) OrderDetail {
 
 	require.NotEmpty(t, orderDetail.ID)
 	require.NotEmpty(t, orderDetail.CreatedAt)
-	require.NotEmpty(t, orderDetail.UpdatedAt)
-	require.Equal(t, orderDetail.CreatedAt, orderDetail.UpdatedAt)
+	require.Zero(t, orderDetail.UpdatedAt)
 
 	return orderDetail
 

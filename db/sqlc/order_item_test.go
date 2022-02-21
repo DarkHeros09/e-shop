@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"testing"
-	"time"
 
 	"github.com/DarkHeros09/e-shop/v2/util"
 	"github.com/stretchr/testify/require"
@@ -30,9 +29,7 @@ func createRandomOrderItem(t *testing.T) OrderItem {
 
 	require.NotEmpty(t, orderItem.ID)
 	require.NotEmpty(t, orderItem.CreatedAt)
-	require.NotEmpty(t, orderItem.UpdatedAt)
-
-	require.Equal(t, orderItem.CreatedAt, orderItem.UpdatedAt)
+	require.Zero(t, orderItem.UpdatedAt)
 
 	return orderItem
 
@@ -72,8 +69,6 @@ func TestGetOrderItemByOrderID(t *testing.T) {
 	require.Equal(t, orderItem1.Quantity, orderItem2.Quantity)
 	require.Equal(t, orderItem1.CreatedAt, orderItem2.CreatedAt)
 	require.Equal(t, orderItem1.UpdatedAt, orderItem2.UpdatedAt)
-
-	require.WithinDuration(t, orderItem1.CreatedAt, orderItem2.UpdatedAt, time.Second)
 
 }
 

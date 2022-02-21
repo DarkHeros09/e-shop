@@ -39,7 +39,7 @@ func createRandomProduct(t *testing.T) Product {
 	require.Equal(t, arg.Sku, product.Sku)
 
 	require.NotEmpty(t, product.CreatedAt)
-	require.NotEmpty(t, product.UpdatedAt)
+	require.Zero(t, product.UpdatedAt)
 	require.False(t, product.Active)
 
 	return product

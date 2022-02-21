@@ -55,6 +55,7 @@ func TestGetAdmin(t *testing.T) {
 	require.Equal(t, admin1.Email, admin2.Email)
 	require.Equal(t, admin1.Password, admin2.Password)
 	require.Equal(t, admin1.TypeID, admin2.TypeID)
+	require.True(t, admin2.Active)
 	require.WithinDuration(t, admin1.CreatedAt, admin2.CreatedAt, time.Second)
 	require.WithinDuration(t, admin1.UpdatedAt, admin2.UpdatedAt, time.Second)
 }
