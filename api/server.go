@@ -44,10 +44,10 @@ func (server *Server) setupRouter() {
 	userRoutes := router.Group("/").Use(authMiddleware(server.tokenMaker, false))
 	adminRoutes := router.Group("/").Use(authMiddleware(server.tokenMaker, true))
 
-	userRoutes.GET("/users/:id", server.getUser)    //* Finished With tests (token and changed response... No Etag)
-	adminRoutes.GET("/users", server.listUsers)     //! Admin Only
-	userRoutes.PUT("/users/:id", server.updateUser) //* Finished With tests (token and changed response... No Etag)
-	router.DELETE("/users/:id", server.deleteUser)  //! Admin Only
+	userRoutes.GET("/users/:id", server.getUser)        //* Finished With tests (token and changed response... No Etag)
+	adminRoutes.GET("/users", server.listUsers)         //! Admin Only # Finished With tests (token and changed response... No Etag)
+	userRoutes.PUT("/users/:id", server.updateUser)     //* Finished With tests (token and changed response... No Etag)
+	adminRoutes.DELETE("/users/:id", server.deleteUser) //! Admin Only # Finished With tests (token and changed response... No Etag)
 
 	userRoutes.POST("/useraddresses", server.createUserAddress)                      //* Finished With tests (token and changed response... No Etag)
 	userRoutes.GET("/useraddresses/:id", server.getUserAddress)                      //* Finished With tests (token and changed response... No Etag)
@@ -63,20 +63,24 @@ func (server *Server) setupRouter() {
 	userRoutes.PUT("/userpayments/:user_id", server.updateUserPaymentByUserID)      //* Finished With tests (token and changed response... No Etag)
 	userRoutes.DELETE("/userpayments/:id", server.deleteUserPayment)                //* Finished With tests (token and changed response... No Etag)
 
-	router.POST("/categories", server.createCategory) //! Admin Only
-	router.GET("/categories/:id", server.getCategory)
-	router.GET("/categories", server.listCategories)
+	adminRoutes.POST("/categories", server.createCategory)       //! Admin Only # Finished With tests (token and changed response... No Etag)
+	router.GET("/categories/:id", server.getCategory)            //? no auth required # Finished With tests (token and changed response... No Etag)
+	router.GET("/categories", server.listCategories)             //? no auth required # Finished With tests (token and changed response... No Etag)
+	adminRoutes.PUT("/categories/:id", server.updateCategory)    //! Admin Only # Finished With tests (token and changed response... No Etag)
+	adminRoutes.DELETE("/categories/:id", server.deleteCategory) //! Admin Only # Finished With tests (token and changed response... No Etag)
 
-	router.POST("/inventories", server.createInventory) //! Admin Only
-	router.GET("/inventories/:id", server.getInventory)
-	router.GET("/inventories", server.listInventories)
+	adminRoutes.POST("/inventories", server.createInventory)       //! Admin Only
+	router.GET("/inventories/:id", server.getInventory)            //? no auth required # Finished With tests (token and changed response... No Etag)
+	router.GET("/inventories", server.listInventories)             //? no auth required # Finished With tests (token and changed response... No Etag)
+	adminRoutes.PUT("/inventories/:id", server.updateInventory)    //! Admin Only # Finished With tests (token and changed response... No Etag)
+	adminRoutes.DELETE("/inventories/:id", server.deleteInventory) //! Admin Only # Finished With tests (token and changed response... No Etag)
 
-	router.POST("/discounts", server.createDiscount) //! Admin Only
-	router.GET("/discounts/:id", server.getDiscount)
+	adminRoutes.POST("/discounts", server.createDiscount) //! Admin Only
+	router.GET("/discounts/:id", server.getDiscount)      //? no auth required
 	router.GET("/discounts", server.listDiscount)
 
 	router.POST("/products", server.createProduct) //! Admin Only
-	router.GET("/products/:id", server.getProduct)
+	router.GET("/products/:id", server.getProduct) //? no auth required
 	router.GET("/products", server.listProducts)
 	router.PUT("/products/:id", server.updateProduct)    //! Admin Only
 	router.DELETE("/products/:id", server.deleteProduct) //! Admin Only

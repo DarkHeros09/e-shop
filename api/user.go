@@ -122,13 +122,14 @@ func (server *Server) listUsers(ctx *gin.Context) {
 	}
 
 	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.AdminPayload)
-	users, err := server.store.ListUsers(ctx, arg)
+	if authPayload.AdminID == 0 || authPayload.TypeID != 1 || !authPayload.Active {
+		err := errors.New("account unauthorized")
+		ctx.JSON(http.StatusUnauthorized, errorResponse(err))
+		return
+	}
 
-	if err != nil || authPayload.AdminID == 0 || authPayload.TypeID != 1 || !authPayload.Active {
-		if authPayload.AdminID == 0 || authPayload.TypeID != 1 || !authPayload.Active {
-			ctx.JSON(http.StatusUnauthorized, errorResponse(err))
-			return
-		}
+	users, err := server.store.ListUsers(ctx, arg)
+	if err != nil {
 		if err == sql.ErrNoRows {
 			ctx.JSON(http.StatusNotFound, errorResponse(err))
 			return
@@ -187,6 +188,12 @@ func (server *Server) deleteUser(ctx *gin.Context) {
 		return
 	}
 
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.AdminPayload)
+	if authPayload.AdminID == 0 || authPayload.TypeID != 1 || !authPayload.Active {
+		err := errors.New("account unauthorized")
+		ctx.JSON(http.StatusUnauthorized, errorResponse(err))
+		return
+	}
 	err := server.store.DeleteUser(ctx, req.ID)
 	if err != nil {
 		if pqErr, ok := err.(*pq.Error); ok {
