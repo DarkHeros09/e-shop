@@ -69,19 +69,21 @@ func (server *Server) setupRouter() {
 	adminRoutes.PUT("/categories/:id", server.updateCategory)    //! Admin Only # Finished With tests (token and changed response... No Etag)
 	adminRoutes.DELETE("/categories/:id", server.deleteCategory) //! Admin Only # Finished With tests (token and changed response... No Etag)
 
-	adminRoutes.POST("/inventories", server.createInventory)       //! Admin Only
+	adminRoutes.POST("/inventories", server.createInventory)       //! Admin Only # Finished With tests (token and changed response... No Etag)
 	router.GET("/inventories/:id", server.getInventory)            //? no auth required # Finished With tests (token and changed response... No Etag)
 	router.GET("/inventories", server.listInventories)             //? no auth required # Finished With tests (token and changed response... No Etag)
 	adminRoutes.PUT("/inventories/:id", server.updateInventory)    //! Admin Only # Finished With tests (token and changed response... No Etag)
 	adminRoutes.DELETE("/inventories/:id", server.deleteInventory) //! Admin Only # Finished With tests (token and changed response... No Etag)
 
-	adminRoutes.POST("/discounts", server.createDiscount) //! Admin Only
-	router.GET("/discounts/:id", server.getDiscount)      //? no auth required
-	router.GET("/discounts", server.listDiscount)
+	adminRoutes.POST("/discounts", server.createDiscount)       //! Admin Only
+	router.GET("/discounts/:id", server.getDiscount)            //? no auth required
+	router.GET("/discounts", server.listDiscount)               //? no auth required
+	adminRoutes.PUT("/discounts/:id", server.updateDiscount)    //! Admin Only # Finished With tests (token and changed response... No Etag)
+	adminRoutes.DELETE("/discounts/:id", server.deleteDiscount) //! Admin Only # Finished With tests (token and changed response... No Etag)
 
-	router.POST("/products", server.createProduct) //! Admin Only
-	router.GET("/products/:id", server.getProduct) //? no auth required
-	router.GET("/products", server.listProducts)
+	router.POST("/products", server.createProduct)       //! Admin Only
+	router.GET("/products/:id", server.getProduct)       //? no auth required
+	router.GET("/products", server.listProducts)         //? no auth required
 	router.PUT("/products/:id", server.updateProduct)    //! Admin Only
 	router.DELETE("/products/:id", server.deleteProduct) //! Admin Only
 

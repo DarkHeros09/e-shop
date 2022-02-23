@@ -436,86 +436,86 @@ func TestUpdateProductCategoryAPI(t *testing.T) {
 				require.Equal(t, http.StatusOK, recorder.Code)
 			},
 		},
-		// {
-		// 	name:       "Unauthorized",
-		// 	CategoryID: productCategory.ID,
-		// 	body: gin.H{
-		// 		"id":     productCategory.ID,
-		// 		"active": false,
-		// 	},
-		// 	setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
-		// 		addAuthorizationForAdmin(t, request, tokenMaker, authorizationTypeBearer, admin.ID, admin.Username, admin.TypeID, false, time.Minute)
-		// 	},
-		// 	buildStubs: func(store *mockdb.MockStore) {
-		// 		store.EXPECT().
-		// 			UpdateProductCategory(gomock.Any(), gomock.Any()).
-		// 			Times(0)
-		// 	},
-		// 	checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
-		// 		require.Equal(t, http.StatusUnauthorized, recorder.Code)
-		// 	},
-		// },
-		// {
-		// 	name:       "NoAuthorization",
-		// 	CategoryID: productCategory.ID,
-		// 	body: gin.H{
-		// 		"id":     productCategory.ID,
-		// 		"active": false,
-		// 	},
-		// 	setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
-		// 	},
-		// 	buildStubs: func(store *mockdb.MockStore) {
-		// 		store.EXPECT().
-		// 			UpdateProductCategory(gomock.Any(), gomock.Any()).
-		// 			Times(0)
-		// 	},
-		// 	checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
-		// 		require.Equal(t, http.StatusUnauthorized, recorder.Code)
-		// 	},
-		// },
-		// {
-		// 	name:       "InternalError",
-		// 	CategoryID: productCategory.ID,
-		// 	body: gin.H{
-		// 		"id":     productCategory.ID,
-		// 		"active": false,
-		// 	},
-		// 	setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
-		// 		addAuthorizationForAdmin(t, request, tokenMaker, authorizationTypeBearer, admin.ID, admin.Username, admin.TypeID, admin.Active, time.Minute)
-		// 	},
-		// 	buildStubs: func(store *mockdb.MockStore) {
-		// 		arg := db.UpdateProductCategoryParams{
-		// 			ID:     productCategory.ID,
-		// 			Active: false,
-		// 		}
-		// 		store.EXPECT().
-		// 			UpdateProductCategory(gomock.Any(), gomock.Eq(arg)).
-		// 			Times(1).
-		// 			Return(db.ProductCategory{}, sql.ErrConnDone)
-		// 	},
-		// 	checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
-		// 		require.Equal(t, http.StatusInternalServerError, recorder.Code)
-		// 	},
-		// },
-		// {
-		// 	name:       "InvalidID",
-		// 	CategoryID: 0,
-		// 	body: gin.H{
-		// 		"id":     0,
-		// 		"active": false,
-		// 	},
-		// 	setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
-		// 		addAuthorizationForAdmin(t, request, tokenMaker, authorizationTypeBearer, admin.ID, admin.Username, admin.TypeID, admin.Active, time.Minute)
-		// 	},
-		// 	buildStubs: func(store *mockdb.MockStore) {
-		// 		store.EXPECT().
-		// 			UpdateProductCategory(gomock.Any(), gomock.Any()).
-		// 			Times(0)
-		// 	},
-		// 	checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
-		// 		require.Equal(t, http.StatusBadRequest, recorder.Code)
-		// 	},
-		// },
+		{
+			name:       "Unauthorized",
+			CategoryID: productCategory.ID,
+			body: gin.H{
+				"id":     productCategory.ID,
+				"active": false,
+			},
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				addAuthorizationForAdmin(t, request, tokenMaker, authorizationTypeBearer, admin.ID, admin.Username, admin.TypeID, false, time.Minute)
+			},
+			buildStubs: func(store *mockdb.MockStore) {
+				store.EXPECT().
+					UpdateProductCategory(gomock.Any(), gomock.Any()).
+					Times(0)
+			},
+			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusUnauthorized, recorder.Code)
+			},
+		},
+		{
+			name:       "NoAuthorization",
+			CategoryID: productCategory.ID,
+			body: gin.H{
+				"id":     productCategory.ID,
+				"active": false,
+			},
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+			},
+			buildStubs: func(store *mockdb.MockStore) {
+				store.EXPECT().
+					UpdateProductCategory(gomock.Any(), gomock.Any()).
+					Times(0)
+			},
+			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusUnauthorized, recorder.Code)
+			},
+		},
+		{
+			name:       "InternalError",
+			CategoryID: productCategory.ID,
+			body: gin.H{
+				"id":     productCategory.ID,
+				"active": false,
+			},
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				addAuthorizationForAdmin(t, request, tokenMaker, authorizationTypeBearer, admin.ID, admin.Username, admin.TypeID, admin.Active, time.Minute)
+			},
+			buildStubs: func(store *mockdb.MockStore) {
+				arg := db.UpdateProductCategoryParams{
+					ID:     productCategory.ID,
+					Active: false,
+				}
+				store.EXPECT().
+					UpdateProductCategory(gomock.Any(), gomock.Eq(arg)).
+					Times(1).
+					Return(db.ProductCategory{}, sql.ErrConnDone)
+			},
+			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusInternalServerError, recorder.Code)
+			},
+		},
+		{
+			name:       "InvalidID",
+			CategoryID: 0,
+			body: gin.H{
+				"id":     0,
+				"active": false,
+			},
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				addAuthorizationForAdmin(t, request, tokenMaker, authorizationTypeBearer, admin.ID, admin.Username, admin.TypeID, admin.Active, time.Minute)
+			},
+			buildStubs: func(store *mockdb.MockStore) {
+				store.EXPECT().
+					UpdateProductCategory(gomock.Any(), gomock.Any()).
+					Times(0)
+			},
+			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusBadRequest, recorder.Code)
+			},
+		},
 	}
 
 	for i := range testCases {
@@ -702,21 +702,6 @@ func TestDeleteProductCategoryAPI(t *testing.T) {
 
 	}
 
-}
-
-func randomPCUser(t *testing.T) (user db.User, password string) {
-	password = util.RandomString(6)
-	hashedPassword, err := util.HashPassword(password)
-	require.NoError(t, err)
-
-	user = db.User{
-		ID:        util.RandomMoney(),
-		Username:  util.RandomUser(),
-		Password:  hashedPassword,
-		Telephone: int32(util.RandomInt(7, 7)),
-		Email:     util.RandomEmail(),
-	}
-	return
 }
 
 func randomPCSuperAdmin(t *testing.T) (admin db.Admin, password string) {

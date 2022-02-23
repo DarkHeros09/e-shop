@@ -20,9 +20,9 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestCreateProductInventoryAPI(t *testing.T) {
-	admin, _ := randomPISuperAdmin(t)
-	productInventory := createRandomProductInventory(t)
+func TestCreateProductDiscountAPI(t *testing.T) {
+	admin, _ := randomPDSuperAdmin(t)
+	discount := createRandomProductDiscount(t)
 
 	testCases := []struct {
 		name          string
@@ -34,37 +34,49 @@ func TestCreateProductInventoryAPI(t *testing.T) {
 		{
 			name: "OK",
 			body: gin.H{
-				"quantity": productInventory.Quantity,
+				"name":             discount.Name,
+				"description":      discount.Description,
+				"discount_percent": discount.DiscountPercent,
 			},
 			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
 				addAuthorizationForAdmin(t, request, tokenMaker, authorizationTypeBearer, admin.ID, admin.Username, admin.TypeID, admin.Active, time.Minute)
 			},
 			buildStubs: func(store *mockdb.MockStore) {
-				arg := productInventory.Quantity
+				arg := db.CreateDiscountParams{
+					Name:            discount.Name,
+					Description:     discount.Description,
+					DiscountPercent: discount.DiscountPercent,
+				}
 
 				store.EXPECT().
-					CreateProductInventory(gomock.Any(), gomock.Eq(arg)).
+					CreateDiscount(gomock.Any(), gomock.Eq(arg)).
 					Times(1).
-					Return(productInventory, nil)
+					Return(discount, nil)
 			},
 			checkResponse: func(recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusOK, recorder.Code)
-				requireBodyMatchProductInventory(t, recorder.Body, productInventory)
+				requireBodyMatchProductDiscount(t, recorder.Body, discount)
 			},
 		},
 		{
 			name: "Unauthorized",
 			body: gin.H{
-				"quantity": productInventory.Quantity,
+				"name":             discount.Name,
+				"description":      discount.Description,
+				"discount_percent": discount.DiscountPercent,
 			},
 			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
 				addAuthorizationForAdmin(t, request, tokenMaker, authorizationTypeBearer, admin.ID, admin.Username, admin.TypeID, false, time.Minute)
 			},
 			buildStubs: func(store *mockdb.MockStore) {
-				arg := productInventory.Quantity
+				arg := db.CreateDiscountParams{
+					Name:            discount.Name,
+					Description:     discount.Description,
+					DiscountPercent: discount.DiscountPercent,
+				}
 
 				store.EXPECT().
-					CreateProductInventory(gomock.Any(), gomock.Eq(arg)).
+					CreateDiscount(gomock.Any(), gomock.Eq(arg)).
 					Times(0)
 			},
 			checkResponse: func(recorder *httptest.ResponseRecorder) {
@@ -74,15 +86,21 @@ func TestCreateProductInventoryAPI(t *testing.T) {
 		{
 			name: "NoAuthorization",
 			body: gin.H{
-				"quantity": productInventory.Quantity,
+				"name":             discount.Name,
+				"description":      discount.Description,
+				"discount_percent": discount.DiscountPercent,
 			},
 			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
 			},
 			buildStubs: func(store *mockdb.MockStore) {
-				arg := productInventory.Quantity
+				arg := db.CreateDiscountParams{
+					Name:            discount.Name,
+					Description:     discount.Description,
+					DiscountPercent: discount.DiscountPercent,
+				}
 
 				store.EXPECT().
-					CreateProductInventory(gomock.Any(), gomock.Eq(arg)).
+					CreateDiscount(gomock.Any(), gomock.Eq(arg)).
 					Times(0)
 			},
 			checkResponse: func(recorder *httptest.ResponseRecorder) {
@@ -92,34 +110,42 @@ func TestCreateProductInventoryAPI(t *testing.T) {
 		{
 			name: "InternalError",
 			body: gin.H{
-				"quantity": productInventory.Quantity,
+				"name":             discount.Name,
+				"description":      discount.Description,
+				"discount_percent": discount.DiscountPercent,
 			},
 			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
 				addAuthorizationForAdmin(t, request, tokenMaker, authorizationTypeBearer, admin.ID, admin.Username, admin.TypeID, admin.Active, time.Minute)
 			},
 			buildStubs: func(store *mockdb.MockStore) {
-				arg := productInventory.Quantity
+				arg := db.CreateDiscountParams{
+					Name:            discount.Name,
+					Description:     discount.Description,
+					DiscountPercent: discount.DiscountPercent,
+				}
 
 				store.EXPECT().
-					CreateProductInventory(gomock.Any(), gomock.Eq(arg)).
+					CreateDiscount(gomock.Any(), gomock.Eq(arg)).
 					Times(1).
-					Return(db.ProductInventory{}, sql.ErrConnDone)
+					Return(db.Discount{}, sql.ErrConnDone)
 			},
 			checkResponse: func(recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusInternalServerError, recorder.Code)
 			},
 		},
 		{
-			name: "InvalidInventoryQuantity",
+			name: "InvalidDiscount",
 			body: gin.H{
-				"quantity": -1,
+				"name":             discount.Name,
+				"description":      discount.Description,
+				"discount_percent": "",
 			},
 			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
 				addAuthorizationForAdmin(t, request, tokenMaker, authorizationTypeBearer, admin.ID, admin.Username, admin.TypeID, admin.Active, time.Minute)
 			},
 			buildStubs: func(store *mockdb.MockStore) {
 				store.EXPECT().
-					CreateProductInventory(gomock.Any(), gomock.Any()).
+					CreateDiscount(gomock.Any(), gomock.Any()).
 					Times(0)
 			},
 			checkResponse: func(recorder *httptest.ResponseRecorder) {
@@ -144,7 +170,7 @@ func TestCreateProductInventoryAPI(t *testing.T) {
 			data, err := json.Marshal(tc.body)
 			require.NoError(t, err)
 
-			url := "/inventories"
+			url := "/discounts"
 			request, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(data))
 			require.NoError(t, err)
 
@@ -155,74 +181,74 @@ func TestCreateProductInventoryAPI(t *testing.T) {
 	}
 }
 
-func TestGetProductInventoryAPI(t *testing.T) {
-	productInventory := createRandomProductInventory(t)
+func TestGetProductDiscountAPI(t *testing.T) {
+	productDiscount := createRandomProductDiscount(t)
 
 	testCases := []struct {
 		name          string
-		InventoryID   int64
+		DiscountID    int64
 		body          gin.H
 		buildStub     func(store *mockdb.MockStore)
 		checkResponse func(t *testing.T, recorder *httptest.ResponseRecorder)
 	}{
 		{
-			name:        "OK",
-			InventoryID: productInventory.ID,
+			name:       "OK",
+			DiscountID: productDiscount.ID,
 			body: gin.H{
-				"id": productInventory.ID,
+				"id": productDiscount.ID,
 			},
 			buildStub: func(store *mockdb.MockStore) {
 				store.EXPECT().
-					GetProductInventory(gomock.Any(), gomock.Eq(productInventory.ID)).
+					GetDiscount(gomock.Any(), gomock.Eq(productDiscount.ID)).
 					Times(1).
-					Return(productInventory, nil)
+					Return(productDiscount, nil)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusOK, recorder.Code)
-				requireBodyMatchProductInventory(t, recorder.Body, productInventory)
+				requireBodyMatchProductDiscount(t, recorder.Body, productDiscount)
 			},
 		},
 		{
-			name:        "NotFound",
-			InventoryID: productInventory.ID,
+			name:       "NotFound",
+			DiscountID: productDiscount.ID,
 			body: gin.H{
-				"id": productInventory.ID,
+				"id": productDiscount.ID,
 			},
 			buildStub: func(store *mockdb.MockStore) {
 				store.EXPECT().
-					GetProductInventory(gomock.Any(), gomock.Eq(productInventory.ID)).
+					GetDiscount(gomock.Any(), gomock.Eq(productDiscount.ID)).
 					Times(1).
-					Return(db.ProductInventory{}, sql.ErrNoRows)
+					Return(db.Discount{}, sql.ErrNoRows)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusNotFound, recorder.Code)
 			},
 		},
 		{
-			name:        "InternalError",
-			InventoryID: productInventory.ID,
+			name:       "InternalError",
+			DiscountID: productDiscount.ID,
 			body: gin.H{
-				"id": productInventory.ID,
+				"id": productDiscount.ID,
 			},
 			buildStub: func(store *mockdb.MockStore) {
 				store.EXPECT().
-					GetProductInventory(gomock.Any(), gomock.Eq(productInventory.ID)).
+					GetDiscount(gomock.Any(), gomock.Eq(productDiscount.ID)).
 					Times(1).
-					Return(db.ProductInventory{}, sql.ErrConnDone)
+					Return(db.Discount{}, sql.ErrConnDone)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusInternalServerError, recorder.Code)
 			},
 		},
 		{
-			name:        "InvalidID",
-			InventoryID: 0,
+			name:       "InvalidID",
+			DiscountID: 0,
 			body: gin.H{
 				"id": 0,
 			},
 			buildStub: func(store *mockdb.MockStore) {
 				store.EXPECT().
-					GetProductInventory(gomock.Any(), gomock.Any()).
+					GetDiscount(gomock.Any(), gomock.Any()).
 					Times(0)
 
 			},
@@ -250,7 +276,7 @@ func TestGetProductInventoryAPI(t *testing.T) {
 			data, err := json.Marshal(tc.body)
 			require.NoError(t, err)
 
-			url := fmt.Sprintf("/inventories/%d", tc.InventoryID)
+			url := fmt.Sprintf("/discounts/%d", tc.DiscountID)
 			request, err := http.NewRequest(http.MethodGet, url, bytes.NewReader(data))
 			require.NoError(t, err)
 
@@ -263,11 +289,11 @@ func TestGetProductInventoryAPI(t *testing.T) {
 
 }
 
-func TestListProductInventoryAPI(t *testing.T) {
+func TestListProductDiscountAPI(t *testing.T) {
 	n := 5
-	productInventories := make([]db.ProductInventory, n)
+	productdiscounts := make([]db.Discount, n)
 	for i := 0; i < n; i++ {
-		productInventories[i] = createRandomProductInventory(t)
+		productdiscounts[i] = createRandomProductDiscount(t)
 	}
 
 	type Query struct {
@@ -289,19 +315,19 @@ func TestListProductInventoryAPI(t *testing.T) {
 			},
 
 			buildStubs: func(store *mockdb.MockStore) {
-				arg := db.ListProductInventoriesParams{
+				arg := db.ListDiscountsParams{
 					Limit:  int32(n),
 					Offset: 0,
 				}
 
 				store.EXPECT().
-					ListProductInventories(gomock.Any(), gomock.Eq(arg)).
+					ListDiscounts(gomock.Any(), gomock.Eq(arg)).
 					Times(1).
-					Return(productInventories, nil)
+					Return(productdiscounts, nil)
 			},
 			checkResponse: func(recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusOK, recorder.Code)
-				requireBodyMatchProductInventories(t, recorder.Body, productInventories)
+				requireBodyMatchProductDiscounts(t, recorder.Body, productdiscounts)
 			},
 		},
 		{
@@ -313,9 +339,9 @@ func TestListProductInventoryAPI(t *testing.T) {
 
 			buildStubs: func(store *mockdb.MockStore) {
 				store.EXPECT().
-					ListProductInventories(gomock.Any(), gomock.Any()).
+					ListDiscounts(gomock.Any(), gomock.Any()).
 					Times(1).
-					Return([]db.ProductInventory{}, sql.ErrConnDone)
+					Return([]db.Discount{}, sql.ErrConnDone)
 			},
 			checkResponse: func(recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusInternalServerError, recorder.Code)
@@ -330,7 +356,7 @@ func TestListProductInventoryAPI(t *testing.T) {
 
 			buildStubs: func(store *mockdb.MockStore) {
 				store.EXPECT().
-					ListProductInventories(gomock.Any(), gomock.Any()).
+					ListDiscounts(gomock.Any(), gomock.Any()).
 					Times(0)
 			},
 			checkResponse: func(recorder *httptest.ResponseRecorder) {
@@ -346,7 +372,7 @@ func TestListProductInventoryAPI(t *testing.T) {
 
 			buildStubs: func(store *mockdb.MockStore) {
 				store.EXPECT().
-					ListProductInventories(gomock.Any(), gomock.Any()).
+					ListDiscounts(gomock.Any(), gomock.Any()).
 					Times(0)
 			},
 			checkResponse: func(recorder *httptest.ResponseRecorder) {
@@ -367,7 +393,7 @@ func TestListProductInventoryAPI(t *testing.T) {
 			server := newTestServer(t, store)
 			recorder := httptest.NewRecorder()
 
-			url := "/inventories"
+			url := "/discounts"
 			request, err := http.NewRequest(http.MethodGet, url, nil)
 			require.NoError(t, err)
 
@@ -383,58 +409,55 @@ func TestListProductInventoryAPI(t *testing.T) {
 	}
 }
 
-func TestUpdateProductInventoryAPI(t *testing.T) {
+func TestUpdateProductDiscountAPI(t *testing.T) {
 	admin, _ := randomPISuperAdmin(t)
-	productInventory := createRandomProductInventory(t)
+	productDiscount := createRandomProductDiscount(t)
 
 	testCases := []struct {
 		name          string
-		InventoryID   int64
+		DiscountID    int64
 		body          gin.H
 		setupAuth     func(t *testing.T, request *http.Request, tokenMaker token.Maker)
 		buildStubs    func(store *mockdb.MockStore)
 		checkResponse func(t *testing.T, recorder *httptest.ResponseRecorder)
 	}{
 		{
-			name:        "OK",
-			InventoryID: productInventory.ID,
+			name:       "OK",
+			DiscountID: productDiscount.ID,
 			body: gin.H{
-				"id":       productInventory.ID,
-				"quantity": int32(0),
-				"active":   false,
+				"id":     productDiscount.ID,
+				"active": false,
 			},
 			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
 				addAuthorizationForAdmin(t, request, tokenMaker, authorizationTypeBearer, admin.ID, admin.Username, admin.TypeID, admin.Active, time.Minute)
 			},
 			buildStubs: func(store *mockdb.MockStore) {
-				arg := db.UpdateProductInventoryParams{
-					ID:       productInventory.ID,
-					Quantity: int32(0),
-					Active:   false,
+				arg := db.UpdateDiscountParams{
+					ID:     productDiscount.ID,
+					Active: false,
 				}
 				store.EXPECT().
-					UpdateProductInventory(gomock.Any(), gomock.Eq(arg)).
+					UpdateDiscount(gomock.Any(), gomock.Eq(arg)).
 					Times(1).
-					Return(productInventory, nil)
+					Return(productDiscount, nil)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusOK, recorder.Code)
 			},
 		},
 		{
-			name:        "Unauthorized",
-			InventoryID: productInventory.ID,
+			name:       "Unauthorized",
+			DiscountID: productDiscount.ID,
 			body: gin.H{
-				"id":       productInventory.ID,
-				"quantity": int32(0),
-				"active":   false,
+				"id":     productDiscount.ID,
+				"active": false,
 			},
 			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
 				addAuthorizationForAdmin(t, request, tokenMaker, authorizationTypeBearer, admin.ID, admin.Username, admin.TypeID, false, time.Minute)
 			},
 			buildStubs: func(store *mockdb.MockStore) {
 				store.EXPECT().
-					UpdateProductInventory(gomock.Any(), gomock.Any()).
+					UpdateDiscount(gomock.Any(), gomock.Any()).
 					Times(0)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
@@ -442,18 +465,17 @@ func TestUpdateProductInventoryAPI(t *testing.T) {
 			},
 		},
 		{
-			name:        "NoAuthorization",
-			InventoryID: productInventory.ID,
+			name:       "NoAuthorization",
+			DiscountID: productDiscount.ID,
 			body: gin.H{
-				"id":       productInventory.ID,
-				"quantity": int32(0),
-				"active":   false,
+				"id":     productDiscount.ID,
+				"active": false,
 			},
 			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
 			},
 			buildStubs: func(store *mockdb.MockStore) {
 				store.EXPECT().
-					UpdateProductInventory(gomock.Any(), gomock.Any()).
+					UpdateDiscount(gomock.Any(), gomock.Any()).
 					Times(0)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
@@ -461,44 +483,42 @@ func TestUpdateProductInventoryAPI(t *testing.T) {
 			},
 		},
 		{
-			name:        "InternalError",
-			InventoryID: productInventory.ID,
+			name:       "InternalError",
+			DiscountID: productDiscount.ID,
 			body: gin.H{
-				"id":       productInventory.ID,
-				"quantity": int32(0),
-				"active":   false,
+				"id":     productDiscount.ID,
+				"active": false,
 			},
 			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
 				addAuthorizationForAdmin(t, request, tokenMaker, authorizationTypeBearer, admin.ID, admin.Username, admin.TypeID, admin.Active, time.Minute)
 			},
 			buildStubs: func(store *mockdb.MockStore) {
-				arg := db.UpdateProductInventoryParams{
-					ID:     productInventory.ID,
+				arg := db.UpdateDiscountParams{
+					ID:     productDiscount.ID,
 					Active: false,
 				}
 				store.EXPECT().
-					UpdateProductInventory(gomock.Any(), gomock.Eq(arg)).
+					UpdateDiscount(gomock.Any(), gomock.Eq(arg)).
 					Times(1).
-					Return(db.ProductInventory{}, sql.ErrConnDone)
+					Return(db.Discount{}, sql.ErrConnDone)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusInternalServerError, recorder.Code)
 			},
 		},
 		{
-			name:        "InvalidID",
-			InventoryID: 0,
+			name:       "InvalidID",
+			DiscountID: 0,
 			body: gin.H{
-				"id":       0,
-				"quantity": int32(0),
-				"active":   false,
+				"id":     0,
+				"active": false,
 			},
 			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
 				addAuthorizationForAdmin(t, request, tokenMaker, authorizationTypeBearer, admin.ID, admin.Username, admin.TypeID, admin.Active, time.Minute)
 			},
 			buildStubs: func(store *mockdb.MockStore) {
 				store.EXPECT().
-					UpdateProductInventory(gomock.Any(), gomock.Any()).
+					UpdateDiscount(gomock.Any(), gomock.Any()).
 					Times(0)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
@@ -523,7 +543,7 @@ func TestUpdateProductInventoryAPI(t *testing.T) {
 			data, err := json.Marshal(tc.body)
 			require.NoError(t, err)
 
-			url := fmt.Sprintf("/inventories/%d", tc.InventoryID)
+			url := fmt.Sprintf("/discounts/%d", tc.DiscountID)
 			request, err := http.NewRequest(http.MethodPut, url, bytes.NewReader(data))
 			require.NoError(t, err)
 
@@ -534,30 +554,30 @@ func TestUpdateProductInventoryAPI(t *testing.T) {
 	}
 }
 
-func TestDeleteProductInventoryAPI(t *testing.T) {
+func TestDeleteProductDiscountAPI(t *testing.T) {
 	admin, _ := randomPISuperAdmin(t)
-	productInventory := createRandomProductInventory(t)
+	productDiscount := createRandomProductDiscount(t)
 
 	testCases := []struct {
 		name          string
 		body          gin.H
-		InventoryID   int64
+		DiscountID    int64
 		setupAuth     func(t *testing.T, request *http.Request, tokenMaker token.Maker)
 		buildStub     func(store *mockdb.MockStore)
 		checkResponse func(t *testing.T, recorder *httptest.ResponseRecorder)
 	}{
 		{
-			name:        "OK",
-			InventoryID: productInventory.ID,
+			name:       "OK",
+			DiscountID: productDiscount.ID,
 			body: gin.H{
-				"id": productInventory.ID,
+				"id": productDiscount.ID,
 			},
 			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
 				addAuthorizationForAdmin(t, request, tokenMaker, authorizationTypeBearer, admin.ID, admin.Username, admin.TypeID, admin.Active, time.Minute)
 			},
 			buildStub: func(store *mockdb.MockStore) {
 				store.EXPECT().
-					DeleteProductInventory(gomock.Any(), gomock.Eq(productInventory.ID)).
+					DeleteDiscount(gomock.Any(), gomock.Eq(productDiscount.ID)).
 					Times(1).
 					Return(nil)
 			},
@@ -566,10 +586,10 @@ func TestDeleteProductInventoryAPI(t *testing.T) {
 			},
 		},
 		{
-			name:        "Unauthorized",
-			InventoryID: productInventory.ID,
+			name:       "Unauthorized",
+			DiscountID: productDiscount.ID,
 			body: gin.H{
-				"id": productInventory.ID,
+				"id": productDiscount.ID,
 			},
 			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
 				addAuthorizationForAdmin(t, request, tokenMaker, authorizationTypeBearer, admin.ID, admin.Username, admin.TypeID, false, time.Minute)
@@ -577,7 +597,7 @@ func TestDeleteProductInventoryAPI(t *testing.T) {
 			},
 			buildStub: func(store *mockdb.MockStore) {
 				store.EXPECT().
-					DeleteProductInventory(gomock.Any(), gomock.Any()).
+					DeleteDiscount(gomock.Any(), gomock.Any()).
 					Times(0)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
@@ -585,16 +605,16 @@ func TestDeleteProductInventoryAPI(t *testing.T) {
 			},
 		},
 		{
-			name:        "No Authorization",
-			InventoryID: productInventory.ID,
+			name:       "No Authorization",
+			DiscountID: productDiscount.ID,
 			body: gin.H{
-				"id": productInventory.ID,
+				"id": productDiscount.ID,
 			},
 			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
 			},
 			buildStub: func(store *mockdb.MockStore) {
 				store.EXPECT().
-					DeleteProductInventory(gomock.Any(), gomock.Any()).
+					DeleteDiscount(gomock.Any(), gomock.Any()).
 					Times(0)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
@@ -602,17 +622,17 @@ func TestDeleteProductInventoryAPI(t *testing.T) {
 			},
 		},
 		{
-			name:        "NotFound",
-			InventoryID: productInventory.ID,
+			name:       "NotFound",
+			DiscountID: productDiscount.ID,
 			body: gin.H{
-				"id": productInventory.ID,
+				"id": productDiscount.ID,
 			},
 			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
 				addAuthorizationForAdmin(t, request, tokenMaker, authorizationTypeBearer, admin.ID, admin.Username, admin.TypeID, admin.Active, time.Minute)
 			},
 			buildStub: func(store *mockdb.MockStore) {
 				store.EXPECT().
-					DeleteProductInventory(gomock.Any(), gomock.Eq(productInventory.ID)).
+					DeleteDiscount(gomock.Any(), gomock.Eq(productDiscount.ID)).
 					Times(1).
 					Return(sql.ErrNoRows)
 			},
@@ -621,17 +641,17 @@ func TestDeleteProductInventoryAPI(t *testing.T) {
 			},
 		},
 		{
-			name:        "InternalError",
-			InventoryID: productInventory.ID,
+			name:       "InternalError",
+			DiscountID: productDiscount.ID,
 			body: gin.H{
-				"id": productInventory.ID,
+				"id": productDiscount.ID,
 			},
 			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
 				addAuthorizationForAdmin(t, request, tokenMaker, authorizationTypeBearer, admin.ID, admin.Username, admin.TypeID, admin.Active, time.Minute)
 			},
 			buildStub: func(store *mockdb.MockStore) {
 				store.EXPECT().
-					DeleteProductInventory(gomock.Any(), gomock.Eq(productInventory.ID)).
+					DeleteDiscount(gomock.Any(), gomock.Eq(productDiscount.ID)).
 					Times(1).
 					Return(sql.ErrConnDone)
 			},
@@ -640,8 +660,8 @@ func TestDeleteProductInventoryAPI(t *testing.T) {
 			},
 		},
 		{
-			name:        "InvalidID",
-			InventoryID: 0,
+			name:       "InvalidID",
+			DiscountID: 0,
 			body: gin.H{
 				"id": 0,
 			},
@@ -650,7 +670,7 @@ func TestDeleteProductInventoryAPI(t *testing.T) {
 			},
 			buildStub: func(store *mockdb.MockStore) {
 				store.EXPECT().
-					DeleteProductInventory(gomock.Any(), gomock.Any()).
+					DeleteDiscount(gomock.Any(), gomock.Any()).
 					Times(0)
 
 			},
@@ -679,7 +699,7 @@ func TestDeleteProductInventoryAPI(t *testing.T) {
 			data, err := json.Marshal(tc.body)
 			require.NoError(t, err)
 
-			url := fmt.Sprintf("/inventories/%d", tc.InventoryID)
+			url := fmt.Sprintf("/discounts/%d", tc.DiscountID)
 			request, err := http.NewRequest(http.MethodDelete, url, bytes.NewReader(data))
 			require.NoError(t, err)
 
@@ -693,7 +713,7 @@ func TestDeleteProductInventoryAPI(t *testing.T) {
 
 }
 
-func randomPISuperAdmin(t *testing.T) (admin db.Admin, password string) {
+func randomPDSuperAdmin(t *testing.T) (admin db.Admin, password string) {
 	password = util.RandomString(6)
 	hashedPassword, err := util.HashPassword(password)
 	require.NoError(t, err)
@@ -709,34 +729,38 @@ func randomPISuperAdmin(t *testing.T) (admin db.Admin, password string) {
 	return
 }
 
-func createRandomProductInventory(t *testing.T) (productInventory db.ProductInventory) {
-	productInventory = db.ProductInventory{
-		ID:       util.RandomInt(1, 10),
-		Quantity: int32(util.RandomInt(1, 10)),
-		Active:   true,
+func createRandomProductDiscount(t *testing.T) (discount db.Discount) {
+	discount = db.Discount{
+		ID:              util.RandomInt(1, 10),
+		Name:            util.RandomUser(),
+		Description:     util.RandomUser(),
+		DiscountPercent: fmt.Sprint(util.RandomMoney()),
+		Active:          true,
 	}
 	return
 }
 
-func requireBodyMatchProductInventory(t *testing.T, body *bytes.Buffer, productInventory db.ProductInventory) {
+func requireBodyMatchProductDiscount(t *testing.T, body *bytes.Buffer, discount db.Discount) {
 	data, err := ioutil.ReadAll(body)
 	require.NoError(t, err)
 
-	var gotProductInventory db.ProductInventory
-	err = json.Unmarshal(data, &gotProductInventory)
+	var gotDiscount db.Discount
+	err = json.Unmarshal(data, &gotDiscount)
 
 	require.NoError(t, err)
-	require.Equal(t, productInventory.ID, gotProductInventory.ID)
-	require.Equal(t, productInventory.Quantity, gotProductInventory.Quantity)
-	require.Equal(t, productInventory.Active, gotProductInventory.Active)
+	require.Equal(t, discount.ID, gotDiscount.ID)
+	require.Equal(t, discount.Name, gotDiscount.Name)
+	require.Equal(t, discount.Description, gotDiscount.Description)
+	require.Equal(t, discount.DiscountPercent, gotDiscount.DiscountPercent)
+	require.Equal(t, discount.Active, gotDiscount.Active)
 }
 
-func requireBodyMatchProductInventories(t *testing.T, body *bytes.Buffer, productInventories []db.ProductInventory) {
+func requireBodyMatchProductDiscounts(t *testing.T, body *bytes.Buffer, discounts []db.Discount) {
 	data, err := ioutil.ReadAll(body)
 	require.NoError(t, err)
 
-	var gotProductInventories []db.ProductInventory
-	err = json.Unmarshal(data, &gotProductInventories)
+	var gotDiscounts []db.Discount
+	err = json.Unmarshal(data, &gotDiscounts)
 	require.NoError(t, err)
-	require.Equal(t, productInventories, gotProductInventories)
+	require.Equal(t, discounts, gotDiscounts)
 }

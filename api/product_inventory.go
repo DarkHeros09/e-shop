@@ -25,7 +25,7 @@ func (server *Server) createInventory(ctx *gin.Context) {
 		return
 	}
 
-	if err := ctx.BindJSON(&req); err != nil {
+	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
