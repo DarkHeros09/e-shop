@@ -15,7 +15,7 @@ func createRandomOrderDetail(t *testing.T) OrderDetail {
 	paymentDetail := createRandomPaymentDetail(t)
 	arg := CreateOrderDetailParams{
 		UserID:    user.ID,
-		Total:     fmt.Sprint(util.RandomMoney()),
+		Total:     util.RandomDecimal(1, 100),
 		PaymentID: paymentDetail.ID,
 	}
 

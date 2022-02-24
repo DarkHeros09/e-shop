@@ -3,7 +3,6 @@ package db
 import (
 	"context"
 	"database/sql"
-	"fmt"
 	"testing"
 	"time"
 
@@ -16,7 +15,7 @@ func createRandomDiscount(t *testing.T) Discount {
 	arg := CreateDiscountParams{
 		Name:            util.RandomUser(),
 		Description:     util.RandomUser(),
-		DiscountPercent: fmt.Sprint(util.RandomMoney()),
+		DiscountPercent: util.RandomDecimal(1, 100),
 	}
 	discount, err := testQueires.CreateDiscount(context.Background(), arg)
 	require.NoError(t, err)

@@ -734,8 +734,9 @@ func createRandomProductDiscount(t *testing.T) (discount db.Discount) {
 		ID:              util.RandomInt(1, 10),
 		Name:            util.RandomUser(),
 		Description:     util.RandomUser(),
-		DiscountPercent: fmt.Sprint(util.RandomMoney()),
-		Active:          true,
+		DiscountPercent: util.RandomDecimal(1, 100),
+		// DiscountPercent: util.RandomDecimal(0, 100),
+		Active: true,
 	}
 	return
 }

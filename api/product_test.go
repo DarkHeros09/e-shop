@@ -9,9 +9,11 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
 	mockdb "github.com/DarkHeros09/e-shop/v2/db/mock"
 	db "github.com/DarkHeros09/e-shop/v2/db/sqlc"
+	"github.com/DarkHeros09/e-shop/v2/token"
 	"github.com/DarkHeros09/e-shop/v2/util"
 	"github.com/gin-gonic/gin"
 	"github.com/golang/mock/gomock"
@@ -41,6 +43,7 @@ func TestGetProductAPI(t *testing.T) {
 				requireBodyMatchProduct(t, recorder.Body, product)
 			},
 		},
+
 		{
 			name:      "NotFound",
 			productID: product.ID,
@@ -102,7 +105,6 @@ func TestGetProductAPI(t *testing.T) {
 			require.NoError(t, err)
 
 			server.router.ServeHTTP(recorder, request)
-
 			//check response
 			tc.checkResponse(t, recorder)
 		})
@@ -112,12 +114,14 @@ func TestGetProductAPI(t *testing.T) {
 }
 
 func TestCreateProductAPI(t *testing.T) {
+	admin, _ := randomPSuperAdmin(t)
 	product := randomProduct()
 
 	testCases := []struct {
 		name          string
 		body          gin.H
 		productID     int64
+		setupAuth     func(t *testing.T, request *http.Request, tokenMaker token.Maker)
 		buildStubs    func(store *mockdb.MockStore)
 		checkResponse func(recoder *httptest.ResponseRecorder)
 	}{
@@ -131,6 +135,9 @@ func TestCreateProductAPI(t *testing.T) {
 				"inventory_id": product.InventoryID,
 				"price":        product.Price,
 				"discount_id":  product.DiscountID,
+			},
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				addAuthorizationForAdmin(t, request, tokenMaker, authorizationTypeBearer, admin.ID, admin.Username, admin.TypeID, admin.Active, time.Minute)
 			},
 			buildStubs: func(store *mockdb.MockStore) {
 				arg := db.CreateProductParams{
@@ -154,6 +161,56 @@ func TestCreateProductAPI(t *testing.T) {
 			},
 		},
 		{
+			name:      "NoAuthorization",
+			productID: product.ID,
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+			},
+			buildStubs: func(store *mockdb.MockStore) {
+				arg := db.CreateProductParams{
+					Name:        product.Name,
+					Description: product.Description,
+					Sku:         product.Sku,
+					CategoryID:  product.CategoryID,
+					InventoryID: product.InventoryID,
+					Price:       product.Price,
+					DiscountID:  product.DiscountID,
+				}
+
+				store.EXPECT().
+					CreateProduct(gomock.Any(), gomock.Eq(arg)).
+					Times(0)
+
+			},
+			checkResponse: func(recorder *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusUnauthorized, recorder.Code)
+			},
+		},
+		{
+			name:      "Unauthorized",
+			productID: product.ID,
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				addAuthorizationForAdmin(t, request, tokenMaker, authorizationTypeBearer, admin.ID, admin.Username, admin.TypeID, false, time.Minute)
+			},
+			buildStubs: func(store *mockdb.MockStore) {
+				arg := db.CreateProductParams{
+					Name:        product.Name,
+					Description: product.Description,
+					Sku:         product.Sku,
+					CategoryID:  product.CategoryID,
+					InventoryID: product.InventoryID,
+					Price:       product.Price,
+					DiscountID:  product.DiscountID,
+				}
+
+				store.EXPECT().
+					CreateProduct(gomock.Any(), gomock.Eq(arg)).
+					Times(0)
+			},
+			checkResponse: func(recorder *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusUnauthorized, recorder.Code)
+			},
+		},
+		{
 			name: "InternalError",
 			body: gin.H{
 				"name":         product.Name,
@@ -163,6 +220,9 @@ func TestCreateProductAPI(t *testing.T) {
 				"inventory_id": product.InventoryID,
 				"price":        product.Price,
 				"discount_id":  product.DiscountID,
+			},
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				addAuthorizationForAdmin(t, request, tokenMaker, authorizationTypeBearer, admin.ID, admin.Username, admin.TypeID, admin.Active, time.Minute)
 			},
 			buildStubs: func(store *mockdb.MockStore) {
 				store.EXPECT().
@@ -178,6 +238,9 @@ func TestCreateProductAPI(t *testing.T) {
 			name: "InvalidID",
 			body: gin.H{
 				"id": "invalid",
+			},
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				addAuthorizationForAdmin(t, request, tokenMaker, authorizationTypeBearer, admin.ID, admin.Username, admin.TypeID, admin.Active, time.Minute)
 			},
 			buildStubs: func(store *mockdb.MockStore) {
 				store.EXPECT().
@@ -210,6 +273,7 @@ func TestCreateProductAPI(t *testing.T) {
 			request, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(data))
 			require.NoError(t, err)
 
+			tc.setupAuth(t, request, server.tokenMaker)
 			server.router.ServeHTTP(recorder, request)
 			tc.checkResponse(recorder)
 		})
@@ -333,12 +397,14 @@ func TestListProductsAPI(t *testing.T) {
 }
 
 func TestUpdateProductAPI(t *testing.T) {
+	admin, _ := randomPSuperAdmin(t)
 	product := randomProduct()
 
 	testCases := []struct {
 		name          string
 		body          gin.H
 		productID     int64
+		setupAuth     func(t *testing.T, request *http.Request, tokenMaker token.Maker)
 		buildStubs    func(store *mockdb.MockStore)
 		checkResponse func(t *testing.T, recorder *httptest.ResponseRecorder)
 	}{
@@ -352,6 +418,9 @@ func TestUpdateProductAPI(t *testing.T) {
 				"category_id": product.CategoryID,
 				"price":       "66",
 				"active":      true,
+			},
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				addAuthorizationForAdmin(t, request, tokenMaker, authorizationTypeBearer, admin.ID, admin.Username, admin.TypeID, admin.Active, time.Minute)
 			},
 			buildStubs: func(store *mockdb.MockStore) {
 				arg := db.UpdateProductParams{
@@ -373,6 +442,69 @@ func TestUpdateProductAPI(t *testing.T) {
 			},
 		},
 		{
+			name:      "Unauthorized",
+			productID: product.ID,
+			body: gin.H{
+				"id":          product.ID,
+				"name":        "new name",
+				"description": "new discription",
+				"category_id": product.CategoryID,
+				"price":       "66",
+				"active":      true,
+			},
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				addAuthorizationForAdmin(t, request, tokenMaker, authorizationTypeBearer, admin.ID, admin.Username, admin.TypeID, false, time.Minute)
+			},
+			buildStubs: func(store *mockdb.MockStore) {
+				arg := db.UpdateProductParams{
+					ID:          product.ID,
+					Name:        "new name",
+					Description: "new discription",
+					CategoryID:  product.CategoryID,
+					Price:       "66",
+					Active:      true,
+				}
+
+				store.EXPECT().
+					UpdateProduct(gomock.Any(), gomock.Eq(arg)).
+					Times(0)
+			},
+			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusUnauthorized, recorder.Code)
+			},
+		},
+		{
+			name:      "NoAuthorization",
+			productID: product.ID,
+			body: gin.H{
+				"id":          product.ID,
+				"name":        "new name",
+				"description": "new discription",
+				"category_id": product.CategoryID,
+				"price":       "66",
+				"active":      true,
+			},
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+			},
+			buildStubs: func(store *mockdb.MockStore) {
+				arg := db.UpdateProductParams{
+					ID:          product.ID,
+					Name:        "new name",
+					Description: "new discription",
+					CategoryID:  product.CategoryID,
+					Price:       "66",
+					Active:      true,
+				}
+
+				store.EXPECT().
+					UpdateProduct(gomock.Any(), gomock.Eq(arg)).
+					Times(0)
+			},
+			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusUnauthorized, recorder.Code)
+			},
+		},
+		{
 			name:      "InternalError",
 			productID: product.ID,
 			body: gin.H{
@@ -382,6 +514,9 @@ func TestUpdateProductAPI(t *testing.T) {
 				"category_id": product.CategoryID,
 				"price":       "66",
 				"active":      true,
+			},
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				addAuthorizationForAdmin(t, request, tokenMaker, authorizationTypeBearer, admin.ID, admin.Username, admin.TypeID, admin.Active, time.Minute)
 			},
 			buildStubs: func(store *mockdb.MockStore) {
 				arg := db.UpdateProductParams{
@@ -404,6 +539,9 @@ func TestUpdateProductAPI(t *testing.T) {
 		{
 			name:      "InvalidID",
 			productID: 0,
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				addAuthorizationForAdmin(t, request, tokenMaker, authorizationTypeBearer, admin.ID, admin.Username, admin.TypeID, admin.Active, time.Minute)
+			},
 			buildStubs: func(store *mockdb.MockStore) {
 				store.EXPECT().
 					UpdateProduct(gomock.Any(), gomock.Any()).
@@ -435,6 +573,7 @@ func TestUpdateProductAPI(t *testing.T) {
 			request, err := http.NewRequest(http.MethodPut, url, bytes.NewReader(data))
 			require.NoError(t, err)
 
+			tc.setupAuth(t, request, server.tokenMaker)
 			server.router.ServeHTTP(recorder, request)
 			tc.checkResponse(t, recorder)
 		})
@@ -442,12 +581,14 @@ func TestUpdateProductAPI(t *testing.T) {
 }
 
 func TestDeleteProductAPI(t *testing.T) {
+	admin, _ := randomPSuperAdmin(t)
 	product := randomProduct()
 
 	testCases := []struct {
 		name          string
 		body          gin.H
 		productID     int64
+		setupAuth     func(t *testing.T, request *http.Request, tokenMaker token.Maker)
 		buildStub     func(store *mockdb.MockStore)
 		checkResponse func(t *testing.T, recorder *httptest.ResponseRecorder)
 	}{
@@ -456,6 +597,9 @@ func TestDeleteProductAPI(t *testing.T) {
 			productID: product.ID,
 			body: gin.H{
 				"id": product.ID,
+			},
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				addAuthorizationForAdmin(t, request, tokenMaker, authorizationTypeBearer, admin.ID, admin.Username, admin.TypeID, admin.Active, time.Minute)
 			},
 			buildStub: func(store *mockdb.MockStore) {
 				store.EXPECT().
@@ -468,10 +612,48 @@ func TestDeleteProductAPI(t *testing.T) {
 			},
 		},
 		{
+			name:      "Unauthorized",
+			productID: product.ID,
+			body: gin.H{
+				"id": product.ID,
+			},
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				addAuthorizationForAdmin(t, request, tokenMaker, authorizationTypeBearer, admin.ID, admin.Username, 2, admin.Active, time.Minute)
+			},
+			buildStub: func(store *mockdb.MockStore) {
+				store.EXPECT().
+					DeleteProduct(gomock.Any(), gomock.Eq(product.ID)).
+					Times(0)
+			},
+			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusUnauthorized, recorder.Code)
+			},
+		},
+		{
+			name:      "NoAuthorization",
+			productID: product.ID,
+			body: gin.H{
+				"id": product.ID,
+			},
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+			},
+			buildStub: func(store *mockdb.MockStore) {
+				store.EXPECT().
+					DeleteProduct(gomock.Any(), gomock.Eq(product.ID)).
+					Times(0)
+			},
+			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusUnauthorized, recorder.Code)
+			},
+		},
+		{
 			name:      "NotFound",
 			productID: product.ID,
 			body: gin.H{
 				"id": product.ID,
+			},
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				addAuthorizationForAdmin(t, request, tokenMaker, authorizationTypeBearer, admin.ID, admin.Username, admin.TypeID, admin.Active, time.Minute)
 			},
 			buildStub: func(store *mockdb.MockStore) {
 				store.EXPECT().
@@ -489,6 +671,9 @@ func TestDeleteProductAPI(t *testing.T) {
 			body: gin.H{
 				"id": product.ID,
 			},
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				addAuthorizationForAdmin(t, request, tokenMaker, authorizationTypeBearer, admin.ID, admin.Username, admin.TypeID, admin.Active, time.Minute)
+			},
 			buildStub: func(store *mockdb.MockStore) {
 				store.EXPECT().
 					DeleteProduct(gomock.Any(), gomock.Eq(product.ID)).
@@ -504,6 +689,9 @@ func TestDeleteProductAPI(t *testing.T) {
 			productID: 0,
 			body: gin.H{
 				"id": 0,
+			},
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				addAuthorizationForAdmin(t, request, tokenMaker, authorizationTypeBearer, admin.ID, admin.Username, admin.TypeID, admin.Active, time.Minute)
 			},
 			buildStub: func(store *mockdb.MockStore) {
 				store.EXPECT().
@@ -540,6 +728,7 @@ func TestDeleteProductAPI(t *testing.T) {
 			request, err := http.NewRequest(http.MethodDelete, url, bytes.NewReader(data))
 			require.NoError(t, err)
 
+			tc.setupAuth(t, request, server.tokenMaker)
 			server.router.ServeHTTP(recorder, request)
 			//check response
 			tc.checkResponse(t, recorder)
@@ -547,6 +736,22 @@ func TestDeleteProductAPI(t *testing.T) {
 
 	}
 
+}
+
+func randomPSuperAdmin(t *testing.T) (admin db.Admin, password string) {
+	password = util.RandomString(6)
+	hashedPassword, err := util.HashPassword(password)
+	require.NoError(t, err)
+
+	admin = db.Admin{
+		ID:       util.RandomMoney(),
+		Username: util.RandomUser(),
+		Email:    util.RandomEmail(),
+		Password: hashedPassword,
+		Active:   true,
+		TypeID:   1,
+	}
+	return
 }
 
 func randomProduct() db.Product {

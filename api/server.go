@@ -75,17 +75,17 @@ func (server *Server) setupRouter() {
 	adminRoutes.PUT("/inventories/:id", server.updateInventory)    //! Admin Only # Finished With tests (token and changed response... No Etag)
 	adminRoutes.DELETE("/inventories/:id", server.deleteInventory) //! Admin Only # Finished With tests (token and changed response... No Etag)
 
-	adminRoutes.POST("/discounts", server.createDiscount)       //! Admin Only
-	router.GET("/discounts/:id", server.getDiscount)            //? no auth required
-	router.GET("/discounts", server.listDiscount)               //? no auth required
+	adminRoutes.POST("/discounts", server.createDiscount)       //! Admin Only # Finished With tests (token and changed response... No Etag)
+	router.GET("/discounts/:id", server.getDiscount)            //? no auth required # Finished With tests (token and changed response... No Etag)
+	router.GET("/discounts", server.listDiscount)               //? no auth required # Finished With tests (token and changed response... No Etag)
 	adminRoutes.PUT("/discounts/:id", server.updateDiscount)    //! Admin Only # Finished With tests (token and changed response... No Etag)
 	adminRoutes.DELETE("/discounts/:id", server.deleteDiscount) //! Admin Only # Finished With tests (token and changed response... No Etag)
 
-	router.POST("/products", server.createProduct)       //! Admin Only
-	router.GET("/products/:id", server.getProduct)       //? no auth required
-	router.GET("/products", server.listProducts)         //? no auth required
-	router.PUT("/products/:id", server.updateProduct)    //! Admin Only
-	router.DELETE("/products/:id", server.deleteProduct) //! Admin Only
+	adminRoutes.POST("/products", server.createProduct)       //! Admin Only # Finished With tests (token and changed response... No Etag)
+	router.GET("/products/:id", server.getProduct)            //? no auth required # Finished With tests (token and changed response... No Etag)
+	router.GET("/products", server.listProducts)              //* no auth required # Finished With tests (token and changed response.)
+	adminRoutes.PUT("/products/:id", server.updateProduct)    //! Admin Only # Finished With tests (token and changed response... No Etag)
+	adminRoutes.DELETE("/products/:id", server.deleteProduct) //! Admin Only # Finished With tests (token and changed response... No Etag)
 
 	userRoutes.POST("/shoppingsessions", server.createShoppingSession)
 	userRoutes.GET("/shoppingsessions/:id", server.getShoppingSession)
@@ -117,6 +117,8 @@ func (server *Server) setupRouter() {
 // TODO: modify the verification tags in the apis line required tags
 
 // TODO: add etag logic with tests
+
+// TODO: add caching logic with tests
 
 // TODO: modify the list methods where needed like the listshoppingsession method. video 22 mintue 19.50
 

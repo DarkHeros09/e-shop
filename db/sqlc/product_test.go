@@ -21,7 +21,7 @@ func createRandomProduct(t *testing.T) Product {
 		Sku:         util.RandomString(6),
 		CategoryID:  category.ID,
 		InventoryID: inventory.ID,
-		Price:       "10",
+		Price:       util.RandomDecimal(1, 100),
 		DiscountID:  discount.ID,
 	}
 

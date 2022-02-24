@@ -2,10 +2,12 @@ package api
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"net/http"
 
 	db "github.com/DarkHeros09/e-shop/v2/db/sqlc"
+	"github.com/DarkHeros09/e-shop/v2/token"
 	"github.com/gin-gonic/gin"
 	"github.com/hhsnopek/etag"
 	"github.com/lib/pq"
@@ -23,6 +25,13 @@ type createProductRequest struct {
 
 func (server *Server) createProduct(ctx *gin.Context) {
 	var req createProductRequest
+
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.AdminPayload)
+	if authPayload.AdminID == 0 || authPayload.TypeID != 1 || !authPayload.Active {
+		err := errors.New("account unauthorized")
+		ctx.JSON(http.StatusUnauthorized, errorResponse(err))
+		return
+	}
 
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
@@ -110,7 +119,7 @@ func (server *Server) listProducts(ctx *gin.Context) {
 	generatedETag := etag.Generate([]byte(fmt.Sprint(products)), true)
 
 	if requestETag == generatedETag {
-		ctx.JSON(http.StatusNotModified, gin.H{})
+		ctx.JSON(http.StatusNotModified, nil)
 
 	} else {
 		ctx.Header("ETag", generatedETag)
@@ -131,7 +140,14 @@ type updateProductRequest struct {
 func (server *Server) updateProduct(ctx *gin.Context) {
 	var req updateProductRequest
 
-	if err := ctx.BindJSON(&req); err != nil {
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.AdminPayload)
+	if authPayload.AdminID == 0 || authPayload.TypeID != 1 || !authPayload.Active {
+		err := errors.New("account unauthorized")
+		ctx.JSON(http.StatusUnauthorized, errorResponse(err))
+		return
+	}
+
+	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
@@ -167,7 +183,14 @@ type deleteProductRequest struct {
 func (server *Server) deleteProduct(ctx *gin.Context) {
 	var req deleteProductRequest
 
-	if err := ctx.BindJSON(&req); err != nil {
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.AdminPayload)
+	if authPayload.AdminID == 0 || authPayload.TypeID != 1 || !authPayload.Active {
+		err := errors.New("account unauthorized")
+		ctx.JSON(http.StatusUnauthorized, errorResponse(err))
+		return
+	}
+
+	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
