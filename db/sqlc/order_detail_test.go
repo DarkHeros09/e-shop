@@ -91,13 +91,15 @@ func TestDeleteOrderDetail(t *testing.T) {
 }
 
 func TestListOrderDetails(t *testing.T) {
+	var lastOrderDetail OrderDetail
 	for i := 0; i < 10; i++ {
-		createRandomOrderDetail(t)
+		lastOrderDetail = createRandomOrderDetail(t)
 
 	}
 	arg := ListOrderDetailsParams{
+		UserID: lastOrderDetail.UserID,
 		Limit:  5,
-		Offset: 5,
+		Offset: 0,
 	}
 	orderDetails, err := testQueires.ListOrderDetails(context.Background(), arg)
 
@@ -106,5 +108,9 @@ func TestListOrderDetails(t *testing.T) {
 
 	for _, orderDetail := range orderDetails {
 		require.NotEmpty(t, orderDetail)
+		require.Equal(t, lastOrderDetail.ID, orderDetail.ID)
+		require.Equal(t, lastOrderDetail.UserID, orderDetail.UserID)
+		require.Equal(t, lastOrderDetail.PaymentID, orderDetail.PaymentID)
+		require.Equal(t, lastOrderDetail.Total, orderDetail.Total)
 	}
 }

@@ -515,19 +515,34 @@ func (mr *MockStoreMockRecorder) GetAdminType(arg0, arg1 interface{}) *gomock.Ca
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAdminType", reflect.TypeOf((*MockStore)(nil).GetAdminType), arg0, arg1)
 }
 
-// GetCartItem mocks base method.
-func (m *MockStore) GetCartItem(arg0 context.Context, arg1 int64) (db.CartItem, error) {
+// GetCartItemByID mocks base method.
+func (m *MockStore) GetCartItemByID(arg0 context.Context, arg1 int64) (db.CartItem, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetCartItem", arg0, arg1)
+	ret := m.ctrl.Call(m, "GetCartItemByID", arg0, arg1)
 	ret0, _ := ret[0].(db.CartItem)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// GetCartItem indicates an expected call of GetCartItem.
-func (mr *MockStoreMockRecorder) GetCartItem(arg0, arg1 interface{}) *gomock.Call {
+// GetCartItemByID indicates an expected call of GetCartItemByID.
+func (mr *MockStoreMockRecorder) GetCartItemByID(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCartItem", reflect.TypeOf((*MockStore)(nil).GetCartItem), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCartItemByID", reflect.TypeOf((*MockStore)(nil).GetCartItemByID), arg0, arg1)
+}
+
+// GetCartItemBySessionID mocks base method.
+func (m *MockStore) GetCartItemBySessionID(arg0 context.Context, arg1 int64) (db.CartItem, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetCartItemBySessionID", arg0, arg1)
+	ret0, _ := ret[0].(db.CartItem)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetCartItemBySessionID indicates an expected call of GetCartItemBySessionID.
+func (mr *MockStoreMockRecorder) GetCartItemBySessionID(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCartItemBySessionID", reflect.TypeOf((*MockStore)(nil).GetCartItemBySessionID), arg0, arg1)
 }
 
 // GetDiscount mocks base method.
@@ -560,34 +575,19 @@ func (mr *MockStoreMockRecorder) GetOrderDetail(arg0, arg1 interface{}) *gomock.
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetOrderDetail", reflect.TypeOf((*MockStore)(nil).GetOrderDetail), arg0, arg1)
 }
 
-// GetOrderItemByID mocks base method.
-func (m *MockStore) GetOrderItemByID(arg0 context.Context, arg1 int64) (db.OrderItem, error) {
+// GetOrderItem mocks base method.
+func (m *MockStore) GetOrderItem(arg0 context.Context, arg1 db.GetOrderItemParams) (db.OrderItem, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetOrderItemByID", arg0, arg1)
+	ret := m.ctrl.Call(m, "GetOrderItem", arg0, arg1)
 	ret0, _ := ret[0].(db.OrderItem)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// GetOrderItemByID indicates an expected call of GetOrderItemByID.
-func (mr *MockStoreMockRecorder) GetOrderItemByID(arg0, arg1 interface{}) *gomock.Call {
+// GetOrderItem indicates an expected call of GetOrderItem.
+func (mr *MockStoreMockRecorder) GetOrderItem(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetOrderItemByID", reflect.TypeOf((*MockStore)(nil).GetOrderItemByID), arg0, arg1)
-}
-
-// GetOrderItemByOrderDetailID mocks base method.
-func (m *MockStore) GetOrderItemByOrderDetailID(arg0 context.Context, arg1 int64) (db.OrderItem, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetOrderItemByOrderDetailID", arg0, arg1)
-	ret0, _ := ret[0].(db.OrderItem)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetOrderItemByOrderDetailID indicates an expected call of GetOrderItemByOrderDetailID.
-func (mr *MockStoreMockRecorder) GetOrderItemByOrderDetailID(arg0, arg1 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetOrderItemByOrderDetailID", reflect.TypeOf((*MockStore)(nil).GetOrderItemByOrderDetailID), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetOrderItem", reflect.TypeOf((*MockStore)(nil).GetOrderItem), arg0, arg1)
 }
 
 // GetPaymentDetail mocks base method.

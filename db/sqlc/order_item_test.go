@@ -40,7 +40,15 @@ func TestCreateOrderItem(t *testing.T) {
 
 func TestGetOrderItem(t *testing.T) {
 	orderItem1 := createRandomOrderItem(t)
-	orderItem2, err := testQueires.GetOrderItemByID(context.Background(), orderItem1.ID)
+
+	orderDetail1, err := testQueires.GetOrderDetail(context.Background(), orderItem1.OrderID)
+
+	arg := GetOrderItemParams{
+		ID:     orderItem1.ID,
+		UserID: orderDetail1.UserID,
+	}
+
+	orderItem2, err := testQueires.GetOrderItem(context.Background(), arg)
 
 	require.NoError(t, err)
 	require.NotEmpty(t, orderItem2)
@@ -54,23 +62,23 @@ func TestGetOrderItem(t *testing.T) {
 
 }
 
-func TestGetOrderItemByOrderID(t *testing.T) {
-	orderItem1 := createRandomOrderItem(t)
-	orderID := orderItem1.OrderID
+// func TestGetOrderItemByOrderID(t *testing.T) {
+// 	orderItem1 := createRandomOrderItem(t)
+// 	orderID := orderItem1.OrderID
 
-	orderItem2, err := testQueires.GetOrderItemByOrderDetailID(context.Background(), orderID)
+// 	orderItem2, err := testQueires.GetOrderItemByOrderDetailID(context.Background(), orderID)
 
-	require.NoError(t, err)
-	require.NotEmpty(t, orderItem2)
+// 	require.NoError(t, err)
+// 	require.NotEmpty(t, orderItem2)
 
-	require.Equal(t, orderItem1.ID, orderItem2.ID)
-	require.Equal(t, orderItem1.OrderID, orderItem2.OrderID)
-	require.Equal(t, orderItem1.ProductID, orderItem2.ProductID)
-	require.Equal(t, orderItem1.Quantity, orderItem2.Quantity)
-	require.Equal(t, orderItem1.CreatedAt, orderItem2.CreatedAt)
-	require.Equal(t, orderItem1.UpdatedAt, orderItem2.UpdatedAt)
+// 	require.Equal(t, orderItem1.ID, orderItem2.ID)
+// 	require.Equal(t, orderItem1.OrderID, orderItem2.OrderID)
+// 	require.Equal(t, orderItem1.ProductID, orderItem2.ProductID)
+// 	require.Equal(t, orderItem1.Quantity, orderItem2.Quantity)
+// 	require.Equal(t, orderItem1.CreatedAt, orderItem2.CreatedAt)
+// 	require.Equal(t, orderItem1.UpdatedAt, orderItem2.UpdatedAt)
 
-}
+// }
 
 func TestUpdateOrderItem(t *testing.T) {
 	orderItem1 := createRandomOrderItem(t)
@@ -98,7 +106,14 @@ func TestDeleteOrderItem(t *testing.T) {
 
 	require.NoError(t, err)
 
-	orderItem2, err := testQueires.GetOrderItemByID(context.Background(), orderItem1.ID)
+	orderDetail1, err := testQueires.GetOrderDetail(context.Background(), orderItem1.OrderID)
+
+	arg := GetOrderItemParams{
+		ID:     orderItem1.ID,
+		UserID: orderDetail1.UserID,
+	}
+
+	orderItem2, err := testQueires.GetOrderItem(context.Background(), arg)
 
 	require.Error(t, err)
 	require.EqualError(t, err, sql.ErrNoRows.Error())
@@ -106,13 +121,18 @@ func TestDeleteOrderItem(t *testing.T) {
 }
 
 func TestListOrderItems(t *testing.T) {
+	var lastOrderItem OrderItem
 	for i := 0; i < 10; i++ {
-		createRandomOrderItem(t)
+		lastOrderItem = createRandomOrderItem(t)
 
 	}
+
+	orderDetail1, err := testQueires.GetOrderDetail(context.Background(), lastOrderItem.OrderID)
+
 	arg := ListOrderItemsParams{
+		UserID: orderDetail1.UserID,
 		Limit:  5,
-		Offset: 5,
+		Offset: 0,
 	}
 
 	orderItems, err := testQueires.ListOrderItems(context.Background(), arg)
@@ -122,6 +142,10 @@ func TestListOrderItems(t *testing.T) {
 
 	for _, orderItem := range orderItems {
 		require.NotEmpty(t, orderItem)
+		require.Equal(t, lastOrderItem.ID, orderItem.ID)
+		require.Equal(t, lastOrderItem.OrderID, orderItem.OrderID)
+		require.Equal(t, lastOrderItem.ProductID, orderItem.ProductID)
+
 	}
 
 }

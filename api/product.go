@@ -123,6 +123,7 @@ func (server *Server) listProducts(ctx *gin.Context) {
 
 	} else {
 		ctx.Header("ETag", generatedETag)
+		// ctx.Header("Content-Type", "application/json")
 		ctx.JSON(http.StatusOK, products)
 	}
 

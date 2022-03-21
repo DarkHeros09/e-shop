@@ -87,36 +87,41 @@ func (server *Server) setupRouter() {
 	adminRoutes.PUT("/products/:id", server.updateProduct)    //! Admin Only # Finished With tests (token and changed response... No Etag)
 	adminRoutes.DELETE("/products/:id", server.deleteProduct) //! Admin Only # Finished With tests (token and changed response... No Etag)
 
-	userRoutes.POST("/shoppingsessions", server.createShoppingSession)
-	userRoutes.GET("/shoppingsessions/:id", server.getShoppingSession)
+	userRoutes.POST("/shoppingsessions", server.createShoppingSession) //* Finished With tests (token and changed response... No Etag)
+	userRoutes.GET("/shoppingsessions/:id", server.getShoppingSession) //* Finished With tests (token and changed response... No Etag)
 
-	userRoutes.POST("/cartitems", server.createCartItem)
-	router.GET("/cartitems/:id", server.getCartItem)
-	router.GET("/cartitems", server.listCartItems)
+	userRoutes.POST("/cartitems", server.createCartItem)                    //* Finished With tests (token and changed response... No Etag)
+	userRoutes.GET("/cartitems/:session_id", server.getCartItemBySessionID) //* Finished With tests (token and changed response... No Etag)
+	// userRoutes.GET("/cartitems", server.listCartItems)
+	userRoutes.PUT("/cartitems/:session_id", server.updateCartItemBySessionID) //* Finished With tests (token and changed response... No Etag)
+	userRoutes.DELETE("/cartitems/:id", server.deleteCartItemBySessionID)      //* Finished With tests (token and changed response... No Etag)
 
-	router.POST("/orderItems", server.createOrderItem)
-	router.GET("/orderItemsByID/:id", server.getOrderItemByID)
-	router.GET("/orderItemsByOrderDetailID/:id", server.getOrderItemByOrderDetailID)
-	router.GET("/orderItems", server.listOrderItems)
+	userRoutes.POST("/orderitems", server.createOrderItem) //* Finished With tests (token and changed response... No Etag)
+	userRoutes.GET("/orderitems/:id", server.getOrderItem) //* Finished With tests (token and changed response... No Etag)
+	userRoutes.GET("/orderitems", server.listOrderItemsByUser)
 
-	router.POST("/orderDetails", server.createOrderDetail)
-	router.GET("/orderDetails/:id", server.getOrderDetail)
-	router.GET("/orderDetails", server.listOrderDetails)
+	userRoutes.POST("/orderdetails", server.createOrderDetail)
+	router.GET("/orderdetails/:id", server.getOrderDetail)
+	router.GET("/orderdetails", server.listOrderDetails)
 
-	router.POST("/paymentDetails", server.createPaymentDetail)
-	router.GET("/paymentDetails/:id", server.getPaymentDetail)
-	router.GET("/paymentDetails", server.listPaymentDetails)
+	router.POST("/paymentdetails", server.createPaymentDetail)
+	router.GET("/paymentdetails/:id", server.getPaymentDetail)
+	router.GET("/paymentdetails", server.listPaymentDetails)
 
 	server.router = router
 }
 
 // TODO: write the default tests for all the methods
 
+// TODO: seperate superadmin from normal admin
+
 // TODO: add update and delete methods
 
 // TODO: modify the verification tags in the apis line required tags
 
 // TODO: add etag logic with tests
+
+// TODO: set header to application/json
 
 // TODO: add caching logic with tests
 

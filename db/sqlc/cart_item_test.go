@@ -42,7 +42,7 @@ func TestCreateCartItem(t *testing.T) {
 
 func TestGetCartItem(t *testing.T) {
 	cartItem1 := createRandomCartItem(t)
-	cartItem2, err := testQueires.GetCartItem(context.Background(), cartItem1.ID)
+	cartItem2, err := testQueires.GetCartItemByID(context.Background(), cartItem1.ID)
 
 	require.NoError(t, err)
 	require.NotEmpty(t, cartItem2)
@@ -86,7 +86,7 @@ func TestDeleteCartItem(t *testing.T) {
 
 	require.NoError(t, err)
 
-	cartItem2, err := testQueires.GetCartItem(context.Background(), cartItem1.ID)
+	cartItem2, err := testQueires.GetCartItemByID(context.Background(), cartItem1.ID)
 
 	require.Error(t, err)
 	require.EqualError(t, err, sql.ErrNoRows.Error())

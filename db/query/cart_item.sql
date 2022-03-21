@@ -8,9 +8,13 @@ INSERT INTO "cart_item" (
 )
 RETURNING *;
 
--- name: GetCartItem :one
+-- name: GetCartItemByID :one
 SELECT * FROM "cart_item"
 WHERE id = $1 LIMIT 1;
+
+-- name: GetCartItemBySessionID :one
+SELECT * FROM "cart_item"
+WHERE session_id = $1 LIMIT 1;
 
 -- name: ListCartItem :many
 SELECT * FROM "cart_item"

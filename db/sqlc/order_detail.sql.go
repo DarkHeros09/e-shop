@@ -50,7 +50,8 @@ func (q *Queries) DeleteOrderDetail(ctx context.Context, id int64) error {
 
 const getOrderDetail = `-- name: GetOrderDetail :one
 SELECT id, user_id, total, payment_id, created_at, updated_at FROM "order_detail"
-WHERE id = $1 LIMIT 1
+WHERE id = $1 
+LIMIT 1
 `
 
 func (q *Queries) GetOrderDetail(ctx context.Context, id int64) (OrderDetail, error) {
@@ -69,18 +70,20 @@ func (q *Queries) GetOrderDetail(ctx context.Context, id int64) (OrderDetail, er
 
 const listOrderDetails = `-- name: ListOrderDetails :many
 SELECT id, user_id, total, payment_id, created_at, updated_at FROM "order_detail"
+WHERE user_id = $1
 ORDER BY id
-LIMIT $1
-OFFSET $2
+LIMIT $2
+OFFSET $3
 `
 
 type ListOrderDetailsParams struct {
+	UserID int64 `json:"user_id"`
 	Limit  int32 `json:"limit"`
 	Offset int32 `json:"offset"`
 }
 
 func (q *Queries) ListOrderDetails(ctx context.Context, arg ListOrderDetailsParams) ([]OrderDetail, error) {
-	rows, err := q.db.QueryContext(ctx, listOrderDetails, arg.Limit, arg.Offset)
+	rows, err := q.db.QueryContext(ctx, listOrderDetails, arg.UserID, arg.Limit, arg.Offset)
 	if err != nil {
 		return nil, err
 	}

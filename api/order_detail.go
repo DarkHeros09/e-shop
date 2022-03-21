@@ -2,17 +2,19 @@ package api
 
 import (
 	"database/sql"
+	"errors"
 	"net/http"
 
 	db "github.com/DarkHeros09/e-shop/v2/db/sqlc"
+	"github.com/DarkHeros09/e-shop/v2/token"
 	"github.com/gin-gonic/gin"
 	"github.com/lib/pq"
 )
 
 type createOrderDetailRequest struct {
-	UserID    int64  `json:"user_id" binding:"required"`
+	UserID    int64  `json:"user_id" binding:"required,min=1"`
 	Total     string `json:"total" binding:"required"`
-	PaymentID int64  `json:"payment_id" binding:"required"`
+	PaymentID int64  `json:"payment_id" binding:"required,min=1"`
 }
 
 func (server *Server) createOrderDetail(ctx *gin.Context) {
@@ -20,6 +22,13 @@ func (server *Server) createOrderDetail(ctx *gin.Context) {
 
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		return
+	}
+
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.UserPayload)
+	if req.UserID != authPayload.UserID {
+		err := errors.New("account deosn't belong to the authenticated user")
+		ctx.JSON(http.StatusUnauthorized, errorResponse(err))
 		return
 	}
 
@@ -66,6 +75,14 @@ func (server *Server) getOrderDetail(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
+
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.UserPayload)
+	if orderDetail.UserID != authPayload.UserID {
+		err := errors.New("account deosn't belong to the authenticated user")
+		ctx.JSON(http.StatusUnauthorized, errorResponse(err))
+		return
+	}
+
 	ctx.JSON(http.StatusOK, orderDetail)
 }
 
@@ -82,10 +99,13 @@ func (server *Server) listOrderDetails(ctx *gin.Context) {
 		return
 	}
 
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.UserPayload)
 	arg := db.ListOrderDetailsParams{
+		UserID: authPayload.UserID,
 		Limit:  req.PageSize,
 		Offset: (req.PageID - 1) * req.PageSize,
 	}
+
 	orderDetails, err := server.store.ListOrderDetails(ctx, arg)
 	if err != nil {
 		if err == sql.ErrNoRows {

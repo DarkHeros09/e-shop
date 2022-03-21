@@ -48,13 +48,32 @@ func (q *Queries) DeleteCartItem(ctx context.Context, id int64) error {
 	return err
 }
 
-const getCartItem = `-- name: GetCartItem :one
+const getCartItemByID = `-- name: GetCartItemByID :one
 SELECT id, session_id, product_id, quantity, created_at, updated_at FROM "cart_item"
 WHERE id = $1 LIMIT 1
 `
 
-func (q *Queries) GetCartItem(ctx context.Context, id int64) (CartItem, error) {
-	row := q.db.QueryRowContext(ctx, getCartItem, id)
+func (q *Queries) GetCartItemByID(ctx context.Context, id int64) (CartItem, error) {
+	row := q.db.QueryRowContext(ctx, getCartItemByID, id)
+	var i CartItem
+	err := row.Scan(
+		&i.ID,
+		&i.SessionID,
+		&i.ProductID,
+		&i.Quantity,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const getCartItemBySessionID = `-- name: GetCartItemBySessionID :one
+SELECT id, session_id, product_id, quantity, created_at, updated_at FROM "cart_item"
+WHERE session_id = $1 LIMIT 1
+`
+
+func (q *Queries) GetCartItemBySessionID(ctx context.Context, sessionID int64) (CartItem, error) {
+	row := q.db.QueryRowContext(ctx, getCartItemBySessionID, sessionID)
 	var i CartItem
 	err := row.Scan(
 		&i.ID,

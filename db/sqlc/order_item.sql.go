@@ -48,32 +48,23 @@ func (q *Queries) DeleteOrderItem(ctx context.Context, id int64) error {
 	return err
 }
 
-const getOrderItemByID = `-- name: GetOrderItemByID :one
-SELECT id, order_id, product_id, quantity, created_at, updated_at FROM "order_item"
-WHERE id = $1 LIMIT 1
+const getOrderItem = `-- name: GetOrderItem :one
+SELECT "order_item".id, "order_item".order_id, "order_item".product_id, 
+"order_item".quantity, "order_item".created_at, "order_item".updated_at 
+FROM "order_item"
+LEFT JOIN "order_detail" ON "order_detail".id = "order_item".order_id
+WHERE "order_item".id = $1 
+AND "order_detail".user_id = $2
+LIMIT 1
 `
 
-func (q *Queries) GetOrderItemByID(ctx context.Context, id int64) (OrderItem, error) {
-	row := q.db.QueryRowContext(ctx, getOrderItemByID, id)
-	var i OrderItem
-	err := row.Scan(
-		&i.ID,
-		&i.OrderID,
-		&i.ProductID,
-		&i.Quantity,
-		&i.CreatedAt,
-		&i.UpdatedAt,
-	)
-	return i, err
+type GetOrderItemParams struct {
+	ID     int64 `json:"id"`
+	UserID int64 `json:"user_id"`
 }
 
-const getOrderItemByOrderDetailID = `-- name: GetOrderItemByOrderDetailID :one
-SELECT id, order_id, product_id, quantity, created_at, updated_at FROM "order_item"
-WHERE order_id = $1 LIMIT 1
-`
-
-func (q *Queries) GetOrderItemByOrderDetailID(ctx context.Context, orderID int64) (OrderItem, error) {
-	row := q.db.QueryRowContext(ctx, getOrderItemByOrderDetailID, orderID)
+func (q *Queries) GetOrderItem(ctx context.Context, arg GetOrderItemParams) (OrderItem, error) {
+	row := q.db.QueryRowContext(ctx, getOrderItem, arg.ID, arg.UserID)
 	var i OrderItem
 	err := row.Scan(
 		&i.ID,
@@ -87,19 +78,23 @@ func (q *Queries) GetOrderItemByOrderDetailID(ctx context.Context, orderID int64
 }
 
 const listOrderItems = `-- name: ListOrderItems :many
-SELECT id, order_id, product_id, quantity, created_at, updated_at FROM "order_item"
-ORDER BY id
-LIMIT $1
-OFFSET $2
+SELECT "order_item".id, "order_item".order_id, "order_item".product_id, 
+"order_item".quantity, "order_item".created_at, "order_item".updated_at
+FROM "order_item"
+LEFT JOIN "order_detail" ON "order_detail".id = "order_item".order_id
+WHERE "order_detail".user_id = $1
+LIMIT $2
+OFFSET $3
 `
 
 type ListOrderItemsParams struct {
+	UserID int64 `json:"user_id"`
 	Limit  int32 `json:"limit"`
 	Offset int32 `json:"offset"`
 }
 
 func (q *Queries) ListOrderItems(ctx context.Context, arg ListOrderItemsParams) ([]OrderItem, error) {
-	rows, err := q.db.QueryContext(ctx, listOrderItems, arg.Limit, arg.Offset)
+	rows, err := q.db.QueryContext(ctx, listOrderItems, arg.UserID, arg.Limit, arg.Offset)
 	if err != nil {
 		return nil, err
 	}
