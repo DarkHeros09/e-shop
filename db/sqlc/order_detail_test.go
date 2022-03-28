@@ -11,12 +11,12 @@ import (
 )
 
 func createRandomOrderDetail(t *testing.T) OrderDetail {
-	user := createRandomUser(t)
 	paymentDetail := createRandomPaymentDetail(t)
+	user := createRandomUser(t)
 	arg := CreateOrderDetailParams{
+		PaymentID: paymentDetail.ID,
 		UserID:    user.ID,
 		Total:     util.RandomDecimal(1, 100),
-		PaymentID: paymentDetail.ID,
 	}
 
 	orderDetail, err := testQueires.CreateOrderDetail(context.Background(), arg)
@@ -35,8 +35,42 @@ func createRandomOrderDetail(t *testing.T) OrderDetail {
 	return orderDetail
 
 }
+
+func createRandomOrderDetailAndPaymentDetail(t *testing.T) OrderDetail {
+	user := createRandomUser(t)
+	arg := CreateOrderDetailAndPaymentDetailParams{
+		UserID: user.ID,
+		Total:  util.RandomDecimal(1, 100),
+	}
+
+	orderDetail, err := testQueires.CreateOrderDetailAndPaymentDetail(context.Background(), arg)
+
+	require.NoError(t, err)
+	require.NotEmpty(t, orderDetail)
+
+	paymentDetail, err := testQueires.GetPaymentDetail(context.Background(), orderDetail.PaymentID)
+
+	require.NoError(t, err)
+	require.NotEmpty(t, paymentDetail)
+
+	require.Equal(t, arg.UserID, orderDetail.UserID)
+	require.Equal(t, arg.Total, orderDetail.Total)
+	require.Equal(t, paymentDetail.ID, orderDetail.PaymentID)
+
+	require.NotEmpty(t, orderDetail.ID)
+	require.NotEmpty(t, orderDetail.CreatedAt)
+	require.True(t, orderDetail.UpdatedAt.IsZero())
+	require.NotZero(t, orderDetail.PaymentID)
+
+	return orderDetail
+
+}
 func TestCreateOrderDetail(t *testing.T) {
 	createRandomOrderDetail(t)
+}
+
+func TestCreateOrderDetailAndPaymentDetail(t *testing.T) {
+	createRandomOrderDetailAndPaymentDetail(t)
 }
 
 func TestGetOrderDetail(t *testing.T) {

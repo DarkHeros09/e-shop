@@ -318,6 +318,143 @@ func TestGetOrderItemAPI(t *testing.T) {
 
 }
 
+func TestListOrderItemAPI(t *testing.T) {
+	n := 5
+	orderItems := make([]db.OrderItem, n)
+	user, _ := randomOIUser(t)
+	orderDetail1 := createRandomOrderDetail(t, user)
+	orderDetail2 := createRandomOrderDetail(t, user)
+	orderDetail3 := createRandomOrderDetail(t, user)
+	orderItem1 := createRandomOrderItem(t, orderDetail1)
+	orderItem2 := createRandomOrderItem(t, orderDetail2)
+	orderItem3 := createRandomOrderItem(t, orderDetail3)
+
+	orderItems = append(orderItems, orderItem1, orderItem2, orderItem3)
+
+	type Query struct {
+		pageID   int
+		pageSize int
+	}
+
+	testCases := []struct {
+		name          string
+		query         Query
+		setupAuth     func(t *testing.T, request *http.Request, tokenMaker token.Maker)
+		buildStubs    func(store *mockdb.MockStore)
+		checkResponse func(recoder *httptest.ResponseRecorder)
+	}{
+		{
+			name: "OK",
+			query: Query{
+				pageID:   1,
+				pageSize: n,
+			},
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.ID, user.Username, time.Minute)
+			},
+			buildStubs: func(store *mockdb.MockStore) {
+				arg := db.ListOrderItemsParams{
+					UserID: user.ID,
+					Limit:  int32(n),
+					Offset: 0,
+				}
+
+				store.EXPECT().
+					ListOrderItems(gomock.Any(), gomock.Eq(arg)).
+					Times(1).
+					Return(orderItems, nil)
+			},
+			checkResponse: func(recorder *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusOK, recorder.Code)
+				requireBodyMatchOrderItems(t, recorder.Body, orderItems)
+			},
+		},
+		{
+			name: "InternalError",
+			query: Query{
+				pageID:   1,
+				pageSize: n,
+			},
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.ID, user.Username, time.Minute)
+			},
+			buildStubs: func(store *mockdb.MockStore) {
+				store.EXPECT().
+					ListOrderItems(gomock.Any(), gomock.Any()).
+					Times(1).
+					Return([]db.OrderItem{}, sql.ErrConnDone)
+			},
+			checkResponse: func(recorder *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusInternalServerError, recorder.Code)
+			},
+		},
+		{
+			name: "InvalidPageID",
+			query: Query{
+				pageID:   -1,
+				pageSize: n,
+			},
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.ID, user.Username, time.Minute)
+			},
+			buildStubs: func(store *mockdb.MockStore) {
+				store.EXPECT().
+					ListOrderItems(gomock.Any(), gomock.Any()).
+					Times(0)
+			},
+			checkResponse: func(recorder *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusBadRequest, recorder.Code)
+			},
+		},
+		{
+			name: "InvalidPageSize",
+			query: Query{
+				pageID:   1,
+				pageSize: 100000,
+			},
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.ID, user.Username, time.Minute)
+			},
+			buildStubs: func(store *mockdb.MockStore) {
+				store.EXPECT().
+					ListOrderItems(gomock.Any(), gomock.Any()).
+					Times(0)
+			},
+			checkResponse: func(recorder *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusBadRequest, recorder.Code)
+			},
+		},
+	}
+
+	for i := range testCases {
+		tc := testCases[i]
+
+		t.Run(tc.name, func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+
+			store := mockdb.NewMockStore(ctrl)
+			tc.buildStubs(store)
+
+			server := newTestServer(t, store)
+			recorder := httptest.NewRecorder()
+
+			url := "/orderitems"
+			request, err := http.NewRequest(http.MethodGet, url, nil)
+			require.NoError(t, err)
+
+			// Add query parameters to request URL
+			q := request.URL.Query()
+			q.Add("page_id", fmt.Sprintf("%d", tc.query.pageID))
+			q.Add("page_size", fmt.Sprintf("%d", tc.query.pageSize))
+			request.URL.RawQuery = q.Encode()
+
+			tc.setupAuth(t, request, server.tokenMaker)
+			server.router.ServeHTTP(recorder, request)
+			tc.checkResponse(recorder)
+		})
+	}
+}
+
 // func TestGetOrderItemByOrderDetailIDAPI(t *testing.T) {
 // 	user, _ := randomOIUser(t)
 // 	orderDetail := createRandomOrderDetail(t, user)
@@ -529,4 +666,14 @@ func requireBodyMatchOrderItem(t *testing.T, body *bytes.Buffer, orderItem db.Or
 	require.Equal(t, orderItem.ProductID, gotOrderItem.ProductID)
 	require.Equal(t, orderItem.OrderID, gotOrderItem.OrderID)
 	require.Equal(t, orderItem.Quantity, gotOrderItem.Quantity)
+}
+
+func requireBodyMatchOrderItems(t *testing.T, body *bytes.Buffer, orderItems []db.OrderItem) {
+	data, err := ioutil.ReadAll(body)
+	require.NoError(t, err)
+
+	var gotOrderItems []db.OrderItem
+	err = json.Unmarshal(data, &gotOrderItems)
+	require.NoError(t, err)
+	require.Equal(t, orderItems, gotOrderItems)
 }

@@ -38,6 +38,50 @@ func (q *Queries) CreateOrderDetail(ctx context.Context, arg CreateOrderDetailPa
 	return i, err
 }
 
+const createOrderDetailAndPaymentDetail = `-- name: CreateOrderDetailAndPaymentDetail :one
+WITH "payment_ins" AS (
+INSERT INTO "payment_detail" (
+  status,
+  provider,
+  amount 
+) VALUES (
+  'pending',
+  'unknown',
+   0
+)
+RETURNING id, order_id, amount, provider, status, created_at, updated_at
+)
+
+INSERT INTO "order_detail"( 
+  user_id,
+  total,
+  payment_id
+) VALUES (
+  $1, $2, 
+  (SELECT id FROM "payment_ins")
+)
+RETURNING id, user_id, total, payment_id, created_at, updated_at
+`
+
+type CreateOrderDetailAndPaymentDetailParams struct {
+	UserID int64  `json:"user_id"`
+	Total  string `json:"total"`
+}
+
+func (q *Queries) CreateOrderDetailAndPaymentDetail(ctx context.Context, arg CreateOrderDetailAndPaymentDetailParams) (OrderDetail, error) {
+	row := q.db.QueryRowContext(ctx, createOrderDetailAndPaymentDetail, arg.UserID, arg.Total)
+	var i OrderDetail
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.Total,
+		&i.PaymentID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
 const deleteOrderDetail = `-- name: DeleteOrderDetail :exec
 DELETE FROM "order_detail"
 WHERE id = $1

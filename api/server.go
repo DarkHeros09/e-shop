@@ -83,7 +83,7 @@ func (server *Server) setupRouter() {
 
 	adminRoutes.POST("/products", server.createProduct)       //! Admin Only # Finished With tests (token and changed response... No Etag)
 	router.GET("/products/:id", server.getProduct)            //? no auth required # Finished With tests (token and changed response... No Etag)
-	router.GET("/products", server.listProducts)              //* no auth required # Finished With tests (token and changed response.)
+	router.GET("/products", server.listProducts)              //? no auth required # Finished With tests (token and changed response.)
 	adminRoutes.PUT("/products/:id", server.updateProduct)    //! Admin Only # Finished With tests (token and changed response... No Etag)
 	adminRoutes.DELETE("/products/:id", server.deleteProduct) //! Admin Only # Finished With tests (token and changed response... No Etag)
 
@@ -92,21 +92,21 @@ func (server *Server) setupRouter() {
 
 	userRoutes.POST("/cartitems", server.createCartItem)                    //* Finished With tests (token and changed response... No Etag)
 	userRoutes.GET("/cartitems/:session_id", server.getCartItemBySessionID) //* Finished With tests (token and changed response... No Etag)
-	// userRoutes.GET("/cartitems", server.listCartItems)
+
 	userRoutes.PUT("/cartitems/:session_id", server.updateCartItemBySessionID) //* Finished With tests (token and changed response... No Etag)
 	userRoutes.DELETE("/cartitems/:id", server.deleteCartItemBySessionID)      //* Finished With tests (token and changed response... No Etag)
 
 	userRoutes.POST("/orderitems", server.createOrderItem) //* Finished With tests (token and changed response... No Etag)
 	userRoutes.GET("/orderitems/:id", server.getOrderItem) //* Finished With tests (token and changed response... No Etag)
-	userRoutes.GET("/orderitems", server.listOrderItemsByUser)
+	userRoutes.GET("/orderitems", server.listOrderItems)   //* Finished With tests (token and changed response... No Etag)
 
-	userRoutes.POST("/orderdetails", server.createOrderDetail)
-	router.GET("/orderdetails/:id", server.getOrderDetail)
-	router.GET("/orderdetails", server.listOrderDetails)
+	userRoutes.POST("/orderdetails", server.createOrderDetail) //* Finished With tests (token and changed response... No Etag)
+	userRoutes.GET("/orderdetails/:id", server.getOrderDetail) //* Finished With tests (token and changed response... No Etag)
+	userRoutes.GET("/orderdetails", server.listOrderDetails)   //* Finished With tests (token and changed response... No Etag)
 
-	router.POST("/paymentdetails", server.createPaymentDetail)
-	router.GET("/paymentdetails/:id", server.getPaymentDetail)
-	router.GET("/paymentdetails", server.listPaymentDetails)
+	// userRoutes.POST("/paymentdetails", server.createPaymentDetail)
+	userRoutes.GET("/paymentdetails/:id", server.getPaymentDetail)
+	userRoutes.GET("/paymentdetails", server.listPaymentDetails)
 
 	server.router = router
 }

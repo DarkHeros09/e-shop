@@ -141,7 +141,7 @@ type listOrderItemsRequest struct {
 	PageSize int32 `form:"page_size" binding:"required,min=5,max=10"`
 }
 
-func (server *Server) listOrderItemsByUser(ctx *gin.Context) {
+func (server *Server) listOrderItems(ctx *gin.Context) {
 	var req listOrderItemsRequest
 
 	if err := ctx.ShouldBindQuery(&req); err != nil {
@@ -150,7 +150,6 @@ func (server *Server) listOrderItemsByUser(ctx *gin.Context) {
 	}
 
 	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.UserPayload)
-
 	arg := db.ListOrderItemsParams{
 		UserID: authPayload.UserID,
 		Limit:  req.PageSize,

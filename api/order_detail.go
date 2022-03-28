@@ -12,9 +12,8 @@ import (
 )
 
 type createOrderDetailRequest struct {
-	UserID    int64  `json:"user_id" binding:"required,min=1"`
-	Total     string `json:"total" binding:"required"`
-	PaymentID int64  `json:"payment_id" binding:"required,min=1"`
+	UserID int64  `json:"user_id" binding:"required,min=1"`
+	Total  string `json:"total" binding:"required"`
 }
 
 func (server *Server) createOrderDetail(ctx *gin.Context) {
@@ -32,13 +31,12 @@ func (server *Server) createOrderDetail(ctx *gin.Context) {
 		return
 	}
 
-	arg := db.CreateOrderDetailParams{
-		UserID:    req.UserID,
-		Total:     req.Total,
-		PaymentID: req.PaymentID,
+	arg := db.CreateOrderDetailAndPaymentDetailParams{
+		UserID: req.UserID,
+		Total:  req.Total,
 	}
 
-	orderDetail, err := server.store.CreateOrderDetail(ctx, arg)
+	orderDetail, err := server.store.CreateOrderDetailAndPaymentDetail(ctx, arg)
 	if err != nil {
 		if pqErr, ok := err.(*pq.Error); ok {
 			switch pqErr.Code.Name() {

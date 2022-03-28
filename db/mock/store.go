@@ -110,6 +110,21 @@ func (mr *MockStoreMockRecorder) CreateOrderDetail(arg0, arg1 interface{}) *gomo
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateOrderDetail", reflect.TypeOf((*MockStore)(nil).CreateOrderDetail), arg0, arg1)
 }
 
+// CreateOrderDetailAndPaymentDetail mocks base method.
+func (m *MockStore) CreateOrderDetailAndPaymentDetail(arg0 context.Context, arg1 db.CreateOrderDetailAndPaymentDetailParams) (db.OrderDetail, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateOrderDetailAndPaymentDetail", arg0, arg1)
+	ret0, _ := ret[0].(db.OrderDetail)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CreateOrderDetailAndPaymentDetail indicates an expected call of CreateOrderDetailAndPaymentDetail.
+func (mr *MockStoreMockRecorder) CreateOrderDetailAndPaymentDetail(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateOrderDetailAndPaymentDetail", reflect.TypeOf((*MockStore)(nil).CreateOrderDetailAndPaymentDetail), arg0, arg1)
+}
+
 // CreateOrderItem mocks base method.
 func (m *MockStore) CreateOrderItem(arg0 context.Context, arg1 db.CreateOrderItemParams) (db.OrderItem, error) {
 	m.ctrl.T.Helper()

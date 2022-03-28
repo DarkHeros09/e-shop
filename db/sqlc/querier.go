@@ -12,6 +12,7 @@ type Querier interface {
 	CreateCartItem(ctx context.Context, arg CreateCartItemParams) (CartItem, error)
 	CreateDiscount(ctx context.Context, arg CreateDiscountParams) (Discount, error)
 	CreateOrderDetail(ctx context.Context, arg CreateOrderDetailParams) (OrderDetail, error)
+	CreateOrderDetailAndPaymentDetail(ctx context.Context, arg CreateOrderDetailAndPaymentDetailParams) (OrderDetail, error)
 	CreateOrderItem(ctx context.Context, arg CreateOrderItemParams) (OrderItem, error)
 	CreatePaymentDetail(ctx context.Context, arg CreatePaymentDetailParams) (PaymentDetail, error)
 	CreateProduct(ctx context.Context, arg CreateProductParams) (Product, error)

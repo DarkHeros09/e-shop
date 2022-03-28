@@ -9,23 +9,30 @@ import (
 
 const createPaymentDetail = `-- name: CreatePaymentDetail :one
 INSERT INTO "payment_detail" (
+  order_id,
   amount,
   provider,
   status
 ) VALUES (
-  $1, $2, $3
+  $1, $2, $3, $4
 )
 RETURNING id, order_id, amount, provider, status, created_at, updated_at
 `
 
 type CreatePaymentDetailParams struct {
+	OrderID  int64  `json:"order_id"`
 	Amount   int32  `json:"amount"`
 	Provider string `json:"provider"`
 	Status   string `json:"status"`
 }
 
 func (q *Queries) CreatePaymentDetail(ctx context.Context, arg CreatePaymentDetailParams) (PaymentDetail, error) {
-	row := q.db.QueryRowContext(ctx, createPaymentDetail, arg.Amount, arg.Provider, arg.Status)
+	row := q.db.QueryRowContext(ctx, createPaymentDetail,
+		arg.OrderID,
+		arg.Amount,
+		arg.Provider,
+		arg.Status,
+	)
 	var i PaymentDetail
 	err := row.Scan(
 		&i.ID,
@@ -50,10 +57,16 @@ func (q *Queries) DeletePaymentDetail(ctx context.Context, id int64) error {
 }
 
 const getPaymentDetail = `-- name: GetPaymentDetail :one
-SELECT id, order_id, amount, provider, status, created_at, updated_at FROM "payment_detail"
-WHERE id = $1 LIMIT 1
+SELECT "payment_detail".id, "payment_detail".order_id, "payment_detail".amount, 
+"payment_detail".provider, "payment_detail".status, "payment_detail".created_at, 
+"payment_detail".updated_at
+FROM "payment_detail"
+LEFT JOIN "order_detail" ON "order_detail".id = "payment_detail".order_id
+WHERE "payment_detail".id = $1
+LIMIT 1
 `
 
+// AND "order_detail".user_id = $2
 func (q *Queries) GetPaymentDetail(ctx context.Context, id int64) (PaymentDetail, error) {
 	row := q.db.QueryRowContext(ctx, getPaymentDetail, id)
 	var i PaymentDetail

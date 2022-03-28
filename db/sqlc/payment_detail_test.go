@@ -38,19 +38,20 @@ func TestCreatePaymentDetail(t *testing.T) {
 }
 
 func TestGetPaymentDetail(t *testing.T) {
-	paymentDetail1 := createRandomPaymentDetail(t)
-	paymentDetail2, err := testQueires.GetPaymentDetail(context.Background(), paymentDetail1.ID)
+	orderDetail1 := createRandomOrderDetail(t)
+
+	paymentDetail1, err := testQueires.GetPaymentDetail(context.Background(), orderDetail1.PaymentID)
 
 	require.NoError(t, err)
-	require.NotEmpty(t, paymentDetail2)
+	require.NotEmpty(t, paymentDetail1)
 
-	require.Equal(t, paymentDetail1.ID, paymentDetail2.ID)
-	require.Equal(t, paymentDetail1.OrderID, paymentDetail2.OrderID)
-	require.Equal(t, paymentDetail1.Amount, paymentDetail2.Amount)
-	require.Equal(t, paymentDetail1.Provider, paymentDetail2.Provider)
-	require.Equal(t, paymentDetail1.Status, paymentDetail2.Status)
-	require.Equal(t, paymentDetail1.CreatedAt, paymentDetail2.CreatedAt)
-	require.Equal(t, paymentDetail1.UpdatedAt, paymentDetail2.UpdatedAt)
+	require.Equal(t, orderDetail1.PaymentID, paymentDetail1.ID)
+	// require.Equal(t, orderDetail1.ID, paymentDetail1.OrderID)
+	// require.Equal(t, orderDetail1.Amount, paymentDetail1.Amount)
+	// require.Equal(t, orderDetail1.Provider, paymentDetail1.Provider)
+	// require.Equal(t, orderDetail1.Status, paymentDetail1.Status)
+	// require.Equal(t, orderDetail1.CreatedAt, paymentDetail1.CreatedAt)
+	// require.Equal(t, orderDetail1.UpdatedAt, paymentDetail1.UpdatedAt)
 
 }
 
@@ -79,10 +80,30 @@ func TestUpdatePaymentDetail(t *testing.T) {
 
 }
 
+func TestUpdatePaymentDetailOrderID(t *testing.T) {
+	orderDetail := createRandomOrderDetailAndPaymentDetail(t)
+	arg := UpdatePaymentDetailParams{
+		ID:       orderDetail.PaymentID,
+		OrderID:  orderDetail.ID,
+		Amount:   10,
+		Provider: "payme",
+		Status:   "approved",
+	}
+	paymentDetail, err := testQueires.UpdatePaymentDetail(context.Background(), arg)
+
+	require.NoError(t, err)
+	require.NotEmpty(t, paymentDetail)
+
+	require.Equal(t, orderDetail.PaymentID, paymentDetail.ID)
+	require.Equal(t, orderDetail.ID, paymentDetail.OrderID)
+	require.Equal(t, paymentDetail.CreatedAt, paymentDetail.CreatedAt)
+	require.NotEqual(t, paymentDetail.CreatedAt, paymentDetail.UpdatedAt)
+
+}
+
 func TestDeletePaymentDetail(t *testing.T) {
 	paymentDetail1 := createRandomPaymentDetail(t)
 	err := testQueires.DeletePaymentDetail(context.Background(), paymentDetail1.ID)
-
 	require.NoError(t, err)
 
 	paymentDetail2, err := testQueires.GetPaymentDetail(context.Background(), paymentDetail1.ID)
