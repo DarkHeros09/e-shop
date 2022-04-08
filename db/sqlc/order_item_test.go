@@ -10,7 +10,7 @@ import (
 )
 
 func createRandomOrderItem(t *testing.T) OrderItem {
-	orderDetail := createRandomOrderDetail(t)
+	orderDetail, _ := createRandomOrderDetailAndPaymentDetail(t)
 	product := createRandomProduct(t)
 	arg := CreateOrderItemParams{
 		OrderID:   orderDetail.ID,

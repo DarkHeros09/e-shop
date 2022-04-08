@@ -95,21 +95,6 @@ func (mr *MockStoreMockRecorder) CreateDiscount(arg0, arg1 interface{}) *gomock.
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateDiscount", reflect.TypeOf((*MockStore)(nil).CreateDiscount), arg0, arg1)
 }
 
-// CreateOrderDetail mocks base method.
-func (m *MockStore) CreateOrderDetail(arg0 context.Context, arg1 db.CreateOrderDetailParams) (db.OrderDetail, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CreateOrderDetail", arg0, arg1)
-	ret0, _ := ret[0].(db.OrderDetail)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// CreateOrderDetail indicates an expected call of CreateOrderDetail.
-func (mr *MockStoreMockRecorder) CreateOrderDetail(arg0, arg1 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateOrderDetail", reflect.TypeOf((*MockStore)(nil).CreateOrderDetail), arg0, arg1)
-}
-
 // CreateOrderDetailAndPaymentDetail mocks base method.
 func (m *MockStore) CreateOrderDetailAndPaymentDetail(arg0 context.Context, arg1 db.CreateOrderDetailAndPaymentDetailParams) (db.OrderDetail, error) {
 	m.ctrl.T.Helper()
@@ -606,7 +591,7 @@ func (mr *MockStoreMockRecorder) GetOrderItem(arg0, arg1 interface{}) *gomock.Ca
 }
 
 // GetPaymentDetail mocks base method.
-func (m *MockStore) GetPaymentDetail(arg0 context.Context, arg1 int64) (db.PaymentDetail, error) {
+func (m *MockStore) GetPaymentDetail(arg0 context.Context, arg1 db.GetPaymentDetailParams) (db.PaymentDetail, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetPaymentDetail", arg0, arg1)
 	ret0, _ := ret[0].(db.PaymentDetail)
@@ -891,10 +876,10 @@ func (mr *MockStoreMockRecorder) ListOrderItems(arg0, arg1 interface{}) *gomock.
 }
 
 // ListPaymentDetails mocks base method.
-func (m *MockStore) ListPaymentDetails(arg0 context.Context, arg1 db.ListPaymentDetailsParams) ([]db.PaymentDetail, error) {
+func (m *MockStore) ListPaymentDetails(arg0 context.Context, arg1 db.ListPaymentDetailsParams) ([]db.ListPaymentDetailsRow, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ListPaymentDetails", arg0, arg1)
-	ret0, _ := ret[0].([]db.PaymentDetail)
+	ret0, _ := ret[0].([]db.ListPaymentDetailsRow)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

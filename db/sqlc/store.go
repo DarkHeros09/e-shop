@@ -72,19 +72,9 @@ func (store *SQLStore) FinishedPurchaseTx(ctx context.Context, arg FinishedPurch
 	err := store.execTx(ctx, func(q *Queries) error {
 		var err error
 
-		result.PaymentDetail, err = q.CreatePaymentDetail(ctx, CreatePaymentDetailParams{
-			Amount:   0,
-			Provider: "Unknown",
-			Status:   "Pending",
-		})
-		if err != nil {
-			return err
-		}
-
-		result.OrderDetail, err = q.CreateOrderDetail(ctx, CreateOrderDetailParams{
-			UserID:    arg.ShoppingSession.UserID,
-			Total:     arg.ShoppingSession.Total,
-			PaymentID: result.PaymentDetail.ID,
+		result.OrderDetail, err = q.CreateOrderDetailAndPaymentDetail(ctx, CreateOrderDetailAndPaymentDetailParams{
+			UserID: arg.ShoppingSession.UserID,
+			Total:  arg.ShoppingSession.Total,
 		})
 		if err != nil {
 			// log.Fatal("error1: ", err)
@@ -102,7 +92,8 @@ func (store *SQLStore) FinishedPurchaseTx(ctx context.Context, arg FinishedPurch
 		}
 
 		result.PaymentDetail, err = q.UpdatePaymentDetail(ctx, UpdatePaymentDetailParams{
-			ID:       result.OrderDetail.PaymentID,
+			ID:       result.OrderDetail.PaymentID.Int64,
+			UserID:   result.OrderDetail.UserID,
 			OrderID:  result.OrderDetail.ID,
 			Amount:   result.OrderItem.Quantity,
 			Provider: "Cash",

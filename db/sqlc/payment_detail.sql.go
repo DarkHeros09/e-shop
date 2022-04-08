@@ -5,6 +5,8 @@ package db
 
 import (
 	"context"
+	"database/sql"
+	"time"
 )
 
 const createPaymentDetail = `-- name: CreatePaymentDetail :one
@@ -63,12 +65,17 @@ SELECT "payment_detail".id, "payment_detail".order_id, "payment_detail".amount,
 FROM "payment_detail"
 LEFT JOIN "order_detail" ON "order_detail".id = "payment_detail".order_id
 WHERE "payment_detail".id = $1
+AND "order_detail".user_id = $2 
 LIMIT 1
 `
 
-// AND "order_detail".user_id = $2
-func (q *Queries) GetPaymentDetail(ctx context.Context, id int64) (PaymentDetail, error) {
-	row := q.db.QueryRowContext(ctx, getPaymentDetail, id)
+type GetPaymentDetailParams struct {
+	ID     int64 `json:"id"`
+	UserID int64 `json:"user_id"`
+}
+
+func (q *Queries) GetPaymentDetail(ctx context.Context, arg GetPaymentDetailParams) (PaymentDetail, error) {
+	row := q.db.QueryRowContext(ctx, getPaymentDetail, arg.ID, arg.UserID)
 	var i PaymentDetail
 	err := row.Scan(
 		&i.ID,
@@ -83,26 +90,45 @@ func (q *Queries) GetPaymentDetail(ctx context.Context, id int64) (PaymentDetail
 }
 
 const listPaymentDetails = `-- name: ListPaymentDetails :many
-SELECT id, order_id, amount, provider, status, created_at, updated_at FROM "payment_detail"
-ORDER BY id
-LIMIT $1
-OFFSET $2
+SELECT payment_detail.id, order_id, amount, provider, status, payment_detail.created_at, payment_detail.updated_at, order_detail.id, user_id, total, payment_id, order_detail.created_at, order_detail.updated_at FROM "payment_detail"
+LEFT JOIN "order_detail" ON "order_detail".id = "payment_detail".order_id
+WHERE "order_detail".user_id = $1
+ORDER BY "payment_detail".id
+LIMIT $2
+OFFSET $3
 `
 
 type ListPaymentDetailsParams struct {
+	UserID int64 `json:"user_id"`
 	Limit  int32 `json:"limit"`
 	Offset int32 `json:"offset"`
 }
 
-func (q *Queries) ListPaymentDetails(ctx context.Context, arg ListPaymentDetailsParams) ([]PaymentDetail, error) {
-	rows, err := q.db.QueryContext(ctx, listPaymentDetails, arg.Limit, arg.Offset)
+type ListPaymentDetailsRow struct {
+	ID          int64          `json:"id"`
+	OrderID     int64          `json:"order_id"`
+	Amount      int32          `json:"amount"`
+	Provider    string         `json:"provider"`
+	Status      string         `json:"status"`
+	CreatedAt   time.Time      `json:"created_at"`
+	UpdatedAt   time.Time      `json:"updated_at"`
+	ID_2        sql.NullInt64  `json:"id_2"`
+	UserID      sql.NullInt64  `json:"user_id"`
+	Total       sql.NullString `json:"total"`
+	PaymentID   sql.NullInt64  `json:"payment_id"`
+	CreatedAt_2 sql.NullTime   `json:"created_at_2"`
+	UpdatedAt_2 sql.NullTime   `json:"updated_at_2"`
+}
+
+func (q *Queries) ListPaymentDetails(ctx context.Context, arg ListPaymentDetailsParams) ([]ListPaymentDetailsRow, error) {
+	rows, err := q.db.QueryContext(ctx, listPaymentDetails, arg.UserID, arg.Limit, arg.Offset)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	items := []PaymentDetail{}
+	items := []ListPaymentDetailsRow{}
 	for rows.Next() {
-		var i PaymentDetail
+		var i ListPaymentDetailsRow
 		if err := rows.Scan(
 			&i.ID,
 			&i.OrderID,
@@ -111,6 +137,12 @@ func (q *Queries) ListPaymentDetails(ctx context.Context, arg ListPaymentDetails
 			&i.Status,
 			&i.CreatedAt,
 			&i.UpdatedAt,
+			&i.ID_2,
+			&i.UserID,
+			&i.Total,
+			&i.PaymentID,
+			&i.CreatedAt_2,
+			&i.UpdatedAt_2,
 		); err != nil {
 			return nil, err
 		}
@@ -126,17 +158,26 @@ func (q *Queries) ListPaymentDetails(ctx context.Context, arg ListPaymentDetails
 }
 
 const updatePaymentDetail = `-- name: UpdatePaymentDetail :one
+WITH t1 AS (
+SELECT pd.id, pd.order_id, pd.amount, pd.provider, pd.status, pd.created_at, pd.updated_at 
+FROM "payment_detail" AS pd 
+LEFT JOIN "order_detail" ON "order_detail".payment_id = pd.id 
+WHERE pd.id = $1
+And user_id= $2
+)
+
 UPDATE "payment_detail"
-SET order_id = $2,
-amount = $3,
-provider = $4,
-status = $5
-WHERE id = $1
+SET order_id = $3,
+amount = $4,
+provider = $5,
+status = $6 
+WHERE "payment_detail".id = (SELECT id FROM t1)
 RETURNING id, order_id, amount, provider, status, created_at, updated_at
 `
 
 type UpdatePaymentDetailParams struct {
 	ID       int64  `json:"id"`
+	UserID   int64  `json:"user_id"`
 	OrderID  int64  `json:"order_id"`
 	Amount   int32  `json:"amount"`
 	Provider string `json:"provider"`
@@ -146,6 +187,7 @@ type UpdatePaymentDetailParams struct {
 func (q *Queries) UpdatePaymentDetail(ctx context.Context, arg UpdatePaymentDetailParams) (PaymentDetail, error) {
 	row := q.db.QueryRowContext(ctx, updatePaymentDetail,
 		arg.ID,
+		arg.UserID,
 		arg.OrderID,
 		arg.Amount,
 		arg.Provider,

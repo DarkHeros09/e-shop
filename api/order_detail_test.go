@@ -450,10 +450,13 @@ func randomODUser(t *testing.T) (user db.User, password string) {
 
 func createRandomOrderDetail(t *testing.T, user db.User) (orderDetail db.OrderDetail) {
 	orderDetail = db.OrderDetail{
-		ID:        util.RandomMoney(),
-		UserID:    user.ID,
-		Total:     util.RandomDecimal(1, 100),
-		PaymentID: util.RandomMoney(),
+		ID:     util.RandomMoney(),
+		UserID: user.ID,
+		Total:  util.RandomDecimal(1, 100),
+		PaymentID: sql.NullInt64{
+			Int64: util.RandomMoney(),
+			Valid: true,
+		},
 	}
 	return
 }

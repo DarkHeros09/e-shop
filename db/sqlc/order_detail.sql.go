@@ -7,37 +7,6 @@ import (
 	"context"
 )
 
-const createOrderDetail = `-- name: CreateOrderDetail :one
-INSERT INTO "order_detail" (
-  user_id,
-  total,
-  payment_id
-) VALUES (
-  $1, $2, $3
-)
-RETURNING id, user_id, total, payment_id, created_at, updated_at
-`
-
-type CreateOrderDetailParams struct {
-	UserID    int64  `json:"user_id"`
-	Total     string `json:"total"`
-	PaymentID int64  `json:"payment_id"`
-}
-
-func (q *Queries) CreateOrderDetail(ctx context.Context, arg CreateOrderDetailParams) (OrderDetail, error) {
-	row := q.db.QueryRowContext(ctx, createOrderDetail, arg.UserID, arg.Total, arg.PaymentID)
-	var i OrderDetail
-	err := row.Scan(
-		&i.ID,
-		&i.UserID,
-		&i.Total,
-		&i.PaymentID,
-		&i.CreatedAt,
-		&i.UpdatedAt,
-	)
-	return i, err
-}
-
 const createOrderDetailAndPaymentDetail = `-- name: CreateOrderDetailAndPaymentDetail :one
 WITH "payment_ins" AS (
 INSERT INTO "payment_detail" (

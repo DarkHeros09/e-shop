@@ -1,12 +1,4 @@
--- name: CreateOrderDetail :one
-INSERT INTO "order_detail" (
-  user_id,
-  total,
-  payment_id
-) VALUES (
-  $1, $2, $3
-)
-RETURNING *;
+
 
 -- name: CreateOrderDetailAndPaymentDetail :one
 WITH "payment_ins" AS (

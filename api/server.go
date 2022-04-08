@@ -104,9 +104,9 @@ func (server *Server) setupRouter() {
 	userRoutes.GET("/orderdetails/:id", server.getOrderDetail) //* Finished With tests (token and changed response... No Etag)
 	userRoutes.GET("/orderdetails", server.listOrderDetails)   //* Finished With tests (token and changed response... No Etag)
 
-	// userRoutes.POST("/paymentdetails", server.createPaymentDetail)
-	userRoutes.GET("/paymentdetails/:id", server.getPaymentDetail)
-	userRoutes.GET("/paymentdetails", server.listPaymentDetails)
+	userRoutes.GET("/paymentdetails/:id", server.getPaymentDetail)    //* Finished With tests (token and changed response... No Etag)
+	userRoutes.GET("/paymentdetails", server.listPaymentDetails)      //* Finished With tests (token and changed response... No Etag)
+	userRoutes.PUT("/paymentdetails/:id", server.updatePaymentDetail) //* Finished With tests (token and changed response... No Etag)
 
 	server.router = router
 }

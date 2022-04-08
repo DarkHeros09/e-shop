@@ -16,22 +16,32 @@ SELECT "payment_detail".id, "payment_detail".order_id, "payment_detail".amount,
 FROM "payment_detail"
 LEFT JOIN "order_detail" ON "order_detail".id = "payment_detail".order_id
 WHERE "payment_detail".id = $1
--- AND "order_detail".user_id = $2 
+AND "order_detail".user_id = $2 
 LIMIT 1;
 
 -- name: ListPaymentDetails :many
 SELECT * FROM "payment_detail"
-ORDER BY id
-LIMIT $1
-OFFSET $2;
+LEFT JOIN "order_detail" ON "order_detail".id = "payment_detail".order_id
+WHERE "order_detail".user_id = $1
+ORDER BY "payment_detail".id
+LIMIT $2
+OFFSET $3;
 
 -- name: UpdatePaymentDetail :one
+WITH t1 AS (
+SELECT pd.* 
+FROM "payment_detail" AS pd 
+LEFT JOIN "order_detail" ON "order_detail".payment_id = pd.id 
+WHERE pd.id = $1
+And user_id= $2
+)
+
 UPDATE "payment_detail"
-SET order_id = $2,
-amount = $3,
-provider = $4,
-status = $5
-WHERE id = $1
+SET order_id = $3,
+amount = $4,
+provider = $5,
+status = $6 
+WHERE "payment_detail".id = (SELECT id FROM t1)
 RETURNING *;
 
 -- name: DeletePaymentDetail :exec

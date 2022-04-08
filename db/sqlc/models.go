@@ -3,6 +3,7 @@
 package db
 
 import (
+	"database/sql"
 	"time"
 )
 
@@ -51,10 +52,10 @@ type OrderDetail struct {
 	ID     int64 `json:"id"`
 	UserID int64 `json:"user_id"`
 	// must be positive
-	Total     string    `json:"total"`
-	PaymentID int64     `json:"payment_id"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
+	Total     string        `json:"total"`
+	PaymentID sql.NullInt64 `json:"payment_id"`
+	CreatedAt time.Time     `json:"created_at"`
+	UpdatedAt time.Time     `json:"updated_at"`
 }
 
 type OrderItem struct {

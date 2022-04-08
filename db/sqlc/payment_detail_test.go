@@ -9,26 +9,17 @@ import (
 )
 
 func createRandomPaymentDetail(t *testing.T) PaymentDetail {
-	arg := CreatePaymentDetailParams{
-		Amount:   0,
-		Provider: "cash",
-		Status:   "pending",
-	}
+	_, paymentDetail := createRandomOrderDetailAndPaymentDetail(t)
 
-	paymentDetail, err := testQueires.CreatePaymentDetail(context.Background(), arg)
-
-	require.NoError(t, err)
 	require.NotEmpty(t, paymentDetail)
 
-	require.Equal(t, arg.Amount, paymentDetail.Amount)
-	require.Equal(t, arg.Provider, paymentDetail.Provider)
-	require.Equal(t, arg.Status, paymentDetail.Status)
+	require.NotEmpty(t, paymentDetail.Amount)
+	require.NotEmpty(t, paymentDetail.Provider)
+	require.NotEmpty(t, paymentDetail.Status)
 
 	require.NotEmpty(t, paymentDetail.ID)
 	require.NotEmpty(t, paymentDetail.CreatedAt)
-	require.True(t, paymentDetail.UpdatedAt.IsZero())
-
-	// require.True(t, paymentDetail.ID)
+	require.False(t, paymentDetail.UpdatedAt.IsZero())
 
 	return paymentDetail
 
@@ -38,30 +29,34 @@ func TestCreatePaymentDetail(t *testing.T) {
 }
 
 func TestGetPaymentDetail(t *testing.T) {
-	orderDetail1 := createRandomOrderDetail(t)
+	orderDetail1, paymentDetail1 := createRandomOrderDetailAndPaymentDetail(t)
 
-	paymentDetail1, err := testQueires.GetPaymentDetail(context.Background(), orderDetail1.PaymentID)
+	arg := GetPaymentDetailParams{
+		ID:     orderDetail1.PaymentID.Int64,
+		UserID: orderDetail1.UserID,
+	}
+	paymentDetail2, err := testQueires.GetPaymentDetail(context.Background(), arg)
 
 	require.NoError(t, err)
 	require.NotEmpty(t, paymentDetail1)
 
-	require.Equal(t, orderDetail1.PaymentID, paymentDetail1.ID)
-	// require.Equal(t, orderDetail1.ID, paymentDetail1.OrderID)
-	// require.Equal(t, orderDetail1.Amount, paymentDetail1.Amount)
-	// require.Equal(t, orderDetail1.Provider, paymentDetail1.Provider)
-	// require.Equal(t, orderDetail1.Status, paymentDetail1.Status)
-	// require.Equal(t, orderDetail1.CreatedAt, paymentDetail1.CreatedAt)
-	// require.Equal(t, orderDetail1.UpdatedAt, paymentDetail1.UpdatedAt)
+	require.Equal(t, paymentDetail1.ID, paymentDetail2.ID)
+	require.Equal(t, paymentDetail1.OrderID, paymentDetail2.OrderID)
+	require.Equal(t, paymentDetail1.Amount, paymentDetail2.Amount)
+	require.Equal(t, paymentDetail1.Provider, paymentDetail2.Provider)
+	require.Equal(t, paymentDetail1.Status, paymentDetail2.Status)
+	require.Equal(t, paymentDetail1.CreatedAt, paymentDetail2.CreatedAt)
+	require.Equal(t, paymentDetail1.UpdatedAt, paymentDetail2.UpdatedAt)
 
 }
 
 func TestUpdatePaymentDetail(t *testing.T) {
-	paymentDetail1 := createRandomPaymentDetail(t)
-	orderItem := createRandomOrderItem(t)
+	orderDetail1, paymentDetail1 := createRandomOrderDetailAndPaymentDetail(t)
 	arg := UpdatePaymentDetailParams{
 		ID:       paymentDetail1.ID,
-		OrderID:  orderItem.OrderID,
-		Amount:   0,
+		UserID:   orderDetail1.UserID,
+		OrderID:  paymentDetail1.OrderID,
+		Amount:   10,
 		Provider: "payme",
 		Status:   "approved",
 	}
@@ -71,8 +66,8 @@ func TestUpdatePaymentDetail(t *testing.T) {
 	require.NotEmpty(t, paymentDetail2)
 
 	require.Equal(t, paymentDetail1.ID, paymentDetail2.ID)
-	require.Equal(t, arg.OrderID, orderItem.OrderID)
-	require.Equal(t, paymentDetail1.Amount, paymentDetail2.Amount)
+	require.Equal(t, arg.OrderID, orderDetail1.ID)
+	require.NotEqual(t, paymentDetail1.Amount, paymentDetail2.Amount)
 	require.Equal(t, arg.Provider, paymentDetail2.Provider)
 	require.Equal(t, arg.Status, paymentDetail2.Status)
 	require.Equal(t, paymentDetail1.CreatedAt, paymentDetail2.CreatedAt)
@@ -81,9 +76,10 @@ func TestUpdatePaymentDetail(t *testing.T) {
 }
 
 func TestUpdatePaymentDetailOrderID(t *testing.T) {
-	orderDetail := createRandomOrderDetailAndPaymentDetail(t)
+	orderDetail, _ := createRandomOrderDetailAndPaymentDetail(t)
 	arg := UpdatePaymentDetailParams{
-		ID:       orderDetail.PaymentID,
+		ID:       orderDetail.PaymentID.Int64,
+		UserID:   orderDetail.UserID,
 		OrderID:  orderDetail.ID,
 		Amount:   10,
 		Provider: "payme",
@@ -94,7 +90,7 @@ func TestUpdatePaymentDetailOrderID(t *testing.T) {
 	require.NoError(t, err)
 	require.NotEmpty(t, paymentDetail)
 
-	require.Equal(t, orderDetail.PaymentID, paymentDetail.ID)
+	require.Equal(t, orderDetail.PaymentID.Int64, paymentDetail.ID)
 	require.Equal(t, orderDetail.ID, paymentDetail.OrderID)
 	require.Equal(t, paymentDetail.CreatedAt, paymentDetail.CreatedAt)
 	require.NotEqual(t, paymentDetail.CreatedAt, paymentDetail.UpdatedAt)
@@ -102,26 +98,32 @@ func TestUpdatePaymentDetailOrderID(t *testing.T) {
 }
 
 func TestDeletePaymentDetail(t *testing.T) {
-	paymentDetail1 := createRandomPaymentDetail(t)
-	err := testQueires.DeletePaymentDetail(context.Background(), paymentDetail1.ID)
+	orderDetail, _ := createRandomOrderDetailAndPaymentDetail(t)
+
+	err := testQueires.DeletePaymentDetail(context.Background(), orderDetail.PaymentID.Int64)
 	require.NoError(t, err)
+	arg := GetPaymentDetailParams{
+		ID:     orderDetail.PaymentID.Int64,
+		UserID: orderDetail.UserID,
+	}
+	paymentDetail, err := testQueires.GetPaymentDetail(context.Background(), arg)
 
-	paymentDetail2, err := testQueires.GetPaymentDetail(context.Background(), paymentDetail1.ID)
-
+	require.Empty(t, paymentDetail)
 	require.Error(t, err)
 	require.EqualError(t, err, sql.ErrNoRows.Error())
-	require.Empty(t, paymentDetail2)
 
 }
 
 func TestListPaymentDetails(t *testing.T) {
+	var lastOrderDetail OrderDetail
 	for i := 0; i < 10; i++ {
-		createRandomPaymentDetail(t)
+		lastOrderDetail, _ = createRandomOrderDetailAndPaymentDetail(t)
 
 	}
 	arg := ListPaymentDetailsParams{
+		UserID: lastOrderDetail.UserID,
 		Limit:  5,
-		Offset: 5,
+		Offset: 0,
 	}
 
 	paymentDetails, err := testQueires.ListPaymentDetails(context.Background(), arg)
