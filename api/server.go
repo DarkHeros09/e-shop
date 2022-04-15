@@ -39,7 +39,7 @@ func NewServer(config util.Config, store db.Store) (*Server, error) {
 	}
 
 	server.setupRouter()
-	server.gracefullShutDown(server.router)
+	// server.gracefullShutDown(server.router)
 	return server, nil
 }
 
