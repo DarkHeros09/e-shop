@@ -183,7 +183,7 @@ func TestCreateCartItemAPI(t *testing.T) {
 			data, err := json.Marshal(tc.body)
 			require.NoError(t, err)
 
-			url := "/cartitems"
+			url := "/cart-items"
 			request, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(data))
 			require.NoError(t, err)
 
@@ -367,7 +367,7 @@ func TestGetCartItemByIDAPI(t *testing.T) {
 			data, err := json.Marshal(tc.body)
 			require.NoError(t, err)
 
-			url := fmt.Sprintf("/cartitems/%d", tc.SessionID)
+			url := fmt.Sprintf("/cart-items/%d", tc.SessionID)
 			request, err := http.NewRequest(http.MethodGet, url, bytes.NewReader(data))
 			require.NoError(t, err)
 
@@ -381,15 +381,15 @@ func TestGetCartItemByIDAPI(t *testing.T) {
 
 }
 
-// func TestListCartItemsAPI(t *testing.T) {
+// func TestListcart-itemsAPI(t *testing.T) {
 // 	n := 5
-// 	cartItems := make([]db.CartItem, n)
+// 	cart-items := make([]db.CartItem, n)
 // 	user, _ := randomCIUser(t)
 // 	cartItem1 := createRandomCartItem(t)
 // 	cartItem2 := createRandomCartItem(t)
 // 	cartItem3 := createRandomCartItem(t)
 
-// 	cartItems = append(cartItems, cartItem1, cartItem2, cartItem3)
+// 	cart-items = append(cart-items, cartItem1, cartItem2, cartItem3)
 
 // 	type Query struct {
 // 		pageID   int
@@ -421,11 +421,11 @@ func TestGetCartItemByIDAPI(t *testing.T) {
 // 				store.EXPECT().
 // 					ListCartItem(gomock.Any(), gomock.Eq(arg)).
 // 					Times(1).
-// 					Return(cartItems, nil)
+// 					Return(cart-items, nil)
 // 			},
 // 			checkResponse: func(recorder *httptest.ResponseRecorder) {
 // 				require.Equal(t, http.StatusOK, recorder.Code)
-// 				requireBodyMatchCartItems(t, recorder.Body, cartItems)
+// 				requireBodyMatchcart-items(t, recorder.Body, cart-items)
 // 			},
 // 		},
 // 		{
@@ -497,7 +497,7 @@ func TestGetCartItemByIDAPI(t *testing.T) {
 // 			server := newTestServer(t, store)
 // 			recorder := httptest.NewRecorder()
 
-// 			url := "/cartItems"
+// 			url := "/cart-items"
 // 			request, err := http.NewRequest(http.MethodGet, url, nil)
 // 			require.NoError(t, err)
 
@@ -646,7 +646,7 @@ func TestUpdateCartItemByUserIDAPI(t *testing.T) {
 			data, err := json.Marshal(tc.body)
 			require.NoError(t, err)
 
-			url := fmt.Sprintf("/cartitems/%d", tc.SessionID)
+			url := fmt.Sprintf("/cart-items/%d", tc.SessionID)
 			request, err := http.NewRequest(http.MethodPut, url, bytes.NewReader(data))
 			require.NoError(t, err)
 
@@ -794,7 +794,7 @@ func TestDeleteCartItemAPI(t *testing.T) {
 			data, err := json.Marshal(tc.body)
 			require.NoError(t, err)
 
-			url := fmt.Sprintf("/cartitems/%d", tc.ID)
+			url := fmt.Sprintf("/cart-items/%d", tc.ID)
 			request, err := http.NewRequest(http.MethodDelete, url, bytes.NewReader(data))
 			require.NoError(t, err)
 
@@ -856,12 +856,12 @@ func requireBodyMatchCartItem(t *testing.T, body *bytes.Buffer, cartItem db.Cart
 	require.Equal(t, cartItem.Quantity, gotCartItem.Quantity)
 }
 
-// func requireBodyMatchCartItems(t *testing.T, body *bytes.Buffer, cartItems []db.CartItem) {
+// func requireBodyMatchcart-items(t *testing.T, body *bytes.Buffer, cart-items []db.CartItem) {
 // 	data, err := ioutil.ReadAll(body)
 // 	require.NoError(t, err)
 
-// 	var gotCartItems []db.CartItem
-// 	err = json.Unmarshal(data, &gotCartItems)
+// 	var gotcart-items []db.CartItem
+// 	err = json.Unmarshal(data, &gotcart-items)
 // 	require.NoError(t, err)
-// 	require.Equal(t, cartItems, gotCartItems)
+// 	require.Equal(t, cart-items, gotcart-items)
 // }

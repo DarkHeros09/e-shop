@@ -12,8 +12,8 @@ import (
 )
 
 type createShoppingSessionRequest struct {
-	UserID int64  `json:"user_id" binding:"required"`
-	Total  string `json:"total" binding:"required"`
+	UserID int64  `json:"user_id" binding:"required,min=1"`
+	Total  string `json:"total" binding:"required,min=0"`
 }
 
 func (server *Server) createShoppingSession(ctx *gin.Context) {

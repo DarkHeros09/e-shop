@@ -57,6 +57,38 @@ func TestGetUser(t *testing.T) {
 	require.WithinDuration(t, user1.UpdatedAt, user2.UpdatedAt, time.Second)
 }
 
+func TestGetUserByEmail(t *testing.T) {
+	user1 := createRandomUser(t)
+	user2, err := testQueires.GetUserByEmail(context.Background(), user1.Email)
+
+	require.NoError(t, err)
+	require.NotEmpty(t, user2)
+
+	require.Equal(t, user1.ID, user2.ID)
+	require.Equal(t, user1.Username, user2.Username)
+	require.Equal(t, user1.Email, user2.Email)
+	require.Equal(t, user1.Password, user2.Password)
+	require.Equal(t, user1.Telephone, user2.Telephone)
+	require.WithinDuration(t, user1.CreatedAt, user2.CreatedAt, time.Second)
+	require.WithinDuration(t, user1.UpdatedAt, user2.UpdatedAt, time.Second)
+}
+
+func TestGetUserByUsername(t *testing.T) {
+	user1 := createRandomUser(t)
+	user2, err := testQueires.GetUserByUsername(context.Background(), user1.Username)
+
+	require.NoError(t, err)
+	require.NotEmpty(t, user2)
+
+	require.Equal(t, user1.ID, user2.ID)
+	require.Equal(t, user1.Username, user2.Username)
+	require.Equal(t, user1.Email, user2.Email)
+	require.Equal(t, user1.Password, user2.Password)
+	require.Equal(t, user1.Telephone, user2.Telephone)
+	require.WithinDuration(t, user1.CreatedAt, user2.CreatedAt, time.Second)
+	require.WithinDuration(t, user1.UpdatedAt, user2.UpdatedAt, time.Second)
+}
+
 func TestUpdateUser(t *testing.T) {
 	user1 := createRandomUser(t)
 

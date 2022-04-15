@@ -173,7 +173,7 @@ func TestGetPaymentDetailAPI(t *testing.T) {
 			data, err := json.Marshal(tc.body)
 			require.NoError(t, err)
 
-			url := fmt.Sprintf("/paymentdetails/%d", tc.ID)
+			url := fmt.Sprintf("/payment-details/%d", tc.ID)
 			request, err := http.NewRequest(http.MethodGet, url, bytes.NewReader(data))
 			require.NoError(t, err)
 
@@ -307,7 +307,7 @@ func TestListPaymentDetailsAPI(t *testing.T) {
 			server := newTestServer(t, store)
 			recorder := httptest.NewRecorder()
 
-			url := "/paymentdetails"
+			url := "/payment-details"
 			request, err := http.NewRequest(http.MethodGet, url, nil)
 			require.NoError(t, err)
 
@@ -483,7 +483,7 @@ func TestUpdatePaymentDetailAPI(t *testing.T) {
 			data, err := json.Marshal(tc.body)
 			require.NoError(t, err)
 
-			url := fmt.Sprintf("/paymentdetails/%d", tc.PaymentDetailID)
+			url := fmt.Sprintf("/payment-details/%d", tc.PaymentDetailID)
 			request, err := http.NewRequest(http.MethodPut, url, bytes.NewReader(data))
 			require.NoError(t, err)
 

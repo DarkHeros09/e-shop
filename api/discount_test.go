@@ -170,7 +170,7 @@ func TestCreateProductDiscountAPI(t *testing.T) {
 			data, err := json.Marshal(tc.body)
 			require.NoError(t, err)
 
-			url := "/discounts"
+			url := "/products/discounts"
 			request, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(data))
 			require.NoError(t, err)
 
@@ -276,7 +276,7 @@ func TestGetProductDiscountAPI(t *testing.T) {
 			data, err := json.Marshal(tc.body)
 			require.NoError(t, err)
 
-			url := fmt.Sprintf("/discounts/%d", tc.DiscountID)
+			url := fmt.Sprintf("/products/discounts/%d", tc.DiscountID)
 			request, err := http.NewRequest(http.MethodGet, url, bytes.NewReader(data))
 			require.NoError(t, err)
 
@@ -393,7 +393,7 @@ func TestListProductDiscountAPI(t *testing.T) {
 			server := newTestServer(t, store)
 			recorder := httptest.NewRecorder()
 
-			url := "/discounts"
+			url := "/products/discounts"
 			request, err := http.NewRequest(http.MethodGet, url, nil)
 			require.NoError(t, err)
 
@@ -543,7 +543,7 @@ func TestUpdateProductDiscountAPI(t *testing.T) {
 			data, err := json.Marshal(tc.body)
 			require.NoError(t, err)
 
-			url := fmt.Sprintf("/discounts/%d", tc.DiscountID)
+			url := fmt.Sprintf("/products/discounts/%d", tc.DiscountID)
 			request, err := http.NewRequest(http.MethodPut, url, bytes.NewReader(data))
 			require.NoError(t, err)
 
@@ -699,7 +699,7 @@ func TestDeleteProductDiscountAPI(t *testing.T) {
 			data, err := json.Marshal(tc.body)
 			require.NoError(t, err)
 
-			url := fmt.Sprintf("/discounts/%d", tc.DiscountID)
+			url := fmt.Sprintf("/products/discounts/%d", tc.DiscountID)
 			request, err := http.NewRequest(http.MethodDelete, url, bytes.NewReader(data))
 			require.NoError(t, err)
 

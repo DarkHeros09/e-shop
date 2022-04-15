@@ -2,7 +2,6 @@ package api
 
 import (
 	"database/sql"
-	"errors"
 	"net/http"
 	"time"
 
@@ -13,10 +12,10 @@ import (
 )
 
 type createUserPaymentRequest struct {
-	UserID      int64     `json:"user_id" binding:"required"`
+	UserID      int64     `json:"user_id" binding:"required,min=1"`
 	PaymentType string    `json:"payment_type" binding:"required"`
 	Provider    string    `json:"provider" binding:"required"`
-	AccountNo   int32     `json:"account_no" binding:"required"`
+	AccountNo   int32     `json:"account_no" binding:"required,numeric"`
 	Expiry      time.Time `json:"expiry" binding:"required"`
 }
 
@@ -64,8 +63,13 @@ func (server *Server) getUserPayment(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.UserPayload)
+	arg := db.GetUserPaymentParams{
+		ID:     req.ID,
+		UserID: authPayload.UserID,
+	}
 
-	userPayment, err := server.store.GetUserPayment(ctx, req.ID)
+	userPayment, err := server.store.GetUserPayment(ctx, arg)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			ctx.JSON(http.StatusNotFound, errorResponse(err))
@@ -75,43 +79,6 @@ func (server *Server) getUserPayment(ctx *gin.Context) {
 		return
 	}
 
-	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.UserPayload)
-	if userPayment.UserID != authPayload.UserID {
-		err := errors.New("account doesn't belong to the authenticated user")
-		ctx.JSON(http.StatusUnauthorized, errorResponse(err))
-		return
-	}
-	ctx.JSON(http.StatusOK, userPayment)
-}
-
-type getUserPaymentByUserIDRequest struct {
-	UserID int64 `uri:"user_id" binding:"required,min=1"`
-}
-
-func (server *Server) getUserPaymentByUserID(ctx *gin.Context) {
-	var req getUserPaymentByUserIDRequest
-
-	if err := ctx.ShouldBindUri(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, errorResponse(err))
-		return
-	}
-
-	userPayment, err := server.store.GetUserPaymentByUserID(ctx, req.UserID)
-	if err != nil {
-		if err == sql.ErrNoRows {
-			ctx.JSON(http.StatusNotFound, errorResponse(err))
-			return
-		}
-		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
-		return
-	}
-
-	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.UserPayload)
-	if userPayment.UserID != authPayload.UserID {
-		err := errors.New("account doesn't belong to the authenticated user")
-		ctx.JSON(http.StatusUnauthorized, errorResponse(err))
-		return
-	}
 	ctx.JSON(http.StatusOK, userPayment)
 }
 
@@ -146,26 +113,26 @@ func (server *Server) listUserPayments(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, userPayments)
 }
 
-type updateUserPaymentByUserIDRequest struct {
+type updateUserPaymentRequest struct {
 	ID          int64  `json:"id" binding:"required,min=1"`
 	PaymentType string `json:"payment_type" binding:"required"`
 }
 
-func (server *Server) updateUserPaymentByUserID(ctx *gin.Context) {
-	var req updateUserPaymentByUserIDRequest
+func (server *Server) updateUserPayment(ctx *gin.Context) {
+	var req updateUserPaymentRequest
 
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
 	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.UserPayload)
-	arg := db.UpdateUserPaymentByUserIDParams{
-		UserID:      authPayload.UserID,
+	arg := db.UpdateUserPaymentParams{
 		ID:          req.ID,
+		UserID:      authPayload.UserID,
 		PaymentType: req.PaymentType,
 	}
 
-	userPayment, err := server.store.UpdateUserPaymentByUserID(ctx, arg)
+	userPayment, err := server.store.UpdateUserPayment(ctx, arg)
 	if err != nil {
 		if pqErr, ok := err.(*pq.Error); ok {
 			switch pqErr.Code.Name() {
@@ -182,8 +149,7 @@ func (server *Server) updateUserPaymentByUserID(ctx *gin.Context) {
 }
 
 type deleteUserPaymentRequest struct {
-	ID     int64 `json:"id" binding:"required,min=1"`
-	UserID int64 `json:"user_id" binding:"required,min=1"`
+	ID int64 `json:"id" binding:"required,min=1"`
 }
 
 func (server *Server) deleteUserPayment(ctx *gin.Context) {
@@ -195,13 +161,12 @@ func (server *Server) deleteUserPayment(ctx *gin.Context) {
 	}
 
 	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.UserPayload)
-	if req.UserID != authPayload.UserID {
-		err := errors.New("account doesn't belong to the authenticated user")
-		ctx.JSON(http.StatusUnauthorized, errorResponse(err))
-		return
+	arg := db.DeleteUserPaymentParams{
+		ID:     req.ID,
+		UserID: authPayload.UserID,
 	}
 
-	err := server.store.DeleteUserPayment(ctx, req.ID)
+	err := server.store.DeleteUserPayment(ctx, arg)
 	if err != nil {
 		if pqErr, ok := err.(*pq.Error); ok {
 			switch pqErr.Code.Name() {

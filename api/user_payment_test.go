@@ -152,7 +152,7 @@ func TestCreateUserPaymentAPI(t *testing.T) {
 			data, err := json.Marshal(tc.body)
 			require.NoError(t, err)
 
-			url := "/userpayments"
+			url := "/users/payments"
 			request, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(data))
 			require.NoError(t, err)
 
@@ -185,8 +185,12 @@ func TestGetUserPaymentAPI(t *testing.T) {
 				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.ID, user.Username, time.Minute)
 			},
 			buildStub: func(store *mockdb.MockStore) {
+				arg := db.GetUserPaymentParams{
+					ID:     userPayment.ID,
+					UserID: userPayment.UserID,
+				}
 				store.EXPECT().
-					GetUserPayment(gomock.Any(), gomock.Eq(userPayment.ID)).
+					GetUserPayment(gomock.Any(), gomock.Eq(arg)).
 					Times(1).
 					Return(userPayment, nil)
 			},
@@ -213,33 +217,18 @@ func TestGetUserPaymentAPI(t *testing.T) {
 			},
 		},
 		{
-			name: "UnauthorizedUser",
-			ID:   userPayment.ID,
-			body: gin.H{
-				"id": userPayment.ID,
-			},
-			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
-				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, 0, "unauthorizedUser", time.Minute)
-			},
-			buildStub: func(store *mockdb.MockStore) {
-				store.EXPECT().
-					GetUserPayment(gomock.Any(), gomock.Eq(userPayment.ID)).
-					Times(1).
-					Return(userPayment, nil)
-			},
-			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
-				require.Equal(t, http.StatusUnauthorized, recorder.Code)
-			},
-		},
-		{
 			name: "NotFound",
 			ID:   userPayment.ID,
 			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
 				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.ID, user.Username, time.Minute)
 			},
 			buildStub: func(store *mockdb.MockStore) {
+				arg := db.GetUserPaymentParams{
+					ID:     userPayment.ID,
+					UserID: userPayment.UserID,
+				}
 				store.EXPECT().
-					GetUserPayment(gomock.Any(), gomock.Eq(userPayment.ID)).
+					GetUserPayment(gomock.Any(), gomock.Eq(arg)).
 					Times(1).
 					Return(db.UserPayment{}, sql.ErrNoRows)
 			},
@@ -254,8 +243,12 @@ func TestGetUserPaymentAPI(t *testing.T) {
 				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.ID, user.Username, time.Minute)
 			},
 			buildStub: func(store *mockdb.MockStore) {
+				arg := db.GetUserPaymentParams{
+					ID:     userPayment.ID,
+					UserID: userPayment.UserID,
+				}
 				store.EXPECT().
-					GetUserPayment(gomock.Any(), gomock.Eq(userPayment.ID)).
+					GetUserPayment(gomock.Any(), gomock.Eq(arg)).
 					Times(1).
 					Return(db.UserPayment{}, sql.ErrConnDone)
 			},
@@ -299,157 +292,7 @@ func TestGetUserPaymentAPI(t *testing.T) {
 			data, err := json.Marshal(tc.body)
 			require.NoError(t, err)
 
-			url := fmt.Sprintf("/userpayments/%d", tc.ID)
-			request, err := http.NewRequest(http.MethodGet, url, bytes.NewReader(data))
-			require.NoError(t, err)
-
-			tc.setupAuth(t, request, server.tokenMaker)
-			server.router.ServeHTTP(recorder, request)
-			//check response
-			tc.checkResponse(t, recorder)
-		})
-
-	}
-
-}
-
-func TestGetUserPaymentByUserIDAPI(t *testing.T) {
-	user, _ := randomUPUser(t)
-	userPayment := createRandomUserPayment(t, user)
-
-	testCases := []struct {
-		name          string
-		UserID        int64
-		body          gin.H
-		setupAuth     func(t *testing.T, request *http.Request, tokenMaker token.Maker)
-		buildStub     func(store *mockdb.MockStore)
-		checkResponse func(t *testing.T, recorder *httptest.ResponseRecorder)
-	}{
-		{
-			name:   "OK",
-			UserID: userPayment.UserID,
-			body: gin.H{
-				"user_id": userPayment.UserID,
-			},
-			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
-				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.ID, user.Username, time.Minute)
-			},
-			buildStub: func(store *mockdb.MockStore) {
-				store.EXPECT().
-					GetUserPaymentByUserID(gomock.Any(), gomock.Eq(userPayment.UserID)).
-					Times(1).
-					Return(userPayment, nil)
-			},
-			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
-				require.Equal(t, http.StatusOK, recorder.Code)
-				requireBodyMatchUserPayment(t, recorder.Body, userPayment)
-			},
-		},
-		{
-			name:   "NoAuthorization",
-			UserID: userPayment.UserID,
-			body: gin.H{
-				"user_id": user.ID,
-			},
-			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
-			},
-			buildStub: func(store *mockdb.MockStore) {
-				store.EXPECT().
-					GetUserPaymentByUserID(gomock.Any(), gomock.Any()).
-					Times(0)
-			},
-			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
-				require.Equal(t, http.StatusUnauthorized, recorder.Code)
-			},
-		},
-		{
-			name:   "UnauthorizedUser",
-			UserID: userPayment.UserID,
-			body: gin.H{
-				"user_id": user.ID,
-			},
-			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
-				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, 0, "unauthorizedUser", time.Minute)
-			},
-			buildStub: func(store *mockdb.MockStore) {
-				store.EXPECT().
-					GetUserPaymentByUserID(gomock.Any(), gomock.Eq(user.ID)).
-					Times(1).
-					Return(userPayment, nil)
-			},
-			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
-				require.Equal(t, http.StatusUnauthorized, recorder.Code)
-			},
-		},
-		{
-			name:   "NotFound",
-			UserID: userPayment.UserID,
-			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
-				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.ID, user.Username, time.Minute)
-			},
-			buildStub: func(store *mockdb.MockStore) {
-				store.EXPECT().
-					GetUserPaymentByUserID(gomock.Any(), gomock.Eq(user.ID)).
-					Times(1).
-					Return(db.UserPayment{}, sql.ErrNoRows)
-			},
-			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
-				require.Equal(t, http.StatusNotFound, recorder.Code)
-			},
-		},
-		{
-			name:   "InternalError",
-			UserID: userPayment.UserID,
-			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
-				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.ID, user.Username, time.Minute)
-			},
-			buildStub: func(store *mockdb.MockStore) {
-				store.EXPECT().
-					GetUserPaymentByUserID(gomock.Any(), gomock.Eq(user.ID)).
-					Times(1).
-					Return(db.UserPayment{}, sql.ErrConnDone)
-			},
-			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
-				require.Equal(t, http.StatusInternalServerError, recorder.Code)
-			},
-		},
-		{
-			name:   "InvalidID",
-			UserID: 0,
-			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
-				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.ID, user.Username, time.Minute)
-			},
-			buildStub: func(store *mockdb.MockStore) {
-				store.EXPECT().
-					GetUserPaymentByUserID(gomock.Any(), gomock.Any()).
-					Times(0)
-
-			},
-			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
-				require.Equal(t, http.StatusBadRequest, recorder.Code)
-			},
-		},
-	}
-
-	for i := range testCases {
-		tc := testCases[i]
-
-		t.Run(tc.name, func(t *testing.T) {
-			ctrl := gomock.NewController(t) // no need to call defer ctrl.finish() in 1.6V
-
-			store := mockdb.NewMockStore(ctrl)
-			// build stubs
-			tc.buildStub(store)
-
-			// start test server and send request
-			server := newTestServer(t, store)
-			recorder := httptest.NewRecorder()
-
-			// Marshal body data to JSON
-			data, err := json.Marshal(tc.body)
-			require.NoError(t, err)
-
-			url := fmt.Sprintf("/userpaymentsByUserID/%d", tc.UserID)
+			url := fmt.Sprintf("/users/payments/%d", tc.ID)
 			request, err := http.NewRequest(http.MethodGet, url, bytes.NewReader(data))
 			require.NoError(t, err)
 
@@ -580,7 +423,7 @@ func TestListUsersPaymentAPI(t *testing.T) {
 			server := newTestServer(t, store)
 			recorder := httptest.NewRecorder()
 
-			url := "/userpayments"
+			url := "/users/payments"
 			request, err := http.NewRequest(http.MethodGet, url, nil)
 			require.NoError(t, err)
 
@@ -597,7 +440,7 @@ func TestListUsersPaymentAPI(t *testing.T) {
 	}
 }
 
-func TestUpdateUserPaymentByUserIDAPI(t *testing.T) {
+func TestUpdateUserPaymentAPI(t *testing.T) {
 	user, _ := randomUPUser(t)
 	userPayment := createRandomUserPayment(t, user)
 
@@ -621,14 +464,14 @@ func TestUpdateUserPaymentByUserIDAPI(t *testing.T) {
 				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.ID, user.Username, time.Minute)
 			},
 			buildStubs: func(store *mockdb.MockStore) {
-				arg := db.UpdateUserPaymentByUserIDParams{
+				arg := db.UpdateUserPaymentParams{
 					UserID:      userPayment.UserID,
 					ID:          userPayment.ID,
 					PaymentType: "new type",
 				}
 
 				store.EXPECT().
-					UpdateUserPaymentByUserID(gomock.Any(), gomock.Eq(arg)).
+					UpdateUserPayment(gomock.Any(), gomock.Eq(arg)).
 					Times(1).
 					Return(userPayment, nil)
 			},
@@ -648,7 +491,7 @@ func TestUpdateUserPaymentByUserIDAPI(t *testing.T) {
 			},
 			buildStubs: func(store *mockdb.MockStore) {
 				store.EXPECT().
-					UpdateUserPaymentByUserID(gomock.Any(), gomock.Any()).
+					UpdateUserPayment(gomock.Any(), gomock.Any()).
 					Times(0)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
@@ -667,13 +510,13 @@ func TestUpdateUserPaymentByUserIDAPI(t *testing.T) {
 				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.ID, user.Username, time.Minute)
 			},
 			buildStubs: func(store *mockdb.MockStore) {
-				arg := db.UpdateUserPaymentByUserIDParams{
+				arg := db.UpdateUserPaymentParams{
 					UserID:      userPayment.UserID,
 					ID:          userPayment.ID,
 					PaymentType: "new type",
 				}
 				store.EXPECT().
-					UpdateUserPaymentByUserID(gomock.Any(), gomock.Eq(arg)).
+					UpdateUserPayment(gomock.Any(), gomock.Eq(arg)).
 					Times(1).
 					Return(db.UserPayment{}, sql.ErrConnDone)
 			},
@@ -689,7 +532,7 @@ func TestUpdateUserPaymentByUserIDAPI(t *testing.T) {
 			},
 			buildStubs: func(store *mockdb.MockStore) {
 				store.EXPECT().
-					UpdateUserPaymentByUserID(gomock.Any(), gomock.Any()).
+					UpdateUserPayment(gomock.Any(), gomock.Any()).
 					Times(0)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
@@ -714,7 +557,7 @@ func TestUpdateUserPaymentByUserIDAPI(t *testing.T) {
 			data, err := json.Marshal(tc.body)
 			require.NoError(t, err)
 
-			url := fmt.Sprintf("/userpayments/%d", tc.UserID)
+			url := fmt.Sprintf("/users/payments/%d", tc.UserID)
 			request, err := http.NewRequest(http.MethodPut, url, bytes.NewReader(data))
 			require.NoError(t, err)
 
@@ -748,8 +591,12 @@ func TestDeleteUserPaymentAPI(t *testing.T) {
 				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.ID, user.Username, time.Minute)
 			},
 			buildStub: func(store *mockdb.MockStore) {
+				arg := db.DeleteUserPaymentParams{
+					ID:     userPayment.ID,
+					UserID: userPayment.UserID,
+				}
 				store.EXPECT().
-					DeleteUserPayment(gomock.Any(), gomock.Eq(userPayment.ID)).
+					DeleteUserPayment(gomock.Any(), gomock.Eq(arg)).
 					Times(1).
 					Return(nil)
 			},
@@ -768,8 +615,12 @@ func TestDeleteUserPaymentAPI(t *testing.T) {
 				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.ID, user.Username, time.Minute)
 			},
 			buildStub: func(store *mockdb.MockStore) {
+				arg := db.DeleteUserPaymentParams{
+					ID:     userPayment.ID,
+					UserID: userPayment.UserID,
+				}
 				store.EXPECT().
-					DeleteUserPayment(gomock.Any(), gomock.Eq(userPayment.ID)).
+					DeleteUserPayment(gomock.Any(), gomock.Eq(arg)).
 					Times(1).
 					Return(sql.ErrNoRows)
 			},
@@ -788,8 +639,12 @@ func TestDeleteUserPaymentAPI(t *testing.T) {
 				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.ID, user.Username, time.Minute)
 			},
 			buildStub: func(store *mockdb.MockStore) {
+				arg := db.DeleteUserPaymentParams{
+					ID:     userPayment.ID,
+					UserID: userPayment.UserID,
+				}
 				store.EXPECT().
-					DeleteUserPayment(gomock.Any(), gomock.Eq(userPayment.ID)).
+					DeleteUserPayment(gomock.Any(), gomock.Eq(arg)).
 					Times(1).
 					Return(sql.ErrConnDone)
 			},
@@ -838,7 +693,7 @@ func TestDeleteUserPaymentAPI(t *testing.T) {
 			data, err := json.Marshal(tc.body)
 			require.NoError(t, err)
 
-			url := fmt.Sprintf("/userpayments/%d", tc.ID)
+			url := fmt.Sprintf("/users/payments/%d", tc.ID)
 			request, err := http.NewRequest(http.MethodDelete, url, bytes.NewReader(data))
 			require.NoError(t, err)
 

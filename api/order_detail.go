@@ -13,7 +13,7 @@ import (
 
 type createOrderDetailRequest struct {
 	UserID int64  `json:"user_id" binding:"required,min=1"`
-	Total  string `json:"total" binding:"required"`
+	Total  string `json:"total" binding:"required,min=0"`
 }
 
 func (server *Server) createOrderDetail(ctx *gin.Context) {

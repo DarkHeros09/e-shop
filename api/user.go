@@ -16,10 +16,11 @@ type createUserRequest struct {
 	Username  string `json:"username" binding:"required,alphanum"`
 	Email     string `json:"email" binding:"required,email"`
 	Password  string `json:"password" binding:"required,min=6"`
-	Telephone int32  `json:"telephone" binding:"required,min=6"`
+	Telephone int32  `json:"telephone" binding:"required,numeric,min=9,max=9"`
 }
 
 type userResponse struct {
+	ID        int64  `json:"id"`
 	Username  string `json:"username"`
 	Email     string `json:"email"`
 	Telephone int32  `json:"telephone"`
@@ -27,6 +28,7 @@ type userResponse struct {
 
 func newUserResponse(user db.User) userResponse {
 	return userResponse{
+		ID:        user.ID,
 		Username:  user.Username,
 		Email:     user.Email,
 		Telephone: user.Telephone,
@@ -143,7 +145,7 @@ func (server *Server) listUsers(ctx *gin.Context) {
 
 type updateUserRequest struct {
 	ID        int64 `json:"id" binding:"required,min=1"`
-	Telephone int32 `json:"telephone" binding:"required"`
+	Telephone int32 `json:"telephone" binding:"required,numeric,min=9,max=9"`
 }
 
 func (server *Server) updateUser(ctx *gin.Context) {
@@ -214,9 +216,7 @@ func (server *Server) deleteUser(ctx *gin.Context) {
 }
 
 type loginUserRequest struct {
-	//TODO: remove id implement getuser with username
-	ID       int64  `json:"id" binding:"required,min=1"`
-	Username string `json:"username" binding:"required,alphanum"`
+	Email    string `json:"email" binding:"required,email"`
 	Password string `json:"password" binding:"required,min=6"`
 }
 
@@ -233,7 +233,7 @@ func (server *Server) loginUser(ctx *gin.Context) {
 		return
 	}
 
-	user, err := server.store.GetUser(ctx, req.ID)
+	user, err := server.store.GetUserByEmail(ctx, req.Email)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			ctx.JSON(http.StatusNotFound, errorResponse(err))

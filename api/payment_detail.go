@@ -74,8 +74,8 @@ func (server *Server) listPaymentDetails(ctx *gin.Context) {
 
 type updatePaymentDetailRequest struct {
 	ID       int64  `json:"id" binding:"required,min=1"`
-	OrderID  int64  `json:"order_id"`
-	Amount   int32  `json:"amount"`
+	OrderID  int64  `json:"order_id,min=1"`
+	Amount   int32  `json:"amount,numeric"`
 	Provider string `json:"provider"`
 	Status   string `json:"status"`
 }

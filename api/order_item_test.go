@@ -160,7 +160,7 @@ func TestCreateOrderItemAPI(t *testing.T) {
 			data, err := json.Marshal(tc.body)
 			require.NoError(t, err)
 
-			url := "/orderitems"
+			url := "/order-items"
 			request, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(data))
 			require.NoError(t, err)
 
@@ -304,7 +304,7 @@ func TestGetOrderItemAPI(t *testing.T) {
 			data, err := json.Marshal(tc.body)
 			require.NoError(t, err)
 
-			url := fmt.Sprintf("/orderitems/%d", tc.ID)
+			url := fmt.Sprintf("/order-items/%d", tc.ID)
 			request, err := http.NewRequest(http.MethodGet, url, bytes.NewReader(data))
 			require.NoError(t, err)
 
@@ -438,7 +438,7 @@ func TestListOrderItemAPI(t *testing.T) {
 			server := newTestServer(t, store)
 			recorder := httptest.NewRecorder()
 
-			url := "/orderitems"
+			url := "/order-items"
 			request, err := http.NewRequest(http.MethodGet, url, nil)
 			require.NoError(t, err)
 
@@ -454,180 +454,6 @@ func TestListOrderItemAPI(t *testing.T) {
 		})
 	}
 }
-
-// func TestGetOrderItemByOrderDetailIDAPI(t *testing.T) {
-// 	user, _ := randomOIUser(t)
-// 	orderDetail := createRandomOrderDetail(t, user)
-// 	orderItem := createRandomOrderItem(t, orderDetail)
-
-// 	testCases := []struct {
-// 		name          string
-// 		OrderDetailID int64
-// 		body          gin.H
-// 		setupAuth     func(t *testing.T, request *http.Request, tokenMaker token.Maker)
-// 		buildStub     func(store *mockdb.MockStore)
-// 		checkResponse func(t *testing.T, recorder *httptest.ResponseRecorder)
-// 	}{
-// 		{
-// 			name:          "OK",
-// 			OrderDetailID: orderItem.OrderID,
-// 			body: gin.H{
-// 				"order_id": orderItem.OrderID,
-// 			},
-// 			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
-// 				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.ID, user.Username, time.Minute)
-// 			},
-// 			buildStub: func(store *mockdb.MockStore) {
-// 				store.EXPECT().
-// 					GetOrderDetail(gomock.Any(), gomock.Eq(orderItem.OrderID)).
-// 					Times(1).
-// 					Return(orderDetail, nil)
-
-// 				store.EXPECT().
-// 					GetOrderItemByOrderDetailID(gomock.Any(), gomock.Eq(orderItem.OrderID)).
-// 					Times(1).
-// 					Return(orderItem, nil)
-// 			},
-// 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
-// 				require.Equal(t, http.StatusOK, recorder.Code)
-// 				requireBodyMatchOrderItem(t, recorder.Body, orderItem)
-// 			},
-// 		},
-// 		{
-// 			name:          "NoAuthorization",
-// 			OrderDetailID: orderItem.OrderID,
-// 			body: gin.H{
-// 				"order_id": orderItem.OrderID,
-// 			},
-// 			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
-// 			},
-// 			buildStub: func(store *mockdb.MockStore) {
-// 				store.EXPECT().
-// 					GetOrderItemByOrderDetailID(gomock.Any(), gomock.Any()).
-// 					Times(0)
-// 			},
-// 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
-// 				require.Equal(t, http.StatusUnauthorized, recorder.Code)
-// 			},
-// 		},
-// 		{
-// 			name:          "UnauthorizedUser",
-// 			OrderDetailID: orderItem.OrderID,
-// 			body: gin.H{
-// 				"order_id": orderItem.OrderID,
-// 			},
-// 			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
-// 				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, 0, "unauthorizedUser", time.Minute)
-// 			},
-// 			buildStub: func(store *mockdb.MockStore) {
-// 				store.EXPECT().
-// 					GetOrderDetail(gomock.Any(), gomock.Eq(orderItem.OrderID)).
-// 					Times(1).
-// 					Return(orderDetail, nil)
-
-// 				store.EXPECT().
-// 					GetOrderItemByOrderDetailID(gomock.Any(), gomock.Any()).
-// 					Times(0)
-// 			},
-// 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
-// 				require.Equal(t, http.StatusUnauthorized, recorder.Code)
-// 			},
-// 		},
-// 		{
-// 			name:          "NotFound",
-// 			OrderDetailID: orderItem.OrderID,
-// 			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
-// 				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.ID, user.Username, time.Minute)
-// 			},
-// 			buildStub: func(store *mockdb.MockStore) {
-// 				store.EXPECT().
-// 					GetOrderDetail(gomock.Any(), gomock.Eq(orderItem.OrderID)).
-// 					Times(1).
-// 					Return(orderDetail, nil)
-
-// 				store.EXPECT().
-// 					GetOrderItemByOrderDetailID(gomock.Any(), gomock.Eq(orderItem.OrderID)).
-// 					Times(1).
-// 					Return(db.OrderItem{}, sql.ErrNoRows)
-// 			},
-// 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
-// 				require.Equal(t, http.StatusNotFound, recorder.Code)
-// 			},
-// 		},
-// 		{
-// 			name:          "InternalError",
-// 			OrderDetailID: orderItem.OrderID,
-// 			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
-// 				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.ID, user.Username, time.Minute)
-// 			},
-// 			buildStub: func(store *mockdb.MockStore) {
-// 				store.EXPECT().
-// 					GetOrderDetail(gomock.Any(), gomock.Eq(orderItem.OrderID)).
-// 					Times(1).
-// 					Return(orderDetail, nil)
-
-// 				store.EXPECT().
-// 					GetOrderItemByOrderDetailID(gomock.Any(), gomock.Eq(orderItem.OrderID)).
-// 					Times(1).
-// 					Return(db.OrderItem{}, sql.ErrConnDone)
-// 			},
-// 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
-// 				require.Equal(t, http.StatusInternalServerError, recorder.Code)
-// 			},
-// 		},
-// 		{
-// 			name:          "InvalidOrderDetailID",
-// 			OrderDetailID: 0,
-// 			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
-// 				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.ID, user.Username, time.Minute)
-// 			},
-// 			buildStub: func(store *mockdb.MockStore) {
-// 				store.EXPECT().
-// 					GetOrderDetail(gomock.Any(), gomock.Any()).
-// 					Times(0)
-
-// 				store.EXPECT().
-// 					GetOrderItemByOrderDetailID(gomock.Any(), gomock.Any()).
-// 					Times(0)
-
-// 			},
-// 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
-// 				require.Equal(t, http.StatusBadRequest, recorder.Code)
-// 			},
-// 		},
-// 	}
-
-// 	for i := range testCases {
-// 		tc := testCases[i]
-
-// 		t.Run(tc.name, func(t *testing.T) {
-// 			ctrl := gomock.NewController(t) // no need to call defer ctrl.finish() in 1.6V
-
-// 			store := mockdb.NewMockStore(ctrl)
-// 			// build stubs
-// 			tc.buildStub(store)
-
-// 			// start test server and send request
-// 			server := newTestServer(t, store)
-// 			recorder := httptest.NewRecorder()
-
-// 			// Marshal body data to JSON
-// 			data, err := json.Marshal(tc.body)
-// 			require.NoError(t, err)
-
-// 			url := fmt.Sprintf("/orderitemsByOrderDetailID/%d", tc.OrderDetailID)
-// 			request, err := http.NewRequest(http.MethodGet, url, bytes.NewReader(data))
-// 			require.NoError(t, err)
-
-// 			tc.setupAuth(t, request, server.tokenMaker)
-// 			server.router.ServeHTTP(recorder, request)
-// 			//check response
-// 			tc.checkResponse(t, recorder)
-// 		})
-
-// 	}
-
-// }
 
 func randomOIUser(t *testing.T) (user db.User, password string) {
 	password = util.RandomString(6)

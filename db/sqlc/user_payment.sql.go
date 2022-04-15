@@ -52,39 +52,33 @@ func (q *Queries) CreateUserPayment(ctx context.Context, arg CreateUserPaymentPa
 const deleteUserPayment = `-- name: DeleteUserPayment :exec
 DELETE FROM "user_payment"
 WHERE id = $1
+AND user_id = $2
 `
 
-func (q *Queries) DeleteUserPayment(ctx context.Context, id int64) error {
-	_, err := q.db.ExecContext(ctx, deleteUserPayment, id)
+type DeleteUserPaymentParams struct {
+	ID     int64 `json:"id"`
+	UserID int64 `json:"user_id"`
+}
+
+func (q *Queries) DeleteUserPayment(ctx context.Context, arg DeleteUserPaymentParams) error {
+	_, err := q.db.ExecContext(ctx, deleteUserPayment, arg.ID, arg.UserID)
 	return err
 }
 
 const getUserPayment = `-- name: GetUserPayment :one
 SELECT id, user_id, payment_type, provider, account_no, expiry FROM "user_payment"
-WHERE id = $1 LIMIT 1
+WHERE id = $1 
+AND user_id = $2
+LIMIT 1
 `
 
-func (q *Queries) GetUserPayment(ctx context.Context, id int64) (UserPayment, error) {
-	row := q.db.QueryRowContext(ctx, getUserPayment, id)
-	var i UserPayment
-	err := row.Scan(
-		&i.ID,
-		&i.UserID,
-		&i.PaymentType,
-		&i.Provider,
-		&i.AccountNo,
-		&i.Expiry,
-	)
-	return i, err
+type GetUserPaymentParams struct {
+	ID     int64 `json:"id"`
+	UserID int64 `json:"user_id"`
 }
 
-const getUserPaymentByUserID = `-- name: GetUserPaymentByUserID :one
-SELECT id, user_id, payment_type, provider, account_no, expiry FROM "user_payment"
-WHERE user_id = $1 LIMIT 1
-`
-
-func (q *Queries) GetUserPaymentByUserID(ctx context.Context, userID int64) (UserPayment, error) {
-	row := q.db.QueryRowContext(ctx, getUserPaymentByUserID, userID)
+func (q *Queries) GetUserPayment(ctx context.Context, arg GetUserPaymentParams) (UserPayment, error) {
+	row := q.db.QueryRowContext(ctx, getUserPayment, arg.ID, arg.UserID)
 	var i UserPayment
 	err := row.Scan(
 		&i.ID,
@@ -141,22 +135,22 @@ func (q *Queries) ListUserPayments(ctx context.Context, arg ListUserPaymentsPara
 	return items, nil
 }
 
-const updateUserPaymentByUserID = `-- name: UpdateUserPaymentByUserID :one
+const updateUserPayment = `-- name: UpdateUserPayment :one
 UPDATE "user_payment"
 SET payment_type = $3
-WHERE user_id = $1
-AND id = $2
+WHERE id = $1
+AND user_id = $2
 RETURNING id, user_id, payment_type, provider, account_no, expiry
 `
 
-type UpdateUserPaymentByUserIDParams struct {
-	UserID      int64  `json:"user_id"`
+type UpdateUserPaymentParams struct {
 	ID          int64  `json:"id"`
+	UserID      int64  `json:"user_id"`
 	PaymentType string `json:"payment_type"`
 }
 
-func (q *Queries) UpdateUserPaymentByUserID(ctx context.Context, arg UpdateUserPaymentByUserIDParams) (UserPayment, error) {
-	row := q.db.QueryRowContext(ctx, updateUserPaymentByUserID, arg.UserID, arg.ID, arg.PaymentType)
+func (q *Queries) UpdateUserPayment(ctx context.Context, arg UpdateUserPaymentParams) (UserPayment, error) {
+	row := q.db.QueryRowContext(ctx, updateUserPayment, arg.ID, arg.UserID, arg.PaymentType)
 	var i UserPayment
 	err := row.Scan(
 		&i.ID,

@@ -161,7 +161,7 @@ func TestCreateProductCategoryAPI(t *testing.T) {
 			data, err := json.Marshal(tc.body)
 			require.NoError(t, err)
 
-			url := "/categories"
+			url := "/products/categories"
 			request, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(data))
 			require.NoError(t, err)
 
@@ -267,7 +267,7 @@ func TestGetProductCategoryAPI(t *testing.T) {
 			data, err := json.Marshal(tc.body)
 			require.NoError(t, err)
 
-			url := fmt.Sprintf("/categories/%d", tc.CategoryID)
+			url := fmt.Sprintf("/products/categories/%d", tc.CategoryID)
 			request, err := http.NewRequest(http.MethodGet, url, bytes.NewReader(data))
 			require.NoError(t, err)
 
@@ -384,7 +384,7 @@ func TestListProductCategoryAPI(t *testing.T) {
 			server := newTestServer(t, store)
 			recorder := httptest.NewRecorder()
 
-			url := "/categories"
+			url := "/products/categories"
 			request, err := http.NewRequest(http.MethodGet, url, nil)
 			require.NoError(t, err)
 
@@ -534,7 +534,7 @@ func TestUpdateProductCategoryAPI(t *testing.T) {
 			data, err := json.Marshal(tc.body)
 			require.NoError(t, err)
 
-			url := fmt.Sprintf("/categories/%d", tc.CategoryID)
+			url := fmt.Sprintf("/products/categories/%d", tc.CategoryID)
 			request, err := http.NewRequest(http.MethodPut, url, bytes.NewReader(data))
 			require.NoError(t, err)
 
@@ -690,7 +690,7 @@ func TestDeleteProductCategoryAPI(t *testing.T) {
 			data, err := json.Marshal(tc.body)
 			require.NoError(t, err)
 
-			url := fmt.Sprintf("/categories/%d", tc.CategoryID)
+			url := fmt.Sprintf("/products/categories/%d", tc.CategoryID)
 			request, err := http.NewRequest(http.MethodDelete, url, bytes.NewReader(data))
 			require.NoError(t, err)
 

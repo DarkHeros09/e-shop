@@ -14,7 +14,7 @@ import (
 type createCartItemRequest struct {
 	SessionID int64 `json:"session_id" binding:"required,min=1"`
 	ProductID int64 `json:"product_id" binding:"required,min=1"`
-	Quantity  int32 `json:"quantity" binding:"required"`
+	Quantity  int32 `json:"quantity" binding:"required,numeric"`
 }
 
 func (server *Server) createCartItem(ctx *gin.Context) {
@@ -137,7 +137,7 @@ func (server *Server) getCartItemBySessionID(ctx *gin.Context) {
 type updateCartItemBySessionIDRequest struct {
 	SessionID int64 `json:"session_id" binding:"required,min=1"`
 	ID        int64 `json:"id" binding:"required,min=1"`
-	Quantity  int32 `json:"quantity" binding:"required"`
+	Quantity  int32 `json:"quantity" binding:"required,numeric"`
 }
 
 func (server *Server) updateCartItemBySessionID(ctx *gin.Context) {

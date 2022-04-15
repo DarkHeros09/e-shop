@@ -14,7 +14,7 @@ import (
 type createDiscountRequest struct {
 	Name            string `json:"name" binding:"required"`
 	Description     string `json:"description" binding:"required"`
-	DiscountPercent string `json:"discount_percent" binding:"required"`
+	DiscountPercent string `json:"discount_percent" binding:"required,min=0,max=100"`
 }
 
 func (server *Server) createDiscount(ctx *gin.Context) {

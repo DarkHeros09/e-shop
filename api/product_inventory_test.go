@@ -144,7 +144,7 @@ func TestCreateProductInventoryAPI(t *testing.T) {
 			data, err := json.Marshal(tc.body)
 			require.NoError(t, err)
 
-			url := "/inventories"
+			url := "/products/inventories"
 			request, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(data))
 			require.NoError(t, err)
 
@@ -250,7 +250,7 @@ func TestGetProductInventoryAPI(t *testing.T) {
 			data, err := json.Marshal(tc.body)
 			require.NoError(t, err)
 
-			url := fmt.Sprintf("/inventories/%d", tc.InventoryID)
+			url := fmt.Sprintf("/products/inventories/%d", tc.InventoryID)
 			request, err := http.NewRequest(http.MethodGet, url, bytes.NewReader(data))
 			require.NoError(t, err)
 
@@ -367,7 +367,7 @@ func TestListProductInventoryAPI(t *testing.T) {
 			server := newTestServer(t, store)
 			recorder := httptest.NewRecorder()
 
-			url := "/inventories"
+			url := "/products/inventories"
 			request, err := http.NewRequest(http.MethodGet, url, nil)
 			require.NoError(t, err)
 
@@ -523,7 +523,7 @@ func TestUpdateProductInventoryAPI(t *testing.T) {
 			data, err := json.Marshal(tc.body)
 			require.NoError(t, err)
 
-			url := fmt.Sprintf("/inventories/%d", tc.InventoryID)
+			url := fmt.Sprintf("/products/inventories/%d", tc.InventoryID)
 			request, err := http.NewRequest(http.MethodPut, url, bytes.NewReader(data))
 			require.NoError(t, err)
 
@@ -679,7 +679,7 @@ func TestDeleteProductInventoryAPI(t *testing.T) {
 			data, err := json.Marshal(tc.body)
 			require.NoError(t, err)
 
-			url := fmt.Sprintf("/inventories/%d", tc.InventoryID)
+			url := fmt.Sprintf("/products/inventories/%d", tc.InventoryID)
 			request, err := http.NewRequest(http.MethodDelete, url, bytes.NewReader(data))
 			require.NoError(t, err)
 

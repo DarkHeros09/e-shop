@@ -146,7 +146,7 @@ func TestCreateUserAddessAPI(t *testing.T) {
 			data, err := json.Marshal(tc.body)
 			require.NoError(t, err)
 
-			url := "/useraddresses"
+			url := "/users/addresses"
 			request, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(data))
 			require.NoError(t, err)
 
@@ -179,8 +179,12 @@ func TestGetUserAddressAPI(t *testing.T) {
 				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.ID, user.Username, time.Minute)
 			},
 			buildStub: func(store *mockdb.MockStore) {
+				arg := db.GetUserAddressParams{
+					ID:     userAddress.ID,
+					UserID: userAddress.UserID,
+				}
 				store.EXPECT().
-					GetUserAddress(gomock.Any(), gomock.Eq(userAddress.ID)).
+					GetUserAddress(gomock.Any(), gomock.Eq(arg)).
 					Times(1).
 					Return(userAddress, nil)
 			},
@@ -207,33 +211,18 @@ func TestGetUserAddressAPI(t *testing.T) {
 			},
 		},
 		{
-			name: "UnauthorizedUser",
-			ID:   userAddress.ID,
-			body: gin.H{
-				"id": userAddress.ID,
-			},
-			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
-				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, 0, "unauthorizedUser", time.Minute)
-			},
-			buildStub: func(store *mockdb.MockStore) {
-				store.EXPECT().
-					GetUserAddress(gomock.Any(), gomock.Eq(userAddress.ID)).
-					Times(1).
-					Return(userAddress, nil)
-			},
-			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
-				require.Equal(t, http.StatusUnauthorized, recorder.Code)
-			},
-		},
-		{
 			name: "NotFound",
 			ID:   userAddress.ID,
 			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
 				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.ID, user.Username, time.Minute)
 			},
 			buildStub: func(store *mockdb.MockStore) {
+				arg := db.GetUserAddressParams{
+					ID:     userAddress.ID,
+					UserID: userAddress.UserID,
+				}
 				store.EXPECT().
-					GetUserAddress(gomock.Any(), gomock.Eq(userAddress.ID)).
+					GetUserAddress(gomock.Any(), gomock.Eq(arg)).
 					Times(1).
 					Return(db.UserAddress{}, sql.ErrNoRows)
 			},
@@ -248,8 +237,12 @@ func TestGetUserAddressAPI(t *testing.T) {
 				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.ID, user.Username, time.Minute)
 			},
 			buildStub: func(store *mockdb.MockStore) {
+				arg := db.GetUserAddressParams{
+					ID:     userAddress.ID,
+					UserID: userAddress.UserID,
+				}
 				store.EXPECT().
-					GetUserAddress(gomock.Any(), gomock.Eq(userAddress.ID)).
+					GetUserAddress(gomock.Any(), gomock.Eq(arg)).
 					Times(1).
 					Return(db.UserAddress{}, sql.ErrConnDone)
 			},
@@ -293,157 +286,7 @@ func TestGetUserAddressAPI(t *testing.T) {
 			data, err := json.Marshal(tc.body)
 			require.NoError(t, err)
 
-			url := fmt.Sprintf("/useraddresses/%d", tc.ID)
-			request, err := http.NewRequest(http.MethodGet, url, bytes.NewReader(data))
-			require.NoError(t, err)
-
-			tc.setupAuth(t, request, server.tokenMaker)
-			server.router.ServeHTTP(recorder, request)
-			//check response
-			tc.checkResponse(t, recorder)
-		})
-
-	}
-
-}
-
-func TestGetUserAddressByUserIDAPI(t *testing.T) {
-	user, _ := randomUAUser(t)
-	userAddress := createRandomUserAddress(t, user)
-
-	testCases := []struct {
-		name          string
-		UserID        int64
-		body          gin.H
-		setupAuth     func(t *testing.T, request *http.Request, tokenMaker token.Maker)
-		buildStub     func(store *mockdb.MockStore)
-		checkResponse func(t *testing.T, recorder *httptest.ResponseRecorder)
-	}{
-		{
-			name:   "OK",
-			UserID: userAddress.UserID,
-			body: gin.H{
-				"id": userAddress.UserID,
-			},
-			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
-				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.ID, user.Username, time.Minute)
-			},
-			buildStub: func(store *mockdb.MockStore) {
-				store.EXPECT().
-					GetUserAddressByUserID(gomock.Any(), gomock.Eq(userAddress.UserID)).
-					Times(1).
-					Return(userAddress, nil)
-			},
-			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
-				require.Equal(t, http.StatusOK, recorder.Code)
-				requireBodyMatchUserAddress(t, recorder.Body, userAddress)
-			},
-		},
-		{
-			name:   "NoAuthorization",
-			UserID: userAddress.UserID,
-			body: gin.H{
-				"user_id": user.ID,
-			},
-			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
-			},
-			buildStub: func(store *mockdb.MockStore) {
-				store.EXPECT().
-					GetUserAddressByUserID(gomock.Any(), gomock.Any()).
-					Times(0)
-			},
-			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
-				require.Equal(t, http.StatusUnauthorized, recorder.Code)
-			},
-		},
-		{
-			name:   "UnauthorizedUser",
-			UserID: userAddress.UserID,
-			body: gin.H{
-				"user_id": user.ID,
-			},
-			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
-				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, 0, "unauthorizedUser", time.Minute)
-			},
-			buildStub: func(store *mockdb.MockStore) {
-				store.EXPECT().
-					GetUserAddressByUserID(gomock.Any(), gomock.Eq(user.ID)).
-					Times(1).
-					Return(userAddress, nil)
-			},
-			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
-				require.Equal(t, http.StatusUnauthorized, recorder.Code)
-			},
-		},
-		{
-			name:   "NotFound",
-			UserID: userAddress.UserID,
-			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
-				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.ID, user.Username, time.Minute)
-			},
-			buildStub: func(store *mockdb.MockStore) {
-				store.EXPECT().
-					GetUserAddressByUserID(gomock.Any(), gomock.Eq(user.ID)).
-					Times(1).
-					Return(db.UserAddress{}, sql.ErrNoRows)
-			},
-			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
-				require.Equal(t, http.StatusNotFound, recorder.Code)
-			},
-		},
-		{
-			name:   "InternalError",
-			UserID: userAddress.UserID,
-			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
-				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.ID, user.Username, time.Minute)
-			},
-			buildStub: func(store *mockdb.MockStore) {
-				store.EXPECT().
-					GetUserAddressByUserID(gomock.Any(), gomock.Eq(user.ID)).
-					Times(1).
-					Return(db.UserAddress{}, sql.ErrConnDone)
-			},
-			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
-				require.Equal(t, http.StatusInternalServerError, recorder.Code)
-			},
-		},
-		{
-			name:   "InvalidID",
-			UserID: 0,
-			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
-				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.ID, user.Username, time.Minute)
-			},
-			buildStub: func(store *mockdb.MockStore) {
-				store.EXPECT().
-					GetUserAddressByUserID(gomock.Any(), gomock.Any()).
-					Times(0)
-
-			},
-			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
-				require.Equal(t, http.StatusBadRequest, recorder.Code)
-			},
-		},
-	}
-
-	for i := range testCases {
-		tc := testCases[i]
-
-		t.Run(tc.name, func(t *testing.T) {
-			ctrl := gomock.NewController(t) // no need to call defer ctrl.finish() in 1.6V
-
-			store := mockdb.NewMockStore(ctrl)
-			// build stubs
-			tc.buildStub(store)
-
-			// start test server and send request
-			server := newTestServer(t, store)
-			recorder := httptest.NewRecorder()
-
-			// Marshal body data to JSON
-			data, err := json.Marshal(tc.body)
-			require.NoError(t, err)
-
-			url := fmt.Sprintf("/useraddressesByUserID/%d", tc.UserID)
+			url := fmt.Sprintf("/users/addresses/%d", tc.ID)
 			request, err := http.NewRequest(http.MethodGet, url, bytes.NewReader(data))
 			require.NoError(t, err)
 
@@ -574,7 +417,7 @@ func TestListUsersAddressAPI(t *testing.T) {
 			server := newTestServer(t, store)
 			recorder := httptest.NewRecorder()
 
-			url := "/useraddresses"
+			url := "/users/addresses"
 			request, err := http.NewRequest(http.MethodGet, url, nil)
 			require.NoError(t, err)
 
@@ -715,7 +558,7 @@ func TestUpdateUserAddressAPI(t *testing.T) {
 			data, err := json.Marshal(tc.body)
 			require.NoError(t, err)
 
-			url := fmt.Sprintf("/useraddresses/%d", tc.UserID)
+			url := fmt.Sprintf("/users/addresses/%d", tc.UserID)
 			request, err := http.NewRequest(http.MethodPut, url, bytes.NewReader(data))
 			require.NoError(t, err)
 
@@ -839,7 +682,7 @@ func TestDeleteUserAddressAPI(t *testing.T) {
 			data, err := json.Marshal(tc.body)
 			require.NoError(t, err)
 
-			url := fmt.Sprintf("/useraddresses/%d", tc.ID)
+			url := fmt.Sprintf("/users/addresses/%d", tc.ID)
 			request, err := http.NewRequest(http.MethodDelete, url, bytes.NewReader(data))
 			require.NoError(t, err)
 
@@ -862,7 +705,7 @@ func randomUAUser(t *testing.T) (user db.User, password string) {
 		ID:        util.RandomMoney(),
 		Username:  util.RandomUser(),
 		Password:  hashedPassword,
-		Telephone: int32(util.RandomInt(7, 7)),
+		Telephone: int32(util.RandomInt(9, 9)),
 		Email:     util.RandomEmail(),
 	}
 	return
@@ -874,7 +717,7 @@ func createRandomUserAddress(t *testing.T, user db.User) (userAddress db.UserAdd
 		UserID:      user.ID,
 		AddressLine: util.RandomUser(),
 		City:        util.RandomUser(),
-		Telephone:   int32(util.RandomInt(7, 7)),
+		Telephone:   int32(util.RandomInt(9, 9)),
 	}
 	return
 }

@@ -35,7 +35,7 @@ type Querier interface {
 	DeleteShoppingSession(ctx context.Context, id int64) error
 	DeleteUser(ctx context.Context, id int64) error
 	DeleteUserAddress(ctx context.Context, id int64) error
-	DeleteUserPayment(ctx context.Context, id int64) error
+	DeleteUserPayment(ctx context.Context, arg DeleteUserPaymentParams) error
 	GetAdmin(ctx context.Context, id int64) (Admin, error)
 	GetAdminByEmail(ctx context.Context, email string) (Admin, error)
 	GetAdminType(ctx context.Context, id int64) (AdminType, error)
@@ -51,12 +51,10 @@ type Querier interface {
 	GetProductInventoryForUpdate(ctx context.Context, id int64) (ProductInventory, error)
 	GetShoppingSession(ctx context.Context, id int64) (ShoppingSession, error)
 	GetUser(ctx context.Context, id int64) (User, error)
-	GetUserAddress(ctx context.Context, id int64) (UserAddress, error)
-	GetUserAddressByUserID(ctx context.Context, userID int64) (UserAddress, error)
+	GetUserAddress(ctx context.Context, arg GetUserAddressParams) (UserAddress, error)
 	GetUserByEmail(ctx context.Context, email string) (User, error)
 	GetUserByUsername(ctx context.Context, username string) (User, error)
-	GetUserPayment(ctx context.Context, id int64) (UserPayment, error)
-	GetUserPaymentByUserID(ctx context.Context, userID int64) (UserPayment, error)
+	GetUserPayment(ctx context.Context, arg GetUserPaymentParams) (UserPayment, error)
 	ListAdminTypes(ctx context.Context, arg ListAdminTypesParams) ([]AdminType, error)
 	ListAdmins(ctx context.Context, arg ListAdminsParams) ([]Admin, error)
 	ListCartItem(ctx context.Context, arg ListCartItemParams) ([]CartItem, error)
@@ -86,7 +84,7 @@ type Querier interface {
 	UpdateUser(ctx context.Context, arg UpdateUserParams) (User, error)
 	UpdateUserAddress(ctx context.Context, arg UpdateUserAddressParams) (UserAddress, error)
 	UpdateUserAddressByUserID(ctx context.Context, arg UpdateUserAddressByUserIDParams) (UserAddress, error)
-	UpdateUserPaymentByUserID(ctx context.Context, arg UpdateUserPaymentByUserIDParams) (UserPayment, error)
+	UpdateUserPayment(ctx context.Context, arg UpdateUserPaymentParams) (UserPayment, error)
 }
 
 var _ Querier = (*Queries)(nil)

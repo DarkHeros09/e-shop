@@ -11,11 +11,9 @@ RETURNING *;
 
 -- name: GetUserAddress :one
 SELECT * FROM "user_address"
-WHERE id = $1 LIMIT 1;
-
--- name: GetUserAddressByUserID :one
-SELECT * FROM "user_address"
-WHERE user_id = $1 LIMIT 1;
+WHERE id = $1 
+And user_id = $2
+LIMIT 1;
 
 -- name: ListUserAddresses :many
 SELECT * FROM "user_address"

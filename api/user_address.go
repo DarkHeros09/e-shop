@@ -12,10 +12,10 @@ import (
 )
 
 type createUserAddressRequest struct {
-	UserID      int64  `json:"user_id" binding:"required"`
+	UserID      int64  `json:"user_id" binding:"required,min=1"`
 	AddressLine string `json:"address_line" binding:"required"`
 	City        string `json:"city" binding:"required"`
-	Telephone   int32  `json:"telephone" binding:"required"`
+	Telephone   int32  `json:"telephone" binding:"required,numeric,min=9,max=9"`
 }
 
 func (server *Server) createUserAddress(ctx *gin.Context) {
@@ -61,8 +61,12 @@ func (server *Server) getUserAddress(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
-
-	userAddress, err := server.store.GetUserAddress(ctx, req.ID)
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.UserPayload)
+	arg := db.GetUserAddressParams{
+		ID:     req.ID,
+		UserID: authPayload.UserID,
+	}
+	userAddress, err := server.store.GetUserAddress(ctx, arg)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			ctx.JSON(http.StatusNotFound, errorResponse(err))
@@ -71,42 +75,7 @@ func (server *Server) getUserAddress(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
-	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.UserPayload)
-	if userAddress.UserID != authPayload.UserID {
-		err := errors.New("account doesn't belong to the authenticated user")
-		ctx.JSON(http.StatusUnauthorized, errorResponse(err))
-		return
-	}
-	ctx.JSON(http.StatusOK, userAddress)
-}
 
-type getUserAddressByUserIDRequest struct {
-	UserID int64 `uri:"user_id" binding:"required,min=1"`
-}
-
-func (server *Server) getUserAddressByUserID(ctx *gin.Context) {
-	var req getUserAddressByUserIDRequest
-
-	if err := ctx.ShouldBindUri(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, errorResponse(err))
-		return
-	}
-
-	userAddress, err := server.store.GetUserAddressByUserID(ctx, req.UserID)
-	if err != nil {
-		if err == sql.ErrNoRows {
-			ctx.JSON(http.StatusNotFound, errorResponse(err))
-			return
-		}
-		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
-		return
-	}
-	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.UserPayload)
-	if userAddress.UserID != authPayload.UserID {
-		err := errors.New("account doesn't belong to the authenticated user")
-		ctx.JSON(http.StatusUnauthorized, errorResponse(err))
-		return
-	}
 	ctx.JSON(http.StatusOK, userAddress)
 }
 
@@ -144,7 +113,7 @@ type updateUserAddressByUserIDRequest struct {
 	ID          int64  `json:"id" binding:"required,min=1"`
 	AddressLine string `json:"address_line"`
 	City        string `json:"city"`
-	Telephone   int32  `json:"telephone" binding:"required"`
+	Telephone   int32  `json:"telephone" binding:"required,numeric,min=9,max=9"`
 }
 
 func (server *Server) updateUserAddressByUserID(ctx *gin.Context) {

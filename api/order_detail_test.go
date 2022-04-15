@@ -134,7 +134,7 @@ func TestCreateOrderDetailAPI(t *testing.T) {
 			data, err := json.Marshal(tc.body)
 			require.NoError(t, err)
 
-			url := "/orderdetails"
+			url := "/order-details"
 			request, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(data))
 			require.NoError(t, err)
 
@@ -285,7 +285,7 @@ func TestGetOrderDetailAPI(t *testing.T) {
 			data, err := json.Marshal(tc.body)
 			require.NoError(t, err)
 
-			url := fmt.Sprintf("/orderdetails/%d", tc.ID)
+			url := fmt.Sprintf("/order-details/%d", tc.ID)
 			request, err := http.NewRequest(http.MethodGet, url, bytes.NewReader(data))
 			require.NoError(t, err)
 
@@ -416,7 +416,7 @@ func TestListOrderDetailAPI(t *testing.T) {
 			server := newTestServer(t, store)
 			recorder := httptest.NewRecorder()
 
-			url := "/orderdetails"
+			url := "/order-details"
 			request, err := http.NewRequest(http.MethodGet, url, nil)
 			require.NoError(t, err)
 

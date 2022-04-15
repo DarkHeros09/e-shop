@@ -14,7 +14,7 @@ import (
 type createOrderItemRequest struct {
 	OrderID   int64 `json:"order_id" binding:"required,min=1"`
 	ProductID int64 `json:"product_id" binding:"required,min=1"`
-	Quantity  int32 `json:"quantity" binding:"required"`
+	Quantity  int32 `json:"quantity" binding:"required,numeric"`
 }
 
 func (server *Server) createOrderItem(ctx *gin.Context) {
@@ -94,47 +94,6 @@ func (server *Server) getOrderItem(ctx *gin.Context) {
 
 	ctx.JSON(http.StatusOK, orderItem)
 }
-
-// type getOrderItemByOrderDetailIDRequest struct {
-// 	OrderID int64 `uri:"order_id" binding:"required,min=1"`
-// }
-
-// func (server *Server) getOrderItemByOrderDetailID(ctx *gin.Context) {
-// 	var req getOrderItemByOrderDetailIDRequest
-
-// 	if err := ctx.ShouldBindUri(&req); err != nil {
-// 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
-// 		return
-// 	}
-
-// 	orderDetail, err := server.store.GetOrderDetail(ctx, req.OrderID)
-// 	if err != nil {
-// 		if err == sql.ErrNoRows {
-// 			ctx.JSON(http.StatusNotFound, errorResponse(err))
-// 			return
-// 		}
-// 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
-// 		return
-// 	}
-
-// 	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.UserPayload)
-// 	if orderDetail.UserID != authPayload.UserID {
-// 		err := errors.New("account deosn't belong to the authenticated user")
-// 		ctx.JSON(http.StatusUnauthorized, errorResponse(err))
-// 		return
-// 	}
-
-// 	orderItem, err := server.store.GetOrderItemByOrderDetailID(ctx, orderDetail.ID)
-// 	if err != nil {
-// 		if err == sql.ErrNoRows {
-// 			ctx.JSON(http.StatusNotFound, errorResponse(err))
-// 			return
-// 		}
-// 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
-// 		return
-// 	}
-// 	ctx.JSON(http.StatusOK, orderItem)
-// }
 
 type listOrderItemsRequest struct {
 	PageID   int32 `form:"page_id" binding:"required,min=1"`

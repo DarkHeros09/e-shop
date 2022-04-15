@@ -37,32 +37,21 @@ func TestCreateUserAddress(t *testing.T) {
 }
 
 func TestGetUserAddress(t *testing.T) {
-	userAdress1 := createRandomUserAddress(t)
-	userAdress2, err := testQueires.GetUserAddressByUserID(context.Background(), userAdress1.UserID)
+	userAddress1 := createRandomUserAddress(t)
+	arg := GetUserAddressParams{
+		ID:     userAddress1.ID,
+		UserID: userAddress1.UserID,
+	}
+	userAddress2, err := testQueires.GetUserAddress(context.Background(), arg)
 
 	require.NoError(t, err)
-	require.NotEmpty(t, userAdress2)
+	require.NotEmpty(t, userAddress2)
 
-	require.Equal(t, userAdress1.ID, userAdress2.ID)
-	require.Equal(t, userAdress1.UserID, userAdress2.UserID)
-	require.Equal(t, userAdress1.AddressLine, userAdress2.AddressLine)
-	require.Equal(t, userAdress1.City, userAdress2.City)
-	require.Equal(t, userAdress1.Telephone, userAdress2.Telephone)
-
-}
-
-func TestGetUserAddressByUserID(t *testing.T) {
-	userAdress1 := createRandomUserAddress(t)
-	userAdress2, err := testQueires.GetUserAddress(context.Background(), userAdress1.ID)
-
-	require.NoError(t, err)
-	require.NotEmpty(t, userAdress2)
-
-	require.Equal(t, userAdress1.ID, userAdress2.ID)
-	require.Equal(t, userAdress1.UserID, userAdress2.UserID)
-	require.Equal(t, userAdress1.AddressLine, userAdress2.AddressLine)
-	require.Equal(t, userAdress1.City, userAdress2.City)
-	require.Equal(t, userAdress1.Telephone, userAdress2.Telephone)
+	require.Equal(t, userAddress1.ID, userAddress2.ID)
+	require.Equal(t, userAddress1.UserID, userAddress2.UserID)
+	require.Equal(t, userAddress1.AddressLine, userAddress2.AddressLine)
+	require.Equal(t, userAddress1.City, userAddress2.City)
+	require.Equal(t, userAddress1.Telephone, userAddress2.Telephone)
 
 }
 
@@ -94,7 +83,11 @@ func TestDeleteUserAddress(t *testing.T) {
 
 	require.NoError(t, err)
 
-	useraddress2, err := testQueires.GetUserAddress(context.Background(), useraddress1.ID)
+	arg := GetUserAddressParams{
+		ID:     useraddress1.ID,
+		UserID: useraddress1.UserID,
+	}
+	useraddress2, err := testQueires.GetUserAddress(context.Background(), arg)
 
 	require.Error(t, err)
 	require.EqualError(t, err, sql.ErrNoRows.Error())

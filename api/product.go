@@ -3,24 +3,22 @@ package api
 import (
 	"database/sql"
 	"errors"
-	"fmt"
 	"net/http"
 
 	db "github.com/DarkHeros09/e-shop/v2/db/sqlc"
 	"github.com/DarkHeros09/e-shop/v2/token"
 	"github.com/gin-gonic/gin"
-	"github.com/hhsnopek/etag"
 	"github.com/lib/pq"
 )
 
 type createProductRequest struct {
-	Name        string `json:"name" binding:"required"`
-	Description string `json:"description" binding:"required"`
-	Sku         string `json:"sku" binding:"required"`
-	CategoryID  int64  `json:"category_id" binding:"required"`
-	InventoryID int64  `json:"inventory_id" binding:"required"`
-	Price       string `json:"price" binding:"required"`
-	DiscountID  int64  `json:"discount_id" binding:"required"`
+	Name        string `json:"name" binding:"required,alphanum"`
+	Description string `json:"description" binding:"required,alphanum"`
+	Sku         string `json:"sku" binding:"required,alphanum"`
+	CategoryID  int64  `json:"category_id" binding:"required,min=1"`
+	InventoryID int64  `json:"inventory_id" binding:"required,min=1"`
+	Price       string `json:"price" binding:"required,numeric,gt=0"`
+	DiscountID  int64  `json:"discount_id" binding:"required,min=1"`
 }
 
 func (server *Server) createProduct(ctx *gin.Context) {
@@ -115,17 +113,18 @@ func (server *Server) listProducts(ctx *gin.Context) {
 		return
 	}
 
-	requestETag := ctx.GetHeader("If-None-Match")
-	generatedETag := etag.Generate([]byte(fmt.Sprint(products)), true)
+	// requestETag := ctx.GetHeader("If-None-Match")
+	// generatedETag := etag.Generate([]byte(fmt.Sprint(products)), true)
 
-	if requestETag == generatedETag {
-		ctx.JSON(http.StatusNotModified, nil)
+	// if requestETag == generatedETag {
+	// 	ctx.JSON(http.StatusNotModified, nil)
 
-	} else {
-		ctx.Header("ETag", generatedETag)
-		// ctx.Header("Content-Type", "application/json")
-		ctx.JSON(http.StatusOK, products)
-	}
+	// } else {
+	// 	ctx.Header("ETag", generatedETag)
+	// 	ctx.JSON(http.StatusOK, products)
+	// }
+
+	ctx.JSON(http.StatusOK, products)
 
 }
 
@@ -133,9 +132,9 @@ type updateProductRequest struct {
 	ID          int64  `json:"id" binding:"required,min=1"`
 	Name        string `json:"name" binding:"required"`
 	Description string `json:"description" binding:"required"`
-	CategoryID  int64  `json:"category_id" binding:"required"`
-	Price       string `json:"price" binding:"required"`
-	Active      bool   `json:"active" binding:"required"`
+	CategoryID  int64  `json:"category_id" binding:"required,min=1"`
+	Price       string `json:"price" binding:"required,numeric,gt=0"`
+	Active      *bool  `json:"active" binding:"required"`
 }
 
 func (server *Server) updateProduct(ctx *gin.Context) {
@@ -159,7 +158,7 @@ func (server *Server) updateProduct(ctx *gin.Context) {
 		Description: req.Description,
 		CategoryID:  req.CategoryID,
 		Price:       req.Price,
-		Active:      req.Active,
+		Active:      *req.Active,
 	}
 
 	product, err := server.store.UpdateProduct(ctx, arg)

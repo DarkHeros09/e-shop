@@ -56,29 +56,18 @@ func (q *Queries) DeleteUserAddress(ctx context.Context, id int64) error {
 
 const getUserAddress = `-- name: GetUserAddress :one
 SELECT id, user_id, address_line, city, telephone FROM "user_address"
-WHERE id = $1 LIMIT 1
+WHERE id = $1 
+And user_id = $2
+LIMIT 1
 `
 
-func (q *Queries) GetUserAddress(ctx context.Context, id int64) (UserAddress, error) {
-	row := q.db.QueryRowContext(ctx, getUserAddress, id)
-	var i UserAddress
-	err := row.Scan(
-		&i.ID,
-		&i.UserID,
-		&i.AddressLine,
-		&i.City,
-		&i.Telephone,
-	)
-	return i, err
+type GetUserAddressParams struct {
+	ID     int64 `json:"id"`
+	UserID int64 `json:"user_id"`
 }
 
-const getUserAddressByUserID = `-- name: GetUserAddressByUserID :one
-SELECT id, user_id, address_line, city, telephone FROM "user_address"
-WHERE user_id = $1 LIMIT 1
-`
-
-func (q *Queries) GetUserAddressByUserID(ctx context.Context, userID int64) (UserAddress, error) {
-	row := q.db.QueryRowContext(ctx, getUserAddressByUserID, userID)
+func (q *Queries) GetUserAddress(ctx context.Context, arg GetUserAddressParams) (UserAddress, error) {
+	row := q.db.QueryRowContext(ctx, getUserAddress, arg.ID, arg.UserID)
 	var i UserAddress
 	err := row.Scan(
 		&i.ID,

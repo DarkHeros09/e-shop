@@ -442,7 +442,7 @@ func (mr *MockStoreMockRecorder) DeleteUserAddress(arg0, arg1 interface{}) *gomo
 }
 
 // DeleteUserPayment mocks base method.
-func (m *MockStore) DeleteUserPayment(arg0 context.Context, arg1 int64) error {
+func (m *MockStore) DeleteUserPayment(arg0 context.Context, arg1 db.DeleteUserPaymentParams) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "DeleteUserPayment", arg0, arg1)
 	ret0, _ := ret[0].(error)
@@ -696,7 +696,7 @@ func (mr *MockStoreMockRecorder) GetUser(arg0, arg1 interface{}) *gomock.Call {
 }
 
 // GetUserAddress mocks base method.
-func (m *MockStore) GetUserAddress(arg0 context.Context, arg1 int64) (db.UserAddress, error) {
+func (m *MockStore) GetUserAddress(arg0 context.Context, arg1 db.GetUserAddressParams) (db.UserAddress, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetUserAddress", arg0, arg1)
 	ret0, _ := ret[0].(db.UserAddress)
@@ -708,21 +708,6 @@ func (m *MockStore) GetUserAddress(arg0 context.Context, arg1 int64) (db.UserAdd
 func (mr *MockStoreMockRecorder) GetUserAddress(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserAddress", reflect.TypeOf((*MockStore)(nil).GetUserAddress), arg0, arg1)
-}
-
-// GetUserAddressByUserID mocks base method.
-func (m *MockStore) GetUserAddressByUserID(arg0 context.Context, arg1 int64) (db.UserAddress, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetUserAddressByUserID", arg0, arg1)
-	ret0, _ := ret[0].(db.UserAddress)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetUserAddressByUserID indicates an expected call of GetUserAddressByUserID.
-func (mr *MockStoreMockRecorder) GetUserAddressByUserID(arg0, arg1 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserAddressByUserID", reflect.TypeOf((*MockStore)(nil).GetUserAddressByUserID), arg0, arg1)
 }
 
 // GetUserByEmail mocks base method.
@@ -756,7 +741,7 @@ func (mr *MockStoreMockRecorder) GetUserByUsername(arg0, arg1 interface{}) *gomo
 }
 
 // GetUserPayment mocks base method.
-func (m *MockStore) GetUserPayment(arg0 context.Context, arg1 int64) (db.UserPayment, error) {
+func (m *MockStore) GetUserPayment(arg0 context.Context, arg1 db.GetUserPaymentParams) (db.UserPayment, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetUserPayment", arg0, arg1)
 	ret0, _ := ret[0].(db.UserPayment)
@@ -768,21 +753,6 @@ func (m *MockStore) GetUserPayment(arg0 context.Context, arg1 int64) (db.UserPay
 func (mr *MockStoreMockRecorder) GetUserPayment(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserPayment", reflect.TypeOf((*MockStore)(nil).GetUserPayment), arg0, arg1)
-}
-
-// GetUserPaymentByUserID mocks base method.
-func (m *MockStore) GetUserPaymentByUserID(arg0 context.Context, arg1 int64) (db.UserPayment, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetUserPaymentByUserID", arg0, arg1)
-	ret0, _ := ret[0].(db.UserPayment)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetUserPaymentByUserID indicates an expected call of GetUserPaymentByUserID.
-func (mr *MockStoreMockRecorder) GetUserPaymentByUserID(arg0, arg1 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserPaymentByUserID", reflect.TypeOf((*MockStore)(nil).GetUserPaymentByUserID), arg0, arg1)
 }
 
 // ListAdminTypes mocks base method.
@@ -1220,17 +1190,17 @@ func (mr *MockStoreMockRecorder) UpdateUserAddressByUserID(arg0, arg1 interface{
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateUserAddressByUserID", reflect.TypeOf((*MockStore)(nil).UpdateUserAddressByUserID), arg0, arg1)
 }
 
-// UpdateUserPaymentByUserID mocks base method.
-func (m *MockStore) UpdateUserPaymentByUserID(arg0 context.Context, arg1 db.UpdateUserPaymentByUserIDParams) (db.UserPayment, error) {
+// UpdateUserPayment mocks base method.
+func (m *MockStore) UpdateUserPayment(arg0 context.Context, arg1 db.UpdateUserPaymentParams) (db.UserPayment, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "UpdateUserPaymentByUserID", arg0, arg1)
+	ret := m.ctrl.Call(m, "UpdateUserPayment", arg0, arg1)
 	ret0, _ := ret[0].(db.UserPayment)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// UpdateUserPaymentByUserID indicates an expected call of UpdateUserPaymentByUserID.
-func (mr *MockStoreMockRecorder) UpdateUserPaymentByUserID(arg0, arg1 interface{}) *gomock.Call {
+// UpdateUserPayment indicates an expected call of UpdateUserPayment.
+func (mr *MockStoreMockRecorder) UpdateUserPayment(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateUserPaymentByUserID", reflect.TypeOf((*MockStore)(nil).UpdateUserPaymentByUserID), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateUserPayment", reflect.TypeOf((*MockStore)(nil).UpdateUserPayment), arg0, arg1)
 }
