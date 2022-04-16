@@ -21,8 +21,9 @@ func addAuthorization(
 	username string,
 	duration time.Duration,
 ) {
-	token, err := tokenMaker.CreateTokenForUser(userID, username, duration)
+	token, payload, err := tokenMaker.CreateTokenForUser(userID, username, duration)
 	require.NoError(t, err)
+	require.NotEmpty(t, payload)
 
 	authorizationHeader := fmt.Sprintf("%s %s", authorizationType, token)
 	request.Header.Set(authorizationHeaderKey, authorizationHeader)
@@ -39,8 +40,9 @@ func addAuthorizationForAdmin(
 	active bool,
 	duration time.Duration,
 ) {
-	token, err := tokenMaker.CreateTokenForAdmin(adminID, username, typeID, active, duration)
+	token, payload, err := tokenMaker.CreateTokenForAdmin(adminID, username, typeID, active, duration)
 	require.NoError(t, err)
+	require.NotEmpty(t, payload)
 
 	authorizationHeader := fmt.Sprintf("%s %s", authorizationType, token)
 	request.Header.Set(authorizationHeaderKey, authorizationHeader)

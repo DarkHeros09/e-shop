@@ -48,6 +48,7 @@ func (server *Server) setupRouter() {
 
 	router.POST("/users", server.createUser)
 	router.POST("/users/login", server.loginUser)
+	router.POST("/tokens/renew_access", server.renewAccessToken)
 
 	userRoutes := router.Group("/").Use(authMiddleware(server.tokenMaker, false))
 	adminRoutes := router.Group("/").Use(authMiddleware(server.tokenMaker, true))
@@ -171,9 +172,11 @@ func (server *Server) gracefullShutDown(router *gin.Engine) {
 
 // TODO: add etag logic with tests
 
-// TODO: add caching logic with tests
+// TODO: add caching logic with tests, try groupcache
 
-// TODO: modify the list methods where needed like the listshoppingsession method. video 22 mintue 19.50
+// TODO: add refresh token
+
+// DONE: modify the list methods where needed like the listshoppingsession method. video 22 mintue 19.50
 
 // TODO: make etags for put and get, list methods
 

@@ -10,6 +10,7 @@ import (
 
 	db "github.com/DarkHeros09/e-shop/v2/db/sqlc"
 	gomock "github.com/golang/mock/gomock"
+	uuid "github.com/google/uuid"
 )
 
 // MockStore is a mock of Store interface.
@@ -243,6 +244,21 @@ func (m *MockStore) CreateUserPayment(arg0 context.Context, arg1 db.CreateUserPa
 func (mr *MockStoreMockRecorder) CreateUserPayment(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateUserPayment", reflect.TypeOf((*MockStore)(nil).CreateUserPayment), arg0, arg1)
+}
+
+// CreateUserSession mocks base method.
+func (m *MockStore) CreateUserSession(arg0 context.Context, arg1 db.CreateUserSessionParams) (db.UserSession, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateUserSession", arg0, arg1)
+	ret0, _ := ret[0].(db.UserSession)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CreateUserSession indicates an expected call of CreateUserSession.
+func (mr *MockStoreMockRecorder) CreateUserSession(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateUserSession", reflect.TypeOf((*MockStore)(nil).CreateUserSession), arg0, arg1)
 }
 
 // DeleteAdmin mocks base method.
@@ -753,6 +769,21 @@ func (m *MockStore) GetUserPayment(arg0 context.Context, arg1 db.GetUserPaymentP
 func (mr *MockStoreMockRecorder) GetUserPayment(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserPayment", reflect.TypeOf((*MockStore)(nil).GetUserPayment), arg0, arg1)
+}
+
+// GetUserSession mocks base method.
+func (m *MockStore) GetUserSession(arg0 context.Context, arg1 uuid.UUID) (db.UserSession, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetUserSession", arg0, arg1)
+	ret0, _ := ret[0].(db.UserSession)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetUserSession indicates an expected call of GetUserSession.
+func (mr *MockStoreMockRecorder) GetUserSession(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserSession", reflect.TypeOf((*MockStore)(nil).GetUserSession), arg0, arg1)
 }
 
 // ListAdminTypes mocks base method.

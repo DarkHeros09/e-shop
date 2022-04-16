@@ -19,11 +19,12 @@ func TestPasetoMakerForUser(t *testing.T) {
 	issuedAt := time.Now()
 	expiredAt := issuedAt.Add(duration)
 
-	token, err := maker.CreateTokenForUser(userID, username, duration)
+	token, payload, err := maker.CreateTokenForUser(userID, username, duration)
 	require.NoError(t, err)
+	require.NotEmpty(t, payload)
 	require.NotEmpty(t, token)
 
-	payload, err := maker.VerifyTokenForUser(token)
+	payload, err = maker.VerifyTokenForUser(token)
 	require.NoError(t, err)
 	require.NotEmpty(t, token)
 
@@ -37,11 +38,12 @@ func TestExpiredPasetoTokenForUser(t *testing.T) {
 	maker, err := NewPasetoMaker(util.RandomString(32))
 	require.NoError(t, err)
 
-	token, err := maker.CreateTokenForUser(util.RandomMoney(), util.RandomUser(), -time.Minute)
+	token, payload, err := maker.CreateTokenForUser(util.RandomMoney(), util.RandomUser(), -time.Minute)
 	require.NoError(t, err)
+	require.NotEmpty(t, payload)
 	require.NotEmpty(t, token)
 
-	payload, err := maker.VerifyTokenForUser(token)
+	payload, err = maker.VerifyTokenForUser(token)
 	require.Error(t, err)
 	require.EqualError(t, err, ErrExpiredToken.Error())
 	require.Nil(t, payload)
@@ -60,11 +62,12 @@ func TestPasetoMakerForAdmin(t *testing.T) {
 	issuedAt := time.Now()
 	expiredAt := issuedAt.Add(duration)
 
-	token, err := maker.CreateTokenForAdmin(adminID, username, typeID, active, duration)
+	token, payload, err := maker.CreateTokenForAdmin(adminID, username, typeID, active, duration)
 	require.NoError(t, err)
+	require.NotEmpty(t, payload)
 	require.NotEmpty(t, token)
 
-	payload, err := maker.VerifyTokenForAdmin(token)
+	payload, err = maker.VerifyTokenForAdmin(token)
 	require.NoError(t, err)
 	require.NotEmpty(t, token)
 
@@ -80,11 +83,12 @@ func TestExpiredPasetoTokenForAdmin(t *testing.T) {
 	maker, err := NewPasetoMaker(util.RandomString(32))
 	require.NoError(t, err)
 
-	token, err := maker.CreateTokenForAdmin(util.RandomMoney(), util.RandomUser(), util.RandomMoney(), util.RandomBool(), -time.Minute)
+	token, payload, err := maker.CreateTokenForAdmin(util.RandomMoney(), util.RandomUser(), util.RandomMoney(), util.RandomBool(), -time.Minute)
 	require.NoError(t, err)
+	require.NotEmpty(t, payload)
 	require.NotEmpty(t, token)
 
-	payload, err := maker.VerifyTokenForAdmin(token)
+	payload, err = maker.VerifyTokenForAdmin(token)
 	require.Error(t, err)
 	require.EqualError(t, err, ErrExpiredToken.Error())
 	require.Nil(t, payload)

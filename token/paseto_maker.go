@@ -29,13 +29,17 @@ func NewPasetoMaker(symmetricKey string) (Maker, error) {
 }
 
 // CreateToken creates a new token for specific username and duration
-func (maker *PasetoMaker) CreateTokenForUser(userID int64, username string, duration time.Duration) (string, error) {
+func (maker *PasetoMaker) CreateTokenForUser(userID int64, username string, duration time.Duration) (string, *UserPayload, error) {
 	payload, err := NewPayloadForUser(userID, username, duration)
 	if err != nil {
-		return "", err
+		return "", payload, err
 	}
 
-	return maker.paseto.Encrypt(maker.symmetricKey, payload, nil)
+	token, err := maker.paseto.Encrypt(maker.symmetricKey, payload, nil)
+	if err != nil {
+		return "", payload, err
+	}
+	return token, payload, err
 }
 
 // VerifyToken checks if the token is valid or not
@@ -56,13 +60,17 @@ func (maker *PasetoMaker) VerifyTokenForUser(token string) (*UserPayload, error)
 }
 
 // CreateToken creates a new admin token for specific admin and duration
-func (maker *PasetoMaker) CreateTokenForAdmin(adminID int64, username string, type_id int64, active bool, duration time.Duration) (string, error) {
+func (maker *PasetoMaker) CreateTokenForAdmin(adminID int64, username string, type_id int64, active bool, duration time.Duration) (string, *AdminPayload, error) {
 	payload, err := NewPayloadForAdmin(adminID, username, type_id, active, duration)
 	if err != nil {
-		return "", err
+		return "", payload, err
 	}
 
-	return maker.paseto.Encrypt(maker.symmetricKey, payload, nil)
+	token, err := maker.paseto.Encrypt(maker.symmetricKey, payload, nil)
+	if err != nil {
+		return "", payload, err
+	}
+	return token, payload, err
 }
 
 // VerifyToken checks if the token is valid or not
