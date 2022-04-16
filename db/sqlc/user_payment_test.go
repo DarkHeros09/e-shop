@@ -17,7 +17,7 @@ func createRandomUserPayment(t *testing.T) UserPayment {
 		PaymentType: util.RandomUser(),
 		Provider:    util.RandomUser(),
 		AccountNo:   int32(util.RandomInt(0, 10)),
-		Expiry:      time.Date(2022, 01, 01, 1, 1, 1, 1, time.Local),
+		Expiry:      time.Now().Local(),
 	}
 
 	userPayment, err := testQueires.CreateUserPayment(context.Background(), arg)
