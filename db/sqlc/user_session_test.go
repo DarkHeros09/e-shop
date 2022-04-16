@@ -19,7 +19,7 @@ func createRandomUserSession(t *testing.T) UserSession {
 		UserAgent:    util.RandomString(6),
 		ClientIp:     util.RandomString(10),
 		IsBlocked:    false,
-		ExpiresAt:    time.Time{},
+		ExpiresAt:    time.Now().Local().UTC(),
 	}
 
 	userSession, err := testQueires.CreateUserSession(context.Background(), arg)
@@ -32,7 +32,7 @@ func createRandomUserSession(t *testing.T) UserSession {
 	require.Equal(t, arg.UserAgent, userSession.UserAgent)
 	require.Equal(t, arg.ClientIp, userSession.ClientIp)
 	require.Equal(t, arg.IsBlocked, userSession.IsBlocked)
-	require.Equal(t, arg.ExpiresAt, userSession.ExpiresAt)
+	require.WithinDuration(t, arg.ExpiresAt, userSession.ExpiresAt, time.Second)
 
 	require.NotEmpty(t, userSession.CreatedAt)
 
