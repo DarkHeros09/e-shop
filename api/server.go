@@ -26,7 +26,6 @@ type Server struct {
 
 // NewServer creates a new HTTP server and setup routing.
 func NewServer(config util.Config, store db.Store) (*Server, error) {
-	// TODO: implement symmetrickey in .env file
 	tokenMaker, err := token.NewPasetoMaker(config.TokenSymmetricKey)
 	if err != nil {
 		return nil, fmt.Errorf("cannot create token maker: %w", err)
@@ -39,7 +38,7 @@ func NewServer(config util.Config, store db.Store) (*Server, error) {
 	}
 
 	server.setupRouter()
-	// server.gracefullShutDown(server.router)
+	go server.gracefullShutDown(server.router)
 	return server, nil
 }
 
@@ -133,14 +132,6 @@ func (server *Server) gracefullShutDown(router *gin.Engine) {
 		Handler: router,
 	}
 
-	// Initializing the server in a goroutine so that
-	// it won't block the graceful shutdown handling below
-	go func() {
-		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			log.Fatalf("listen: %s\n", err)
-		}
-	}()
-
 	// Wait for interrupt signal to gracefully shutdown the server with
 	// a timeout of 5 seconds.
 	quit := make(chan os.Signal, 1)
@@ -166,6 +157,10 @@ func (server *Server) gracefullShutDown(router *gin.Engine) {
 
 // TODO: seperate superadmin from normal admin
 
+// TODO: implement symmetrickey in .env file
+
+// TODO: make auth checks before calling db
+
 // DONE: add update and delete methods
 
 // DONE: modify the json verification tags in the apis line required tags
@@ -174,7 +169,7 @@ func (server *Server) gracefullShutDown(router *gin.Engine) {
 
 // TODO: add caching logic with tests, try groupcache
 
-// TODO: add refresh token
+// DONE: add refresh token
 
 // DONE: modify the list methods where needed like the listshoppingsession method. video 22 mintue 19.50
 
