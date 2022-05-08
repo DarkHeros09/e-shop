@@ -1,0 +1,5 @@
+make.exe --dry-run --always-make --keep-going --print-directory
+make: Entering directory 'c:/Users/m_ben/Desktop/e-shop'
+docker run --name postgres14-eshop -p 5555:5432 -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=secret -d postgres:14.1-alpine
+make: Leaving directory 'c:/Users/m_ben/Desktop/e-shop'
+ 

@@ -169,6 +169,8 @@ func (server *Server) gracefullShutDown(router *gin.Engine) {
 
 // TODO: add caching logic with tests, try groupcache
 
+// TODO: fix user phone number tag, with regexp along with tests
+
 // DONE: add refresh token
 
 // DONE: modify the list methods where needed like the listshoppingsession method. video 22 mintue 19.50

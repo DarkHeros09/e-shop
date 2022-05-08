@@ -15,7 +15,7 @@ type createUserAddressRequest struct {
 	UserID      int64  `json:"user_id" binding:"required,min=1"`
 	AddressLine string `json:"address_line" binding:"required"`
 	City        string `json:"city" binding:"required"`
-	Telephone   int32  `json:"telephone" binding:"required,numeric,min=9,max=9"`
+	Telephone   int32  `json:"telephone" binding:"required,numeric,min=910000000,max=929999999"`
 }
 
 func (server *Server) createUserAddress(ctx *gin.Context) {
@@ -113,7 +113,7 @@ type updateUserAddressByUserIDRequest struct {
 	ID          int64  `json:"id" binding:"required,min=1"`
 	AddressLine string `json:"address_line"`
 	City        string `json:"city"`
-	Telephone   int32  `json:"telephone" binding:"required,numeric,min=9,max=9"`
+	Telephone   int32  `json:"telephone" binding:"required,numeric,min=910000000,max=929999999"`
 }
 
 func (server *Server) updateUserAddressByUserID(ctx *gin.Context) {

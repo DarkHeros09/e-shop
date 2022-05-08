@@ -705,7 +705,7 @@ func randomUAUser(t *testing.T) (user db.User, password string) {
 		ID:        util.RandomMoney(),
 		Username:  util.RandomUser(),
 		Password:  hashedPassword,
-		Telephone: int32(util.RandomInt(9, 9)),
+		Telephone: int32(util.RandomInt(910000000, 929999999)),
 		Email:     util.RandomEmail(),
 	}
 	return
@@ -717,7 +717,7 @@ func createRandomUserAddress(t *testing.T, user db.User) (userAddress db.UserAdd
 		UserID:      user.ID,
 		AddressLine: util.RandomUser(),
 		City:        util.RandomUser(),
-		Telephone:   int32(util.RandomInt(9, 9)),
+		Telephone:   user.Telephone,
 	}
 	return
 }

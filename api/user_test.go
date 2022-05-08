@@ -937,7 +937,7 @@ func randomUser(t *testing.T) (user db.User, password string) {
 		ID:        util.RandomMoney(),
 		Username:  util.RandomUser(),
 		Password:  hashedPassword,
-		Telephone: int32(util.RandomInt(9, 9)),
+		Telephone: int32(util.RandomInt(910000000, 929999999)),
 		Email:     util.RandomEmail(),
 	}
 	return

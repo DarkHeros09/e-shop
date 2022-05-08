@@ -18,7 +18,7 @@ type createUserRequest struct {
 	Username  string `json:"username" binding:"required,alphanum"`
 	Email     string `json:"email" binding:"required,email"`
 	Password  string `json:"password" binding:"required,min=6"`
-	Telephone int32  `json:"telephone" binding:"required,numeric,min=9,max=9"`
+	Telephone int32  `json:"telephone" binding:"required,numeric,min=910000000,max=929999999"`
 }
 
 type userResponse struct {
@@ -147,7 +147,7 @@ func (server *Server) listUsers(ctx *gin.Context) {
 
 type updateUserRequest struct {
 	ID        int64 `json:"id" binding:"required,min=1"`
-	Telephone int32 `json:"telephone" binding:"required,numeric,min=9,max=9"`
+	Telephone int32 `json:"telephone" binding:"required,numeric,min=910000000,max=929999999"`
 }
 
 func (server *Server) updateUser(ctx *gin.Context) {
