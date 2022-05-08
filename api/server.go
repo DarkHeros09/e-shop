@@ -171,6 +171,8 @@ func (server *Server) gracefullShutDown(router *gin.Engine) {
 
 // TODO: fix user phone number tag, with regexp along with tests
 
+// TODO: change for phoneNumber to string in DB?
+
 // DONE: add refresh token
 
 // DONE: modify the list methods where needed like the listshoppingsession method. video 22 mintue 19.50
